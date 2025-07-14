@@ -1,9 +1,9 @@
-import ProfileViewPage from '@/features/profile/components/profile-view-page';
+import AuditorProfilePage from "@/features/proposals/components/auditor-profile-page";
 
 export const metadata = {
-  title: 'Dashboard : Profile'
+  title: 'Auditor Profile'
 };
 
 export default async function Page() {
-  return <ProfileViewPage />;
+  return <AuditorProfilePage />;
 }
