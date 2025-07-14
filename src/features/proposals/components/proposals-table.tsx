@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { ColumnDef, ColumnFiltersState, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
-import { ArrowUpDown, MoreHorizontal, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowUpDown, MoreHorizontal, Eye, CheckCircle, XCircle, Info } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,8 +27,12 @@ import { Proposal } from '../types';
 import { 
   formatCurrency, 
   formatDate, 
-  getProposalStatusBadgeVariant 
+  getProposalStatusBadgeVariant,
+  getRandomAnonUsername
 } from '../utils';
+import AuditorProfileModal from './auditor-profile-modal';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useRouter } from 'next/navigation';
 
 interface ProposalsTableProps {
   proposals: Proposal[];
@@ -45,6 +49,8 @@ export function ProposalsTable({
 }: ProposalsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [openProfileId, setOpenProfileId] = React.useState<string | null>(null);
+  const router = useRouter();
 
   const columns: ColumnDef<Proposal>[] = [
     {
@@ -69,9 +75,34 @@ export function ProposalsTable({
     {
       accessorKey: 'auditorName',
       header: 'Auditor',
-      cell: ({ row }) => (
-        <div className='font-medium'>{row.getValue('auditorName')}</div>
-      )
+      cell: ({ row }) => {
+        const proposal = row.original;
+        const isAccepted = proposal.status === 'Accepted';
+        return (
+          <div className='flex items-center gap-2'>
+            {isAccepted ? (
+              <span>{proposal.auditorName}</span>
+            ) : (
+              <>
+                <span>{getRandomAnonUsername(proposal.id)}</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className='h-4 w-4 text-muted-foreground cursor-pointer' />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Auditor name is visible once proposal is accepted
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </>
+            )}
+            <Button size='sm' variant='outline' onClick={() => router.push(`/dashboard/profile/${proposal.auditorId}`)}>
+              View Profile
+            </Button>
+          </div>
+        );
+      }
     },
     {
       accessorKey: 'proposedBudget',
@@ -140,10 +171,6 @@ export function ProposalsTable({
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => onProposalSelect(proposal)}>
-                <Eye className='mr-2 h-4 w-4' />
-                View Details
-              </DropdownMenuItem>
               {isPending && onAcceptProposal && onRejectProposal && (
                 <>
                   <DropdownMenuItem onClick={() => onAcceptProposal(proposal)}>

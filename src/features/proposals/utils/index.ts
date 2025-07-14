@@ -99,4 +99,23 @@ export const getEngagementForProposal = (
   proposalId: string
 ): Engagement | null => {
   return engagements.find(engagement => engagement.proposalId === proposalId) || null;
-}; 
+};
+
+export function getRandomAnonUsername(seed?: string): string {
+  // Optionally use a seed for deterministic results per proposal
+  const names = [
+    'Anon Audit', 'AuditFox', 'LedgerLion', 'BalanceBear', 'NumberNinja',
+    'SheetShark', 'BookBadger', 'TallyTiger', 'CountCrane', 'VerifyViper',
+    'CheckCheetah', 'ReconRaven', 'FigureFalcon', 'EntryEagle', 'ReportRhino'
+  ];
+  if (seed) {
+    // Simple hash for deterministic selection
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      hash = (hash * 31 + seed.charCodeAt(i)) % names.length;
+    }
+    return names[Math.abs(hash) % names.length];
+  }
+  // Otherwise random
+  return names[Math.floor(Math.random() * names.length)];
+} 

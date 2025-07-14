@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Calendar, DollarSign, User, FileText } from 'lucide-react';
+import { X, Calendar, DollarSign, User, FileText, Info } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -15,8 +15,12 @@ import { Proposal } from '../types';
 import { 
   formatCurrency, 
   formatDate, 
-  getProposalStatusBadgeVariant 
+  getProposalStatusBadgeVariant,
+  getRandomAnonUsername
 } from '../utils';
+import AuditorProfileModal from './auditor-profile-modal';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import React from 'react';
 
 interface ProposalDetailsModalProps {
   proposal: Proposal | null;
@@ -36,6 +40,8 @@ export function ProposalDetailsModal({
   if (!proposal) return null;
 
   const isPending = proposal.status === 'Pending';
+  const isAccepted = proposal.status === 'Accepted';
+  const [openProfile, setOpenProfile] = React.useState(false);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -50,9 +56,9 @@ export function ProposalDetailsModal({
                 Proposal Details
               </DialogDescription>
             </div>
-            <Button variant='ghost' size='icon' onClick={onClose}>
+            {/* <Button variant='ghost' size='icon' onClick={onClose}>
               <X className='h-4 w-4' />
-            </Button>
+            </Button> */}
           </div>
         </DialogHeader>
 
@@ -70,14 +76,41 @@ export function ProposalDetailsModal({
               <User className='h-5 w-5' />
               Auditor Information
             </h3>
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='grid grid-cols-2 gap-4 items-center'>
               <div>
                 <p className='text-sm text-muted-foreground'>Auditor Name</p>
-                <p className='font-medium'>{proposal.auditorName}</p>
+                <div className='flex items-center gap-2'>
+                  {isAccepted ? (
+                    <>
+                      <span className='font-medium'>{proposal.auditorName}</span>
+                      <Button size='sm' variant='outline' onClick={() => setOpenProfile(true)}>
+                        View Profile
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className='font-medium'>{getRandomAnonUsername(proposal.id)}</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className='h-4 w-4 text-muted-foreground cursor-pointer' />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Auditor name is visible once proposal is accepted
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <Button size='sm' variant='outline' onClick={() => setOpenProfile(true)}>
+                        View Profile
+                      </Button>
+                    </>
+                  )}
+                  <AuditorProfileModal open={openProfile} onOpenChange={setOpenProfile} />
+                </div>
               </div>
               <div>
                 <p className='text-sm text-muted-foreground'>Auditor Email</p>
-                <p className='font-medium'>{proposal.auditorEmail}</p>
+                <p className='font-medium'>{isAccepted ? proposal.auditorEmail : 'Hidden'}</p>
               </div>
             </div>
           </div>
@@ -150,6 +183,20 @@ export function ProposalDetailsModal({
                 </li>
               ))}
             </ul>
+          </div>
+
+          {/* Availability Window */}
+          <Separator />
+          <div>
+            <h3 className='font-semibold text-lg mb-3'>Availability Window</h3>
+            <p className='text-sm'>Can start within 3 days</p>
+          </div>
+
+          {/* Extra Section for Questions/Notes */}
+          <Separator />
+          <div>
+            <h3 className='font-semibold text-lg mb-3'>Questions / Notes to Client</h3>
+            <p className='text-sm'>Looking forward to collaborating. Please let me know if you have any specific requirements or questions.</p>
           </div>
 
           {/* Timestamps */}
