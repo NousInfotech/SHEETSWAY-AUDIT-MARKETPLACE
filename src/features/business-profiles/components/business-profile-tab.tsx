@@ -1,75 +1,68 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import BusinessProfileList from './business-profile-list';
 import BusinessProfileForm, { BusinessProfileFormValues } from './business-profile-form';
-import { useAuth } from '@/components/layout/providers';
-import api from '@/lib/axios';
-import { BUSINESS_PROFILES_API } from '@/config/api';
-import { mockBusinessProfiles, generateMockBusinessProfile } from '../utils/mock-data';
-import { v4 as uuidv4, validate as validateUuid } from 'uuid';
+import {
+  getBusinessProfiles,
+  createBusinessProfile,
+  updateBusinessProfile,
+  deleteBusinessProfile,
+} from '@/api/user.api';
+
+interface BusinessProfileType extends BusinessProfileFormValues {
+  id?: string;
+}
 
 export default function BusinessProfileTab() {
-  const { user } = useAuth();
-  let userId = user?.uid || '';
-  if (!validateUuid(userId)) {
-    // Always ensure a valid UUID for userId
-    if (typeof window !== 'undefined') {
-      let mockUserId = localStorage.getItem('mockUserId');
-      if (!mockUserId || !validateUuid(mockUserId)) {
-        mockUserId = uuidv4();
-        localStorage.setItem('mockUserId', mockUserId);
-      }
-      userId = mockUserId;
-    } else {
-      userId = uuidv4();
-    }
-  }
   const [open, setOpen] = useState(false);
-  const [editProfile, setEditProfile] = useState<BusinessProfileFormValues | null>(null);
-  const [profiles, setProfiles] = useState<BusinessProfileFormValues[]>([]);
+  const [editProfile, setEditProfile] = useState<BusinessProfileType | null>(null);
+  const [profiles, setProfiles] = useState<BusinessProfileType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Helper to load from localStorage or fallback to mock
-  function loadProfiles() {
+  useEffect(() => {
+    loadProfiles();
+  }, []);
+
+  async function loadProfiles() {
     setLoading(true);
     setError(null);
     try {
-      const local = localStorage.getItem('businessProfiles');
-      let data: BusinessProfileFormValues[] = [];
-      if (local) {
-        data = JSON.parse(local);
-      } else {
-        data = mockBusinessProfiles;
-        localStorage.setItem('businessProfiles', JSON.stringify(data));
-      }
+      const data = await getBusinessProfiles();
       setProfiles(data);
-    } catch (err: any) {
+    } catch (err) {
       setError('Failed to load business profiles');
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => {
-    if (userId) {
-      loadProfiles();
-    }
-  }, [userId]);
+  async function handleCreateOrUpdateProfile(profile: BusinessProfileFormValues) {
+    try {
+      if (editProfile) {
+        // Update existing profile
+        await updateBusinessProfile(editProfile.id as string, profile);
+        await loadProfiles();
+      } else {
+        // Create new profile
+        const created = await createBusinessProfile(profile);
+        setProfiles((prev) => [created, ...prev]);
+      }
 
-  function saveProfiles(newProfiles: BusinessProfileFormValues[]) {
-    setProfiles(newProfiles);
-    localStorage.setItem('businessProfiles', JSON.stringify(newProfiles));
+      setEditProfile(null);
+      setOpen(false);
+    } catch (err) {
+      setError('Failed to save business profile');
+    }
   }
 
-  async function handleCreateProfile(profile: BusinessProfileFormValues) {
-    setError(null);
+  async function handleDelete(id: string) {
     try {
-      const newProfiles = [profile, ...profiles];
-      saveProfiles(newProfiles);
-    } catch (err: any) {
-      setError('Failed to create business profile');
+      await deleteBusinessProfile(id);
+      await loadProfiles();
+    } catch (err) {
+      setError('Failed to delete business profile');
     }
   }
 
@@ -78,32 +71,9 @@ export default function BusinessProfileTab() {
     setOpen(true);
   }
 
-  async function handleCreateOrUpdateProfile(profile: BusinessProfileFormValues) {
-    setError(null);
-    try {
-      let newProfiles;
-      if (editProfile) {
-        // Update existing
-        newProfiles = profiles.map(p => p.id === editProfile.id ? { ...profile, id: editProfile.id, userId: editProfile.userId, createdAt: editProfile.createdAt, updatedAt: new Date().toISOString() } : p);
-      } else {
-        // Create new
-        newProfiles = [profile, ...profiles];
-      }
-      saveProfiles(newProfiles);
-      setEditProfile(null);
-    } catch (err: any) {
-      setError('Failed to save business profile');
-    }
-  }
-
   function handleFormOpenChange(open: boolean) {
     setOpen(open);
     if (!open) setEditProfile(null);
-  }
-
-  function handleDelete(id: string) {
-    const newProfiles = profiles.filter(p => p.id !== id);
-    saveProfiles(newProfiles);
   }
 
   return (
@@ -112,22 +82,35 @@ export default function BusinessProfileTab() {
         open={open}
         onOpenChange={handleFormOpenChange}
         onSubmit={handleCreateOrUpdateProfile}
-        userId={userId}
         initialValues={editProfile}
         isEdit={!!editProfile}
       />
+
       {loading ? (
         <div>Loading...</div>
       ) : error ? (
         <div className="text-red-500">{error}</div>
+      ) : profiles.length === 0 ? (
+        <p className="text-gray-500">No business profiles found.</p>
       ) : (
-        <BusinessProfileList profiles={profiles} onEdit={handleEdit} onDelete={handleDelete} />
+        <BusinessProfileList
+          profiles={profiles}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       )}
+
       <div className="mb-4">
-        <Button variant="default" onClick={() => { setEditProfile(null); setOpen(true); }}>
+        <Button
+          variant="default"
+          onClick={() => {
+            setEditProfile(null);
+            setOpen(true);
+          }}
+        >
           Create Business Profile
         </Button>
       </div>
     </div>
   );
-} 
+}

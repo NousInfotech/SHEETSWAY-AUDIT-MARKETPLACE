@@ -1,5 +1,7 @@
+import { CountryEnum, FirmSizeEnum } from '@/features/business-profiles/utils/zod-schemas';
+import { Country, FirmSize } from '@/types/api-types/enums';
 import { z } from 'zod';
-import { Country, FirmSize } from '@prisma/client';
+
 
 // =============================================================================
 // USER SCHEMAS

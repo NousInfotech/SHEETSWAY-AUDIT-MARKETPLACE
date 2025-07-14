@@ -1,8 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { businessProfileSchema, CountryEnum, FirmSizeEnum } from '../utils/zod-schemas';
+import { businessProfileSchema} from '@/validators/user.validator'
+import { CountryEnum,FirmSizeEnum } from '../utils/zod-schemas';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,39 +11,33 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { toast } from "sonner";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { updateBusinessProfile } from '@/api/user.api';
 
 export type BusinessProfileFormValues = z.infer<typeof businessProfileSchema>;
 
-export default function BusinessProfileForm({ open, onOpenChange, onSubmit, userId, initialValues, isEdit }: {
+export default function BusinessProfileForm({ open, onOpenChange, onSubmit, initialValues, isEdit }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: BusinessProfileFormValues) => void;
-  userId: string;
   initialValues?: BusinessProfileFormValues | null;
   isEdit?: boolean;
 }) {
   const form = useForm<BusinessProfileFormValues>({
     resolver: zodResolver(businessProfileSchema),
     defaultValues: initialValues || {
-      id: undefined,
-      userId: userId,
       name: '',
       vatId: '',
       country: undefined,
       category: '',
       size: undefined,
       annualTurnover: undefined,
-      transactionsPerYear: undefined,
-      createdAt: undefined,
-      updatedAt: undefined,
+      transactionsPerYear: undefined
     },
   });
 
   React.useEffect(() => {
     if (open) {
       form.reset(initialValues || {
-        id: undefined,
-        userId: userId,
         name: '',
         vatId: '',
         country: undefined,
@@ -50,19 +45,13 @@ export default function BusinessProfileForm({ open, onOpenChange, onSubmit, user
         size: undefined,
         annualTurnover: undefined,
         transactionsPerYear: undefined,
-        createdAt: undefined,
-        updatedAt: undefined,
       });
     }
-  }, [open, initialValues, userId]);
+  }, [open, initialValues]);
 
   function handleSubmit(values: BusinessProfileFormValues) {
     onSubmit({
-      ...values,
-      id: isEdit && initialValues?.id ? initialValues.id : crypto.randomUUID(),
-      userId: userId,
-      createdAt: isEdit && initialValues?.createdAt ? initialValues.createdAt : new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      ...values
     });
     toast.success(isEdit ? "Business profile updated successfully!" : "Business profile created successfully!");
     onOpenChange(false);
