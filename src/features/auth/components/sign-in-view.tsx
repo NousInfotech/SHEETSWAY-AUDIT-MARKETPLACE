@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import axios from '@/lib/axios';
 
 interface SignInViewPageProps {
   isDark?: boolean;
@@ -32,7 +33,13 @@ export default function SignInViewPage({
     setLoading(true);
     setError('');
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      const name = user.displayName || '';
+      const firebaseId = user.uid;
+      const token = await user.getIdToken();
+      localStorage.setItem('token', token);
+      await axios.post('/user', { name, email: user.email, firebaseId });
       router.push('/dashboard/overview');
     } catch (err: any) {
       setError(err.message);
@@ -46,7 +53,14 @@ export default function SignInViewPage({
     setError('');
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const name = user.displayName;
+      const email = user.email;
+      const firebaseId = user.uid;
+      const token = await user.getIdToken();
+      localStorage.setItem('token', token);
+      await axios.post('/api/v1/users', { name, email, firebaseId });
       router.push('/dashboard/overview');
     } catch (err: any) {
       setError(err.message);

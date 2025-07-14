@@ -1,23 +1,15 @@
 import axios from 'axios';
-import { getAuth } from 'firebase/auth';
-import { app } from './firebase';
 
-const auth = getAuth(app);
-
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+const instance = axios.create({
+  baseURL: 'http://localhost:5000', // or actual backend baseURL
 });
 
-// Add interceptor to attach token
-api.interceptors.request.use(async (config) => {
-  const user = auth.currentUser;
-
-  if (user) {
-    const token = await user.getIdToken();
+instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-
   return config;
 });
 
-export default api;
+export default instance;
