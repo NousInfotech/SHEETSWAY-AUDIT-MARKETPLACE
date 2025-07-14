@@ -7,7 +7,7 @@
     "url": "https://github.com/Kiranism"
   },
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -78,6 +78,7 @@
     "firebase": "^10.14.1",
     "input-otp": "^1.4.2",
     "kbar": "^0.1.0-beta.45",
+    "lightningcss": "^1.30.1",
     "lucide-react": "^0.476.0",
     "match-sorter": "^8.0.0",
     "motion": "^11.17.0",
@@ -91,6 +92,7 @@
     "react-dom": "19.0.0",
     "react-dropzone": "^14.3.5",
     "react-hook-form": "^7.54.1",
+    "react-plaid-link": "^4.0.1",
     "react-resizable-panels": "^2.1.7",
     "react-responsive": "^10.0.0",
     "recharts": "^2.15.1",
