@@ -13,6 +13,7 @@ import Link from 'next/link';
 import type React from 'react';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
+import axios from '@/lib/axios';
 
 interface SignUpViewPageProps {
   isDark?: boolean;
@@ -26,6 +27,7 @@ export default function SignUpViewPage({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -36,11 +38,20 @@ export default function SignUpViewPage({
       setError('Passwords do not match');
       return;
     }
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
 
     setLoading(true);
     setError('');
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      const firebaseId = user.uid;
+      const token = await user.getIdToken();
+      localStorage.setItem('token', token);
+      await axios.post('/api/v1/users', { name, email, firebaseId });
       // Redirect or show success as needed
     } catch (err: any) {
       setError(err.message);
@@ -54,7 +65,15 @@ export default function SignUpViewPage({
     setError('');
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const name = user.displayName;
+      const email = user.email;
+      const firebaseId = user.uid;
+      const token = await user.getIdToken();
+      localStorage.setItem('token', token);
+      await axios.post('/api/v1/users', { name, email, firebaseId });
+      // Redirect or show success as needed
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -173,6 +192,24 @@ export default function SignUpViewPage({
 
             {/* Form */}
             <form onSubmit={handleSignUp} className='space-y-4'>
+              {/* Name Input */}
+              <div className='space-y-2'>
+                <label
+                  className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}
+                >
+                  Name
+                </label>
+                <Input
+                  type='text'
+                  placeholder='Enter your name'
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  disabled={loading}
+                  className={`${isDark ? 'border-gray-700 bg-black text-white placeholder-gray-500' : 'border-gray-300 bg-white'}`}
+                />
+              </div>
+
               {/* Email Input */}
               <div className='space-y-2'>
                 <label
