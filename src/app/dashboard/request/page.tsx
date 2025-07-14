@@ -55,47 +55,47 @@ import { Textarea } from '@/components/ui/textarea';
 import PageContainer from '@/components/layout/page-container'; // Make sure this path is correct
 
 // Zod schema
-const formSchema = z
-  .object({
-    financialYear: z.date({
-      required_error: 'Financial year end date is required.'
-    }),
-    framework: z.enum(['GAPSME', 'IFRS'], {
-      required_error: 'You need to select a framework.'
-    }),
-    businessSize: z.enum(['Micro', 'Small', 'Medium', 'Large'], {
-      required_error: 'Business size is required.'
-    }),
-    isTaxReturnNeeded: z.enum(['Yes', 'No']),
-    deliveryDeadline: z.date({
-      required_error: 'A delivery deadline is required.'
-    }),
-    notes: z.string().optional(),
-    files: z.any().optional(),
-    budget: z.string().optional(),
-    urgency: z.enum(['Normal', 'Urgent'])
-  })
-  .refine((data) => data.deliveryDeadline > data.financialYear, {
-    message: 'Deadline must be after the financial year end.',
-    path: ['deliveryDeadline']
-  });
+const formSchema = z.object({
+  businessId: z.string().uuid('Invalid business ID format'),
+  type: z.enum(['AUDIT', 'TAX', 'OTHER'], {
+    required_error: 'Request type is required.'
+  }),
+  framework: z.enum(['GAPSME', 'IFRS'], {
+    required_error: 'You need to select a framework.'
+  }),
+  financialYear: z.string().min(1, 'Financial year is required'),
+  auditStart: z.string().datetime().optional(),
+  auditEnd: z.string().datetime().optional(),
+  deadline: z.string().datetime('Invalid deadline format'),
+  notes: z.string().min(1, 'Notes are required'),
+  urgency: z.enum(['Normal', 'Urgent'], {
+    required_error: 'Urgency is required.'
+  }),
+  budget: z.number().min(0, 'Budget must be 0 or greater').optional(),
+  isAnonymous: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+  preferredLanguages: z.array(z.string()).min(1, 'At least one preferred language is required'),
+  timeZone: z.string().optional(),
+  workingHours: z.string().optional(),
+  specialFlags: z.array(z.string()).optional(),
+});
 
 type AuditFormValues = z.infer<typeof formSchema>;
 
 const RequestPage = () => {
-  const [step, setStep] = useState<'selection' | 'auditForm' | 'taxForm'>(
-    'selection'
-  );
+  const [step, setStep] = useState<'selection' | 'auditForm' | 'taxForm'>('selection');
 
   const form = useForm<AuditFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      isTaxReturnNeeded: 'No',
+      isAnonymous: false,
+      isActive: true,
+      preferredLanguages: [],
+      specialFlags: [],
       urgency: 'Normal',
       notes: '',
-      budget: ''
     },
-    mode: 'onChange'
+    mode: 'onChange',
   });
 
   function onSubmit(data: AuditFormValues) {
@@ -147,92 +147,50 @@ const RequestPage = () => {
 
   const renderAuditForm = () => (
     <div className='mx-auto w-full max-w-4xl'>
-      <Button
-        variant='ghost'
-        onClick={() => setStep('selection')}
-        className='mb-6'
-      >
+      <Button variant='ghost' onClick={() => setStep('selection')} className='mb-6'>
         <ChevronLeft className='mr-2 h-4 w-4' /> Back to selection
       </Button>
-      <h2 className='mb-6 text-3xl font-bold tracking-tight'>
-        Financial Audit Request
-      </h2>
-
+      <h2 className='mb-6 text-3xl font-bold tracking-tight'>Financial Audit Request</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
           <div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
-            {/* Financial Year */}
+            {/* Business ID */}
             <FormField
               control={form.control}
-              name='financialYear'
+              name='businessId'
               render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>Financial Year End</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-full justify-start pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          <CalendarIcon className='mr-2 h-4 w-4 opacity-50' />
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0' align='start'>
-                      <Calendar
-                        mode='single'
-                        selected={field.value}
-                        onSelect={field.onChange}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <FormItem>
+                  <FormLabel>Business ID</FormLabel>
+                  <FormControl>
+                    <Input type='text' placeholder='Enter business UUID' {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {/* Delivery Deadline */}
+            {/* Type */}
             <FormField
               control={form.control}
-              name='deliveryDeadline'
+              name='type'
               render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>Delivery Deadline</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={cn(
-                            'w-full justify-start pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          <CalendarIcon className='mr-2 h-4 w-4 opacity-50' />
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0' align='start'>
-                      <Calendar
-                        mode='single'
-                        selected={field.value}
-                        onSelect={field.onChange}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <FormItem>
+                  <FormLabel>Request Type</FormLabel>
+                  <FormControl>
+                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className='flex flex-row items-center space-x-6'>
+                      <FormItem className='flex items-center space-y-0 space-x-2'>
+                        <FormControl><RadioGroupItem value='AUDIT' /></FormControl>
+                        <FormLabel className='font-normal'>Audit</FormLabel>
+                      </FormItem>
+                      <FormItem className='flex items-center space-y-0 space-x-2'>
+                        <FormControl><RadioGroupItem value='TAX' /></FormControl>
+                        <FormLabel className='font-normal'>Tax</FormLabel>
+                      </FormItem>
+                      <FormItem className='flex items-center space-y-0 space-x-2'>
+                        <FormControl><RadioGroupItem value='OTHER' /></FormControl>
+                        <FormLabel className='font-normal'>Other</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -245,21 +203,13 @@ const RequestPage = () => {
                 <FormItem className='space-y-3'>
                   <FormLabel>Framework</FormLabel>
                   <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className='flex flex-row items-center space-x-6'
-                    >
+                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className='flex flex-row items-center space-x-6'>
                       <FormItem className='flex items-center space-y-0 space-x-2'>
-                        <FormControl>
-                          <RadioGroupItem value='GAPSME' />
-                        </FormControl>
+                        <FormControl><RadioGroupItem value='GAPSME' /></FormControl>
                         <FormLabel className='font-normal'>GAPSME</FormLabel>
                       </FormItem>
                       <FormItem className='flex items-center space-y-0 space-x-2'>
-                        <FormControl>
-                          <RadioGroupItem value='IFRS' />
-                        </FormControl>
+                        <FormControl><RadioGroupItem value='IFRS' /></FormControl>
                         <FormLabel className='font-normal'>IFRS</FormLabel>
                       </FormItem>
                     </RadioGroup>
@@ -268,151 +218,72 @@ const RequestPage = () => {
                 </FormItem>
               )}
             />
-            {/* Business Size */}
+            {/* Financial Year */}
             <FormField
               control={form.control}
-              name='businessSize'
+              name='financialYear'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Business Size</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Select a business size' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value='Micro'>Micro</SelectItem>
-                      <SelectItem value='Small'>Small</SelectItem>
-                      <SelectItem value='Medium'>Medium</SelectItem>
-                      <SelectItem value='Large'>Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Financial Year</FormLabel>
+                  <FormControl>
+                    <Input type='text' placeholder='e.g. 2023' {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {/* Tax Return Needed? */}
-            <div className='md:col-span-2'>
-              <FormField
-                control={form.control}
-                name='isTaxReturnNeeded'
-                render={({ field }) => (
-                  <FormItem className='space-y-3'>
-                    <FormLabel>Is Tax Return Needed with this Audit?</FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className='flex flex-row items-center space-x-6'
-                      >
-                        <FormItem className='flex items-center space-y-0 space-x-2'>
-                          <FormControl>
-                            <RadioGroupItem value='Yes' />
-                          </FormControl>
-                          <FormLabel className='font-normal'>Yes</FormLabel>
-                        </FormItem>
-                        <FormItem className='flex items-center space-y-0 space-x-2'>
-                          <FormControl>
-                            <RadioGroupItem value='No' />
-                          </FormControl>
-                          <FormLabel className='font-normal'>No</FormLabel>
-                        </FormItem>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* File Upload */}
-            <div className='md:col-span-2'>
-              <FormField
-                control={form.control}
-                name='files'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>File Upload (Trial Balance, etc.)</FormLabel>
-                    <FormControl>
-                      <div className='relative flex h-32 w-full justify-center rounded-md border-2 border-dashed px-6 pt-5 pb-6'>
-                        <div className='space-y-1 text-center'>
-                          <UploadCloud className='text-muted-foreground mx-auto h-12 w-12' />
-                          <div className='flex text-sm'>
-                            <label
-                              htmlFor='file-upload'
-                              className='text-primary focus-within:ring-primary hover:text-primary/80 relative cursor-pointer rounded-md font-medium focus-within:ring-2 focus-within:ring-offset-2 focus-within:outline-none'
-                            >
-                              <span>Upload files</span>
-                              <Input
-                                id='file-upload'
-                                type='file'
-                                className='sr-only'
-                                multiple
-                                onChange={(e) => field.onChange(e.target.files)}
-                              />
-                            </label>
-                            <p className='pl-1'>or drag and drop</p>
-                          </div>
-                          <p className='text-muted-foreground text-xs'>
-                            PNG, JPG, PDF, XLSX up to 10MB
-                          </p>
-                        </div>
-                      </div>
-                    </FormControl>
-                    <FormDescription>
-                      {field.value && field.value.length > 0
-                        ? `Selected: ${Array.from(field.value as FileList)
-                            .map((file: any) => file.name)
-                            .join(', ')}`
-                        : 'No files selected.'}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Notes */}
-            <div className='md:col-span-2'>
-              <FormField
-                control={form.control}
-                name='notes'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes / Requirements</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder='Add any specific notes or requirements for this audit...'
-                        className='resize-y'
-                        rows={4}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {/* Budget */}
+            {/* Audit Start */}
             <FormField
               control={form.control}
-              name='budget'
+              name='auditStart'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Budget (Optional)</FormLabel>
-                  <div className='relative'>
-                    <DollarSign className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
-                    <FormControl>
-                      <Input
-                        type='number'
-                        placeholder='0.00'
-                        className='pl-8'
-                        {...field}
-                      />
-                    </FormControl>
-                  </div>
+                  <FormLabel>Audit Start (optional)</FormLabel>
+                  <FormControl>
+                    <Input type='datetime-local' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Audit End */}
+            <FormField
+              control={form.control}
+              name='auditEnd'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Audit End (optional)</FormLabel>
+                  <FormControl>
+                    <Input type='datetime-local' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Deadline */}
+            <FormField
+              control={form.control}
+              name='deadline'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Deadline</FormLabel>
+                  <FormControl>
+                    <Input type='datetime-local' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Notes */}
+            <FormField
+              control={form.control}
+              name='notes'
+              render={({ field }) => (
+                <FormItem className='md:col-span-2'>
+                  <FormLabel>Notes / Requirements</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder='Add any specific notes or requirements for this audit...' className='resize-y' rows={4} {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -422,24 +293,16 @@ const RequestPage = () => {
               control={form.control}
               name='urgency'
               render={({ field }) => (
-                <FormItem className='space-y-3'>
+                <FormItem>
                   <FormLabel>Urgency Level</FormLabel>
                   <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className='flex flex-row items-center space-x-6'
-                    >
+                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className='flex flex-row items-center space-x-6'>
                       <FormItem className='flex items-center space-y-0 space-x-2'>
-                        <FormControl>
-                          <RadioGroupItem value='Normal' />
-                        </FormControl>
+                        <FormControl><RadioGroupItem value='Normal' /></FormControl>
                         <FormLabel className='font-normal'>Normal</FormLabel>
                       </FormItem>
                       <FormItem className='flex items-center space-y-0 space-x-2'>
-                        <FormControl>
-                          <RadioGroupItem value='Urgent' />
-                        </FormControl>
+                        <FormControl><RadioGroupItem value='Urgent' /></FormControl>
                         <FormLabel className='font-normal'>Urgent</FormLabel>
                       </FormItem>
                     </RadioGroup>
@@ -448,14 +311,107 @@ const RequestPage = () => {
                 </FormItem>
               )}
             />
+            {/* Budget */}
+            <FormField
+              control={form.control}
+              name='budget'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Budget (Optional)</FormLabel>
+                  <FormControl>
+                    <Input type='number' placeholder='0.00' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Is Anonymous */}
+            <FormField
+              control={form.control}
+              name='isAnonymous'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Submit as Anonymous?</FormLabel>
+                  <FormControl>
+                    <input type='checkbox' checked={field.value} onChange={e => field.onChange(e.target.checked)} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Is Active */}
+            <FormField
+              control={form.control}
+              name='isActive'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Is Active?</FormLabel>
+                  <FormControl>
+                    <input type='checkbox' checked={field.value} onChange={e => field.onChange(e.target.checked)} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Preferred Languages */}
+            <FormField
+              control={form.control}
+              name='preferredLanguages'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Preferred Languages</FormLabel>
+                  <FormControl>
+                    <Input type='text' placeholder='Comma separated, e.g. English,Spanish' value={field.value.join(',')} onChange={e => field.onChange(e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Time Zone */}
+            <FormField
+              control={form.control}
+              name='timeZone'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Time Zone (Optional)</FormLabel>
+                  <FormControl>
+                    <Input type='text' placeholder='e.g. Europe/Malta' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Working Hours */}
+            <FormField
+              control={form.control}
+              name='workingHours'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Working Hours (Optional)</FormLabel>
+                  <FormControl>
+                    <Input type='text' placeholder='e.g. 9am-5pm' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Special Flags */}
+            <FormField
+              control={form.control}
+              name='specialFlags'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Special Flags (Optional)</FormLabel>
+                  <FormControl>
+                    <Input type='text' placeholder='Comma separated, e.g. urgent,priority' value={field.value?.join(',') || ''} onChange={e => field.onChange(e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-
           <div className='flex justify-end pb-8'>
-            {' '}
-            {/* Add padding to the bottom */}
-            <Button type='submit' size='lg'>
-              Submit Request
-            </Button>
+            <Button type='submit' size='lg'>Submit Request</Button>
           </div>
         </form>
       </Form>
