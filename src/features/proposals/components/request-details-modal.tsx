@@ -64,7 +64,7 @@ export function RequestDetailsModal({
             </Badge>
             <Badge 
               variant={request.urgency === 'Urgent' ? 'destructive' : 'outline'}
-              className={getUrgencyColor(request.urgency)}
+              className={`${getUrgencyColor(request.urgency)} ${request.urgency === 'Urgent' ? 'text-white' : ''}`}
             >
               {request.urgency}
             </Badge>

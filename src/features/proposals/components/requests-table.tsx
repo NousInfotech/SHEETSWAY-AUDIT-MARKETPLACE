@@ -116,11 +116,11 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals }: Re
         const urgency = row.getValue('urgency') as 'Normal' | 'Urgent';
         return (
           <Badge 
-            variant={urgency === 'Urgent' ? 'destructive' : 'outline'}
-            className={getUrgencyColor(urgency)}
-          >
-            {urgency}
-          </Badge>
+  variant={urgency === 'Urgent' ? 'destructive' : 'outline'}
+  className={urgency === 'Urgent' ? 'bg-red-600 text-white' : 'bg-muted text-muted-foreground'}
+>
+  {urgency}
+</Badge>
         );
       }
     },
