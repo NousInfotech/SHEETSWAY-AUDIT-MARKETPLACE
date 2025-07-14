@@ -13,10 +13,17 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@
 
 export type BusinessProfileFormValues = z.infer<typeof businessProfileSchema>;
 
-export default function BusinessProfileForm({ open, onOpenChange, onSubmit, userId }: { open: boolean; onOpenChange: (open: boolean) => void; onSubmit: (data: BusinessProfileFormValues) => void; userId: string; }) {
+export default function BusinessProfileForm({ open, onOpenChange, onSubmit, userId, initialValues, isEdit }: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: BusinessProfileFormValues) => void;
+  userId: string;
+  initialValues?: BusinessProfileFormValues | null;
+  isEdit?: boolean;
+}) {
   const form = useForm<BusinessProfileFormValues>({
     resolver: zodResolver(businessProfileSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       id: undefined,
       userId: userId,
       name: '',
@@ -31,15 +38,33 @@ export default function BusinessProfileForm({ open, onOpenChange, onSubmit, user
     },
   });
 
+  React.useEffect(() => {
+    if (open) {
+      form.reset(initialValues || {
+        id: undefined,
+        userId: userId,
+        name: '',
+        vatId: '',
+        country: undefined,
+        category: '',
+        size: undefined,
+        annualTurnover: undefined,
+        transactionsPerYear: undefined,
+        createdAt: undefined,
+        updatedAt: undefined,
+      });
+    }
+  }, [open, initialValues, userId]);
+
   function handleSubmit(values: BusinessProfileFormValues) {
     onSubmit({
       ...values,
-      id: crypto.randomUUID(),
-      userId,
-      createdAt: new Date().toISOString(),
+      id: isEdit && initialValues?.id ? initialValues.id : crypto.randomUUID(),
+      userId: userId,
+      createdAt: isEdit && initialValues?.createdAt ? initialValues.createdAt : new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
-    toast.success("Business profile created successfully!");
+    toast.success(isEdit ? "Business profile updated successfully!" : "Business profile created successfully!");
     onOpenChange(false);
     form.reset();
   }
@@ -48,7 +73,7 @@ export default function BusinessProfileForm({ open, onOpenChange, onSubmit, user
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Business Profile</DialogTitle>
+          <DialogTitle>{isEdit ? 'Edit Business Profile' : 'Create Business Profile'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -128,10 +153,16 @@ export default function BusinessProfileForm({ open, onOpenChange, onSubmit, user
               </FormItem>
             )} />
             <DialogFooter>
-              <Button type="submit">Create</Button>
+              <Button type="submit">{isEdit ? 'Update' : 'Create'}</Button>
             </DialogFooter>
           </form>
         </Form>
+        {/* Debug output for validation errors */}
+        <div style={{ color: 'red', marginTop: 16, fontSize: 12 }}>
+          {Object.keys(form.formState.errors).length > 0 && (
+            <pre>{JSON.stringify(form.formState.errors, null, 2)}</pre>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -3,19 +3,41 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import PlaidIntegrationList, { PlaidIntegration } from './plaid-integration-list';
 import PlaidIntegrationForm from './plaid-integration-form';
-// import { mockPlaidIntegrations, generateMockPlaidIntegration } from '../utils/mock-data';
+import { mockPlaidIntegrations, generateMockPlaidIntegration } from '../utils/mock-data';
 
 export default function PlaidIntegrationTab() {
   const [open, setOpen] = useState(false);
   const [integrations, setIntegrations] = useState<PlaidIntegration[]>([]);
 
-  // TODO: Optionally fetch real integrations from backend on mount
-  // useEffect(() => {
-  //   api.get('/api/v1/plaid-integration/list').then(res => setIntegrations(res.data));
-  // }, []);
+  // Helper to load from localStorage or fallback to mock
+  function loadIntegrations() {
+    try {
+      const local = localStorage.getItem('plaidIntegrations');
+      let data: PlaidIntegration[] = [];
+      if (local) {
+        data = JSON.parse(local);
+      } else {
+        data = mockPlaidIntegrations;
+        localStorage.setItem('plaidIntegrations', JSON.stringify(data));
+      }
+      setIntegrations(data);
+    } catch (err) {
+      // Optionally handle error
+    }
+  }
+
+  useEffect(() => {
+    loadIntegrations();
+  }, []);
+
+  function saveIntegrations(newIntegrations: PlaidIntegration[]) {
+    setIntegrations(newIntegrations);
+    localStorage.setItem('plaidIntegrations', JSON.stringify(newIntegrations));
+  }
 
   function handleConnect(newIntegration: PlaidIntegration) {
-    setIntegrations(prev => [newIntegration, ...prev]);
+    const newIntegrations = [newIntegration, ...integrations];
+    saveIntegrations(newIntegrations);
   }
 
   return (
