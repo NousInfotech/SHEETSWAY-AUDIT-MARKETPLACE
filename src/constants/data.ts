@@ -68,6 +68,14 @@ export const navItems: NavItem[] = [
     shortcut: ['c', 'c'],
     isActive: false,
     items: []
+  },
+  {
+    title: 'Business Profiles & Integrations',
+    url: '/dashboard/business-profiles',
+    icon: 'user2', // Valid icon from Icons
+    isActive: false,
+    shortcut: ['b', 'p'],
+    items: []
   }
 ];
 
