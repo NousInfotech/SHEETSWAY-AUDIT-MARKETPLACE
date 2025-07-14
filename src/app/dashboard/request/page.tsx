@@ -57,7 +57,7 @@ import PageContainer from '@/components/layout/page-container'; // Make sure thi
 // Zod schema
 const formSchema = z.object({
   businessId: z.string().uuid('Invalid business ID format'),
-  type: z.enum(['AUDIT', 'TAX', 'OTHER'], {
+  type: z.enum(['AUDIT', 'TAX'], {
     required_error: 'Request type is required.'
   }),
   framework: z.enum(['GAPSME', 'IFRS'], {
@@ -68,7 +68,7 @@ const formSchema = z.object({
   auditEnd: z.string().datetime().optional(),
   deadline: z.string().datetime('Invalid deadline format'),
   notes: z.string().min(1, 'Notes are required'),
-  urgency: z.enum(['Normal', 'Urgent'], {
+  urgency: z.enum(['NORMAL', 'URGENT'], {
     required_error: 'Urgency is required.'
   }),
   budget: z.number().min(0, 'Budget must be 0 or greater').optional(),
@@ -92,7 +92,7 @@ const RequestPage = () => {
       isActive: true,
       preferredLanguages: [],
       specialFlags: [],
-      urgency: 'Normal',
+      urgency: 'NORMAL',
       notes: '',
     },
     mode: 'onChange',
@@ -184,10 +184,6 @@ const RequestPage = () => {
                       <FormItem className='flex items-center space-y-0 space-x-2'>
                         <FormControl><RadioGroupItem value='TAX' /></FormControl>
                         <FormLabel className='font-normal'>Tax</FormLabel>
-                      </FormItem>
-                      <FormItem className='flex items-center space-y-0 space-x-2'>
-                        <FormControl><RadioGroupItem value='OTHER' /></FormControl>
-                        <FormLabel className='font-normal'>Other</FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
@@ -298,11 +294,11 @@ const RequestPage = () => {
                   <FormControl>
                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className='flex flex-row items-center space-x-6'>
                       <FormItem className='flex items-center space-y-0 space-x-2'>
-                        <FormControl><RadioGroupItem value='Normal' /></FormControl>
+                        <FormControl><RadioGroupItem value='NORMAL' /></FormControl>
                         <FormLabel className='font-normal'>Normal</FormLabel>
                       </FormItem>
                       <FormItem className='flex items-center space-y-0 space-x-2'>
-                        <FormControl><RadioGroupItem value='Urgent' /></FormControl>
+                        <FormControl><RadioGroupItem value='URGENT' /></FormControl>
                         <FormLabel className='font-normal'>Urgent</FormLabel>
                       </FormItem>
                     </RadioGroup>
