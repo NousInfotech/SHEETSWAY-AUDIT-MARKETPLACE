@@ -1,42 +1,40 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// context/AuthContext.tsx
 'use client';
-import { useTheme } from 'next-themes';
-import React from 'react';
-import { ActiveThemeProvider } from '../active-theme';
-import { onAuthStateChanged, User } from 'firebase/auth';
+
+import { onAuthStateChanged, getIdToken, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { setToken, clearToken } from '@/lib/utils';
+import React, { useEffect, useState, createContext } from 'react';
+import { useTheme } from 'next-themes';
+import { ActiveThemeProvider } from '../active-theme';
+import { getProfile } from '@/api/user.api';
+import { setUser } from '@sentry/nextjs';
 
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-}
+const AuthContext = createContext<{ firebaseUser: FirebaseUser | null, appUser: { name: string } }>({ firebaseUser: null, appUser: { name: "" } });
 
-const AuthContext = React.createContext<AuthContextType>({
-  user: null,
-  loading: true
-});
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [appUser, setAppUser] = useState<any>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<User | null>(null);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      (firebaseUser: User | null) => {
-        setUser(firebaseUser);
-        setLoading(false);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const token = await getIdToken(user);
+        setToken(token);
+        const data = await getProfile();
+        setAppUser(data);
+        setFirebaseUser(user);
+      } else {
+        clearToken();
+        setFirebaseUser(null);
       }
-    );
+    });
+
     return () => unsubscribe();
   }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
+  return <AuthContext.Provider value={{ firebaseUser, appUser }}>{children}</AuthContext.Provider>;
+};
 
 export function useAuth() {
   return React.useContext(AuthContext);

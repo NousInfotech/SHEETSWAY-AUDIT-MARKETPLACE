@@ -12,6 +12,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import axios from '@/lib/axios';
+import { setToken } from '@/lib/utils';
+import { getProfile } from '@/api/user.api';
 
 interface SignInViewPageProps {
   isDark?: boolean;
@@ -35,11 +37,9 @@ export default function SignInViewPage({
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      const name = user.displayName || '';
-      const firebaseId = user.uid;
       const token = await user.getIdToken();
       localStorage.setItem('token', token);
-      await axios.post('/user', { name, email: user.email, firebaseId });
+      await getProfile();
       router.push('/dashboard/overview');
     } catch (err: any) {
       setError(err.message);
@@ -55,12 +55,9 @@ export default function SignInViewPage({
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      const name = user.displayName;
-      const email = user.email;
-      const firebaseId = user.uid;
       const token = await user.getIdToken();
       localStorage.setItem('token', token);
-      await axios.post('/api/v1/users', { name, email, firebaseId });
+      await getProfile();
       router.push('/dashboard/overview');
     } catch (err: any) {
       setError(err.message);
@@ -195,11 +192,10 @@ export default function SignInViewPage({
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    isDark 
-                      ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700' 
-                      : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:bg-white'
-                  }`}
+                  className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isDark
+                    ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700'
+                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:bg-white'
+                    }`}
                 />
               </div>
 
@@ -227,11 +223,10 @@ export default function SignInViewPage({
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    isDark 
-                      ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700' 
-                      : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:bg-white'
-                  }`}
+                  className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isDark
+                    ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700'
+                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:bg-white'
+                    }`}
                 />
               </div>
 
@@ -273,11 +268,10 @@ export default function SignInViewPage({
                 variant='outline'
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className={`w-full h-10 font-medium rounded-md transition-colors flex items-center justify-center gap-3 ${
-                  isDark 
-                    ? 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700' 
-                    : 'border-gray-300 bg-white text-gray-900 hover:bg-gray-50'
-                }`}
+                className={`w-full h-10 font-medium rounded-md transition-colors flex items-center justify-center gap-3 ${isDark
+                  ? 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'
+                  : 'border-gray-300 bg-white text-gray-900 hover:bg-gray-50'
+                  }`}
               >
                 <svg className='h-5 w-5' viewBox='0 0 24 24'>
                   <path

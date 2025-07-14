@@ -16,14 +16,14 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
 export function UserNav() {
-  const { user } = useAuth();
+  const { appUser, firebaseUser } = useAuth();
   const router = useRouter();
-  if (user) {
+  if (appUser) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
-            <UserAvatarProfile user={user} />
+            <UserAvatarProfile user={firebaseUser} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -35,10 +35,10 @@ export function UserNav() {
           <DropdownMenuLabel className='font-normal'>
             <div className='flex flex-col space-y-1'>
               <p className='text-sm leading-none font-medium'>
-                {user.displayName || user.email || 'User'}
+                {appUser?.name || firebaseUser?.email || 'User'}
               </p>
               <p className='text-muted-foreground text-xs leading-none'>
-                {user.email}
+                {firebaseUser?.email}
               </p>
             </div>
           </DropdownMenuLabel>
