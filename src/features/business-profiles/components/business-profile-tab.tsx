@@ -9,6 +9,7 @@ import {
   updateBusinessProfile,
   deleteBusinessProfile,
 } from '@/api/user.api';
+import { useAuth } from '@/components/layout/providers';
 
 interface BusinessProfileType extends BusinessProfileFormValues {
   id?: string;
@@ -21,6 +22,8 @@ export default function BusinessProfileTab() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { appUser } = useAuth();
+
   useEffect(() => {
     loadProfiles();
   }, []);
@@ -29,7 +32,7 @@ export default function BusinessProfileTab() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getBusinessProfiles();
+      const data = await getBusinessProfiles({ userId: appUser.id });
       setProfiles(data);
     } catch (err) {
       setError('Failed to load business profiles');

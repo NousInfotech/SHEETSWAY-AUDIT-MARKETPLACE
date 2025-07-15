@@ -5,12 +5,12 @@ import {
   CreatePlaidBankAccountInput,
 } from '@/types/api-types/plaid.types';
 
-const baseUrl = '/api/v1/plaid-integrations';
+const baseUrl = '/api/v1/plaid-integration';
 
 /**
  * 🔗 Create a link token for Plaid Link
  */
-export const createLinkToken = async (data: PlaidLinkTokenInput): Promise<{ link_token: string }> => {
+export const createLinkToken = async (data: PlaidLinkTokenInput): Promise<{ linkToken: string }> => {
   const response = await instance.post(`${baseUrl}/link-token`, data);
   return response.data;
 };

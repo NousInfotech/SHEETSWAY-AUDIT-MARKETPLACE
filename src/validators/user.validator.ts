@@ -114,6 +114,7 @@ export const userFiltersSchema = z.object({
 });
 
 export const businessProfileFiltersSchema = z.object({
+  userId:z.string().optional(),
   country: z.nativeEnum(Country).optional(),
   category: z.string().optional(),
   size: z.nativeEnum(FirmSize).optional(),

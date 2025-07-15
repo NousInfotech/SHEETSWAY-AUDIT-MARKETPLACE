@@ -4,22 +4,17 @@ import { Button } from '@/components/ui/button';
 import PlaidIntegrationList, { PlaidIntegration } from './plaid-integration-list';
 import PlaidIntegrationForm from './plaid-integration-form';
 import { mockPlaidIntegrations, generateMockPlaidIntegration } from '../utils/mock-data';
+import { getPlaidBankAccounts } from '@/api/user.api';
+
 
 export default function PlaidIntegrationTab() {
   const [open, setOpen] = useState(false);
   const [integrations, setIntegrations] = useState<PlaidIntegration[]>([]);
 
   // Helper to load from localStorage or fallback to mock
-  function loadIntegrations() {
+  async function loadIntegrations() {
     try {
-      const local = localStorage.getItem('plaidIntegrations');
-      let data: PlaidIntegration[] = [];
-      if (local) {
-        data = JSON.parse(local);
-      } else {
-        data = mockPlaidIntegrations;
-        localStorage.setItem('plaidIntegrations', JSON.stringify(data));
-      }
+      const data = await getPlaidBankAccounts();
       setIntegrations(data);
     } catch (err) {
       // Optionally handle error

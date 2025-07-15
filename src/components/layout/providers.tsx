@@ -10,7 +10,7 @@ import { ActiveThemeProvider } from '../active-theme';
 import { getProfile } from '@/api/user.api';
 import { setUser } from '@sentry/nextjs';
 
-const AuthContext = createContext<{ firebaseUser: FirebaseUser | null, appUser: { name: string } }>({ firebaseUser: null, appUser: { name: "" } });
+const AuthContext = createContext<{ firebaseUser: FirebaseUser | null, appUser: { id: string, name: string } }>({ firebaseUser: null, appUser: { name: "", id: "" } });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);

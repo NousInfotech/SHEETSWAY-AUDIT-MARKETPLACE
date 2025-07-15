@@ -1,46 +1,65 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+'use client';
+import React from 'react';
 import { usePlaidLink } from 'react-plaid-link';
-import api from '@/lib/axios';
-import { generateMockPlaidIntegration } from '../utils/mock-data';
+import { createPlaidBankAccount, createLinkToken, exchangePublicToken } from '@/api/plaid.api';
 
-export default function PlaidIntegrationForm({ open, onOpenChange, onSubmit }: { open: boolean; onOpenChange: (open: boolean) => void; onSubmit: (integration: any) => void; }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (integration: any) => void;
+}
 
-  // For mock mode, just generate a mock integration
-  function handleMockConnect() {
-    setLoading(true);
-    setTimeout(() => {
-      const mock = generateMockPlaidIntegration();
-      onSubmit(mock);
-      onOpenChange(false);
-      setLoading(false);
-    }, 800);
-  }
+export default function PlaidIntegrationForm({ open, onOpenChange, onSubmit }: Props) {
+  const [linkToken, setLinkToken] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (open) {
+      (async () => {
+        const response = await createLinkToken({ businessName: 'Demo Inc.' });
+        console.log(response);
+        if (response?.linkToken) {
+          setLinkToken(response.linkToken);
+        }
+      })();
+    }
+  }, [open]);
+
+  const { open: openPlaid, ready } = usePlaidLink({
+    token: linkToken || '',
+    onSuccess: async (public_token, metadata) => {
+      try {
+        const created = await createPlaidBankAccount({
+          publicToken: public_token,
+          institution: metadata.institution?.name as string,
+          last4: metadata.accounts?.[0]?.mask,
+          accountType: metadata.accounts?.[0]?.subtype,
+          accountName: metadata.accounts?.[0]?.name,
+        });
+
+        onSubmit(created);
+        onOpenChange(false);
+      } catch (err) {
+        console.error('Plaid error:', err);
+      }
+    },
+    onExit: (err) => {
+      if (err) console.error('Plaid Link exited:', err);
+    },
+  });
+
+  if (!open) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Connect Plaid</DialogTitle>
-        </DialogHeader>
-        <div className="py-4">
-          {error && <div className="text-red-500 mb-2">{error}</div>}
-          {loading && <div>Loading...</div>}
-          {!loading && (
-            <Button onClick={handleMockConnect}>
-              Generate Mock Plaid Integration
-            </Button>
-          )}
-        </div>
-        <DialogFooter>
-          <Button variant="secondary" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <div className="p-4 border rounded-lg space-y-4 bg-muted">
+      <h3 className="text-lg font-medium">Connect Your Bank</h3>
+      <button
+        className="px-4 py-2 text-white bg-black rounded-md"
+        onClick={() => openPlaid()}
+        disabled={!ready}
+      >
+        {ready ? 'Connect with Plaid' : 'Loading...'}
+      </button>
+    </div>
   );
-} 
+}
