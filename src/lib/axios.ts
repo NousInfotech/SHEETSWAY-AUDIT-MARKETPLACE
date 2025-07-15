@@ -3,7 +3,7 @@ import axios from 'axios';
 import { getToken } from './utils';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
 });
 
 // Request interceptor: Add auth and role headers
