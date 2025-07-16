@@ -51,14 +51,14 @@ export default function OverViewLayout({
     }
   ];
 
-  const { appUser,firebaseUser } = useAuth();
+  const { appUser, firebaseUser } = useAuth();
 
   return (
     <PageContainer>
       <div className='flex flex-1 flex-col space-y-2'>
         <div className='flex items-center justify-between space-y-2'>
           <h2 className='text-2xl font-bold tracking-tight'>
-            Hi, Welcome Back {firebaseUser?.displayName || appUser.name} 👋
+            Hi, Welcome Back {firebaseUser?.displayName || appUser?.name || ""} 👋
           </h2>
         </div>
 
