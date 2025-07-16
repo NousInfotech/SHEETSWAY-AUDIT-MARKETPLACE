@@ -23,10 +23,10 @@ if (!process.env.NEXT_PUBLIC_SENTRY_DISABLED) {
     // For all available options, see:
     // https://www.npmjs.com/package/@sentry/webpack-plugin#options
     // FIXME: Add your Sentry organization and project names
-    org: process.env.NEXT_PUBLIC_SENTRY_ORG,
-    project: process.env.NEXT_PUBLIC_SENTRY_PROJECT,
+    org: process?.env?.NEXT_PUBLIC_SENTRY_ORG,
+    project: process?.env?.NEXT_PUBLIC_SENTRY_PROJECT,
     // Only print logs for uploading source maps in CI
-    silent: !process.env.CI,
+    silent: !process?.env?.CI,
 
     // For all available options, see:
     // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
