@@ -22,11 +22,7 @@ export default function ProposalsPage() {
 
   return (
     <PageContainer>
-      <ProposalsViewPage 
-        selectedRequestId={requestId}
-        selectedRequest={selectedRequest}
-        proposalsForRequest={proposalsForRequest}
-      />
+      <ProposalsViewPage />
     </PageContainer>
   );
 } 
