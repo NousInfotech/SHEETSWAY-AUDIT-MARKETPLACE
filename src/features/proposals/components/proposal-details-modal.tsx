@@ -12,9 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Proposal } from '../types';
-import { 
-  formatCurrency, 
-  formatDate, 
+import {
+  formatCurrency,
+  formatDate,
   getProposalStatusBadgeVariant,
   getRandomAnonUsername
 } from '../utils';
@@ -37,11 +37,12 @@ export function ProposalDetailsModal({
   onAcceptProposal,
   onRejectProposal
 }: ProposalDetailsModalProps) {
+  
+  const [openProfile, setOpenProfile] = React.useState(false);
   if (!proposal) return null;
 
   const isPending = proposal.status === 'Pending';
   const isAccepted = proposal.status === 'Accepted';
-  const [openProfile, setOpenProfile] = React.useState(false);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -128,7 +129,7 @@ export function ProposalDetailsModal({
                 <p className='text-sm text-muted-foreground mb-1'>Description</p>
                 <p className='text-sm'>{proposal.description}</p>
               </div>
-              
+
               <div className='grid grid-cols-2 gap-4'>
                 <div>
                   <p className='text-sm text-muted-foreground'>Estimated Duration</p>
@@ -218,8 +219,8 @@ export function ProposalDetailsModal({
           </Button>
           {isPending && onAcceptProposal && onRejectProposal && (
             <>
-              <Button 
-                variant='outline' 
+              <Button
+                variant='outline'
                 onClick={() => onRejectProposal(proposal)}
                 className='text-red-600 hover:text-red-700'
               >

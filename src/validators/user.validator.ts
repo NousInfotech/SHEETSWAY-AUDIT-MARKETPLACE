@@ -26,6 +26,7 @@ export const userIdParamsSchema = z.object({
 // =============================================================================
 
 export const businessProfileSchema = z.object({
+  id:z.string().optional(),
   name: z.string().min(1, "Business name is required"),
   vatId: z.string().optional(),
   country: z.nativeEnum(Country, {

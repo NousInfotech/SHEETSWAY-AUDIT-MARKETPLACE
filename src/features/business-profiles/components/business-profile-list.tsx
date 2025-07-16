@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 
 export default function BusinessProfileList({ profiles, onEdit, onDelete }: { profiles: BusinessProfileFormValues[]; onEdit?: (profile: BusinessProfileFormValues) => void; onDelete?: (id: string) => void }) {
   if (!profiles || profiles.length === 0) {
-    return <div className="text-center text-gray-500">No business profiles found. Click 'Create Business Profile' to add one.</div>;
+    return <div className="text-center text-gray-500">{"No business profiles found. Click 'Create Business Profile' to add one."}</div>;
   }
   return (
     <div className="space-y-4">
-      {profiles.map(profile => (
-        <Card key={profile.id}>
+      {profiles.map((profile, index) => (
+        <Card key={index}>
           <CardHeader className="flex flex-row items-center justify-between gap-2">
             <CardTitle>{profile.name}</CardTitle>
             <div className="flex gap-2">
