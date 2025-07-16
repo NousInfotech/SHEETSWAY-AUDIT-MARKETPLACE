@@ -5,7 +5,7 @@ import {
   CreatePlaidBankAccountInput,
 } from '@/types/api-types/plaid.types';
 
-const baseUrl = '/api/v1/plaid-integration';
+const baseUrl = '/api/v1/plaid-integrations';
 
 /**
  * 🔗 Create a link token for Plaid Link
