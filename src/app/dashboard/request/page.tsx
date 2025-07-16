@@ -152,6 +152,20 @@ const RequestPage = () => {
   });
 
   async function onSubmit(data: AuditFormValues) {
+    // Frontend validation for required fields
+    if (!data.businessId) {
+      toast.error('Please select a business profile.');
+      return;
+    }
+    if (!data.plaidAccountId) {
+      toast.error('Please select a Plaid bank account.');
+      return;
+    }
+    // Optionally, check for authentication if you have access to user context
+    // if (!user) {
+    //   toast.error('You must be logged in to submit a request.');
+    //   return;
+    // }
     try {
       await axios.post(API.CLIENT_REQUESTS, data);
       toast.success('Form submitted successfully!');
