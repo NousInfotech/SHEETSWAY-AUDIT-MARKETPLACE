@@ -37,8 +37,9 @@ export function ProposalDetailsModal({
   onAcceptProposal,
   onRejectProposal
 }: ProposalDetailsModalProps) {
-  
+  // Always call hooks first!
   const [openProfile, setOpenProfile] = React.useState(false);
+
   if (!proposal) return null;
 
   const isPending = proposal.status === 'Pending';
