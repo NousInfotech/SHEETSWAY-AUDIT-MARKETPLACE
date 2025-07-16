@@ -6,15 +6,15 @@ import { useEffect } from 'react';
 // Removed unused React import
 
 export default function Page() {
-  const { appUser, loading } = useAuth();
+  const { firebaseUser, loading } = useAuth();
   useEffect(() => {
     if (!loading) {
-      if (!appUser) {
+      if (!firebaseUser) {
         redirect('/auth/sign-in');
       } else {
         redirect('/dashboard/overview');
       }
     }
-  }, [appUser, loading]);
+  }, [firebaseUser, loading]);
   return null;
 }

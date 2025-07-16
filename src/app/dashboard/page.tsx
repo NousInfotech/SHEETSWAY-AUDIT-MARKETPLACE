@@ -5,15 +5,15 @@ import { useEffect } from 'react';
 // Removed unused React import
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
+  const { firebaseUser, loading } = useAuth();
   useEffect(() => {
     if (!loading) {
-      if (!user) {
+      if (!firebaseUser) {
         redirect('/auth/sign-in');
       } else {
         redirect('/dashboard/overview');
       }
     }
-  }, [user, loading]);
+  }, [firebaseUser, loading]);
   return null;
 }
