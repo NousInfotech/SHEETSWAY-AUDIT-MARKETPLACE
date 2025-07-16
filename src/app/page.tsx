@@ -6,15 +6,15 @@ import { useEffect } from 'react';
 // Removed unused React import
 
 export default function Page() {
-  const { user, loading } = useAuth();
+  const { appUser, loading } = useAuth();
   useEffect(() => {
     if (!loading) {
-      if (!user) {
+      if (!appUser) {
         redirect('/auth/sign-in');
       } else {
         redirect('/dashboard/overview');
       }
     }
-  }, [user, loading]);
+  }, [appUser, loading]);
   return null;
 }

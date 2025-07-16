@@ -67,7 +67,7 @@ export default function AppSidebar() {
   const pathname = usePathname();
   const { isOpen } = useMediaQuery();
   const router = useRouter();
-  const { user } = useAuth();
+  const { firebaseUser } = useAuth();
   const handleSwitchTenant = (tenantId: string) => {
     // Tenant switching functionality would be implemented here
     console.log('Switching to tenant:', tenantId);
@@ -153,11 +153,11 @@ export default function AppSidebar() {
                   size='lg'
                   className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                 >
-                  {user && (
+                  {firebaseUser && (
                     <UserAvatarProfile
                       className='h-8 w-8 rounded-lg'
                       showInfo
-                      user={user}
+                      user={firebaseUser}
                     />
                   )}
                   <IconChevronsDown className='ml-auto size-4' />
@@ -171,11 +171,11 @@ export default function AppSidebar() {
               >
                 <DropdownMenuLabel className='p-0 font-normal'>
                   <div className='px-1 py-1.5'>
-                    {user && (
+                    {firebaseUser && (
                       <UserAvatarProfile
                         className='h-8 w-8 rounded-lg'
                         showInfo
-                        user={user}
+                        user={firebaseUser}
                       />
                     )}
                   </div>

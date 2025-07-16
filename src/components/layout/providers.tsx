@@ -8,13 +8,13 @@ import React, { useEffect, useState, createContext } from 'react';
 import { useTheme } from 'next-themes';
 import { ActiveThemeProvider } from '../active-theme';
 import { getProfile } from '@/api/user.api';
-import { setUser } from '@sentry/nextjs';
 
-const AuthContext = createContext<{ firebaseUser: FirebaseUser | null, appUser: { id: string, name: string } }>({ firebaseUser: null, appUser: { name: "", id: "" } });
+const AuthContext = createContext<{ firebaseUser: FirebaseUser | null, appUser: { id: string, name: string }, loading: boolean }>({ firebaseUser: null, appUser: { name: "", id: "" }, loading: false });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [appUser, setAppUser] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-  return <AuthContext.Provider value={{ firebaseUser, appUser }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ firebaseUser, appUser, loading }}>{children}</AuthContext.Provider>;
 };
 
 export function useAuth() {
