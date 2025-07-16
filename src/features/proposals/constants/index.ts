@@ -208,6 +208,24 @@ export const mockProposals: Proposal[] = [
     ],
     createdAt: '2024-03-12T10:00:00Z',
     updatedAt: '2024-03-12T10:00:00Z'
+  },
+  {
+    id: 'prop-1',
+    requestId: 'req-1',
+    auditorName: 'Jane Doe',
+    auditorEmail: 'jane.doe@auditors.com',
+    auditorId: 'aud-1',
+    title: 'IFRS Audit Proposal',
+    description: 'I will deliver a comprehensive audit report within 30 days.',
+    proposedBudget: 9500,
+    estimatedDuration: '30 days',
+    startDate: '2024-02-01',
+    endDate: '2024-03-02',
+    status: 'Pending',
+    terms: '50% upfront, 50% on delivery.',
+    deliverables: ['Audit Report', 'Management Letter'],
+    createdAt: '2024-01-10T00:00:00Z',
+    updatedAt: '2024-01-10T00:00:00Z',
   }
 ];
 

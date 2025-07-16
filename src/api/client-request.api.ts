@@ -12,4 +12,10 @@ export const listClientRequests = async (params?: Record<string, any>) => {
 export const getClientRequestById = async (requestId: string) => {
   const response = await instance.get(`${CLIENT_REQUESTS_API}${requestId}`);
   return response.data;
+};
+
+// Create Client Request (POST)
+export const createClientRequest = async (data: any) => {
+  const response = await instance.post(CLIENT_REQUESTS_API, data);
+  return response.data;
 }; 

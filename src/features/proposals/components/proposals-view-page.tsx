@@ -13,18 +13,19 @@ import { ProposalsTable } from './proposals-table';
 import { RequestDetailsModal } from './request-details-modal';
 import { ProposalDetailsModal } from './proposal-details-modal';
 import { formatCurrency } from '../utils';
+import { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-interface ProposalsViewPageProps {
-  selectedRequestId?: string | null;
-  selectedRequest?: Request | null;
-  proposalsForRequest?: Proposal[];
-}
+// --- MOCK DATA FOR TESTING PURPOSES ---
+// --- END MOCK DATA ---
 
-export function ProposalsViewPage({ 
-  selectedRequestId, 
-  selectedRequest, 
-  proposalsForRequest = [] 
-}: ProposalsViewPageProps) {
+// Remove selectedRequestId, selectedRequest, proposalsForRequest from props
+type ProposalsViewPageProps = {};
+
+export function ProposalsViewPage() {
+  const searchParams = useSearchParams();
+  const requestId = searchParams.get('requestId');
+
   const router = useRouter();
   const {
     requests,
@@ -34,14 +35,18 @@ export function ProposalsViewPage({
     getProposalsByStatus
   } = useProposalsStore();
 
+  // Use real data only
+  const selectedRequest = requests.find(r => r.id === requestId) || null;
+  const proposalsForRequest = proposals.filter(p => p.requestId === requestId);
+
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [showProposalDetails, setShowProposalDetails] = useState(false);
 
   // Calculate statistics
   const totalRequests = requests.length;
   const totalProposals = proposals.length;
-  const acceptedProposals = getProposalsByStatus('Accepted');
-  const pendingProposals = getProposalsByStatus('Pending');
+  const acceptedProposals = proposals.filter(p => p.status === 'Accepted');
+  const pendingProposals = proposals.filter(p => p.status === 'Pending');
   const acceptedProposalsCount = acceptedProposals.length;
   const pendingProposalsCount = pendingProposals.length;
 
@@ -79,7 +84,7 @@ export function ProposalsViewPage({
   };
 
   // If we have a selected request, show proposals for that request
-  if (selectedRequestId && selectedRequest) {
+  if (requestId && selectedRequest) {
     return (
       <div className='container mx-auto py-6 space-y-6'>
         {/* Header with back button */}
