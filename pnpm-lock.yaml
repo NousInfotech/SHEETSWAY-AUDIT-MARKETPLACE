@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@apideck/vault-js':
+        specifier: ^1.8.0
+        version: 1.8.0
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -283,6 +286,10 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
+
+  '@apideck/vault-js@1.8.0':
+    resolution: {integrity: sha512-3qP++KcfMTWvsdDfCU2TOn2hh4Qbioa7vUFCr8+AuDyJ8Evk+xJeSOOEqNEH7GN7y9oHGedadbYnn3JZs854PA==}
+    engines: {node: '>=12'}
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -4894,6 +4901,8 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.12
       '@jridgewell/trace-mapping': 0.3.29
+
+  '@apideck/vault-js@1.8.0': {}
 
   '@babel/code-frame@7.27.1':
     dependencies:

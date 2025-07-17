@@ -50,3 +50,13 @@ export const plaidIntegrationSchema = z.object({
   accountName: z.string(),
   createdAt: z.string(),
 }); 
+
+// Apideck accounting integration schema
+export const apideckIntegrationSchema = z.object({
+  id: z.string(),
+  service: z.string(),
+  status: z.string(),
+  enabled: z.boolean().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string().optional(),
+}); 

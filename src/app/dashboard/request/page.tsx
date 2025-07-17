@@ -87,6 +87,7 @@ const formSchema = z.object({
   timeZone: z.string().optional(),
   workingHours: z.string().optional(),
   specialFlags: z.array(z.string()).optional(),
+  apideckIntegrationId: z.string().min(1, 'Please select an accounting integration'),
 });
 
 type AuditFormValues = z.infer<typeof formSchema>;
@@ -97,18 +98,23 @@ const RequestPage = () => {
   const [businessProfiles, setBusinessProfiles] = useState<any[]>([]);
   const [plaidAccounts, setPlaidAccounts] = useState<any[]>([]);
   const [selectedPlaidAccountId, setSelectedPlaidAccountId] = useState<string>('');
+  const [apideckIntegrations, setApideckIntegrations] = useState<any[]>([]);
+  const [selectedApideckIntegrationId, setSelectedApideckIntegrationId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchDropdownData() {
       setLoading(true);
       try {
-        const [bpRes, plaidRes] = await Promise.all([
+        const [bpRes, plaidRes, apideckRes] = await Promise.all([
           axios.get(API.BUSINESS_PROFILES),
           axios.get(API.PLAID_ACCOUNTS),
+          axios.get(API.APIDECK_ACCOUNTING),
         ]);
-        console.log('Full businessProfiles axios response:', bpRes);
-        console.log('Full plaidAccounts axios response:', plaidRes);
+        // Add detailed logging for debugging
+        console.log('Business profiles full response:', bpRes);
+        console.log('Plaid accounts full response:', plaidRes);
+        console.log('Apideck integrations full response:', apideckRes);
         setBusinessProfiles(
           Array.isArray(bpRes.data?.data)
             ? bpRes.data.data
@@ -123,8 +129,16 @@ const RequestPage = () => {
               ? plaidRes.data
               : []
         );
+        setApideckIntegrations(
+          Array.isArray(apideckRes.data?.data)
+            ? apideckRes.data.data
+            : Array.isArray(apideckRes.data)
+              ? apideckRes.data
+              : []
+        );
       } catch (err) {
         toast.error('Failed to load dropdown data');
+        console.error('Dropdown data fetch error:', err);
       } finally {
         setLoading(false);
       }
@@ -151,6 +165,7 @@ const RequestPage = () => {
       timeZone: '',
       workingHours: '',
       specialFlags: [],
+      apideckIntegrationId: '',
     },
     mode: 'onChange',
   });
@@ -167,9 +182,14 @@ const RequestPage = () => {
       toast.error('Please select a Plaid bank account.');
       return;
     }
+    if (!data.apideckIntegrationId) {
+      toast.error('Please select an accounting integration.');
+      return;
+    }
     const payload = {
       ...data,
       plaidAccountId: selectedPlaidAccountId,
+      apideckIntegrationId: data.apideckIntegrationId,
     };
     try {
       await createClientRequest(payload);
@@ -488,6 +508,40 @@ const RequestPage = () => {
                     <FormLabel>Special Flags (Optional)</FormLabel>
                     <FormControl>
                       <Input type='text' placeholder='Comma separated, e.g. urgent,priority' value={Array.isArray(field.value) ? field.value.join(',') : ''} onChange={e => field.onChange(e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Accounting Integration */}
+              <FormField
+                control={form.control}
+                name='apideckIntegrationId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Accounting Integration</FormLabel>
+                    <FormControl>
+                      {loading ? (
+                        <Input disabled placeholder='Loading...' />
+                      ) : apideckIntegrations.length === 0 ? (
+                        <Input disabled placeholder='No accounting integrations found' />
+                      ) : (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={typeof field.value === 'string' ? field.value : ''}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select an accounting integration' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {apideckIntegrations.map((ai) => (
+                              <SelectItem key={ai.id} value={ai.id}>
+                                {ai.service || ai.label || ai.id} ({ai.status})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
