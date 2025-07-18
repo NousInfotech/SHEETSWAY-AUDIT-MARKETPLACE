@@ -118,8 +118,10 @@ export const deleteBusinessAttachment = async (attachmentId: string) => {
 // 💳 PLAID BANK ACCOUNTS
 // -----------------------------------------------------------------------------
 
-export const getPlaidBankAccounts = async () => {
-  const response = await instance.get(`${baseUrl}/plaid-accounts`);
+export const getPlaidBankAccounts = async (filters?: any) => {
+  const response = await instance.get(`${baseUrl}/plaid-accounts`, {
+    params: filters
+  });
   return response.data;
 };
 
@@ -142,8 +144,10 @@ export const deletePlaidBankAccount = async (plaidAccountId: string) => {
 // 📊 ACCOUNTING INTEGRATIONS
 // -----------------------------------------------------------------------------
 
-export const getAccountingIntegrations = async () => {
-  const response = await instance.get(`${baseUrl}/accounting-integrations`);
+export const getAccountingIntegrations = async (filters?: any) => {
+  const response = await instance.get(`${baseUrl}/accounting-integrations`, {
+    params: filters
+  });
   return response.data;
 };
 

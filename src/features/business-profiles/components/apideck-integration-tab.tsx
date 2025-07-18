@@ -3,15 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import ApideckIntegrationList, { ApideckIntegration } from './apideck-integration-list';
 import ApideckIntegrationForm from './apideck-integration-form';
-import { getAccountingIntegrations } from '@/api/apideck.api';
+import { useAuth } from '@/components/layout/providers';
+import { getAccountingIntegrations } from '@/api/user.api';
 
 export default function ApideckIntegrationTab() {
+  const { appUser } = useAuth();
   const [open, setOpen] = useState(false);
   const [integrations, setIntegrations] = useState<ApideckIntegration[]>([]);
 
   async function loadIntegrations() {
     try {
-      const data = await getAccountingIntegrations();
+      const data = await getAccountingIntegrations({ userId: appUser.id });
       setIntegrations(data);
     } catch (err) {
       // Optionally handle error

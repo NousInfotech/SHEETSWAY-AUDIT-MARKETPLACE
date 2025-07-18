@@ -11,30 +11,53 @@ import { getProfile } from '@/api/user.api';
 
 const AuthContext = createContext<{ firebaseUser: FirebaseUser | null, appUser: { id: string, name: string }, loading: boolean }>({ firebaseUser: null, appUser: { name: "", id: "" }, loading: false });
 
+import { useRouter } from 'next/navigation'; // for App Router
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [appUser, setAppUser] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
+
       if (user) {
-        const token = await getIdToken(user);
-        setToken(token);
-        const data = await getProfile();
-        setAppUser(data);
-        setFirebaseUser(user);
+        try {
+          const token = await getIdToken(user);
+          setToken(token);
+
+          const data = await getProfile(); // attempt to get app profile
+          setAppUser(data);
+          setFirebaseUser(user);
+        } catch (err) {
+          console.error('No profile found or error occurred:', err);
+          clearToken(); // remove invalid token
+          setFirebaseUser(null);
+          setAppUser(null);
+          router.push('/signup'); // redirect to signup page
+        } finally {
+          setLoading(false);
+        }
       } else {
         clearToken();
         setFirebaseUser(null);
+        setAppUser(null);
+        setLoading(false);
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
-  return <AuthContext.Provider value={{ firebaseUser, appUser, loading }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ firebaseUser, appUser, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
+
 
 export function useAuth() {
   return React.useContext(AuthContext);

@@ -56,6 +56,8 @@ import PageContainer from '@/components/layout/page-container'; // Make sure thi
 import axios from '@/lib/axios';
 import { API } from '@/config/api';
 import { createClientRequest } from '@/api/client-request.api';
+import { getBusinessProfiles, getPlaidBankAccounts,getAccountingIntegrations } from '@/api/user.api';
+import { useAuth } from '@/components/layout/providers';
 
 // Zod schema
 const formSchema = z.object({
@@ -95,6 +97,7 @@ type AuditFormValues = z.infer<typeof formSchema>;
 const RequestPage = () => {
   console.log('RequestPage rendered');
   // Remove step state and selection logic
+  const { appUser} = useAuth();
   const [businessProfiles, setBusinessProfiles] = useState<any[]>([]);
   const [plaidAccounts, setPlaidAccounts] = useState<any[]>([]);
   const [selectedPlaidAccountId, setSelectedPlaidAccountId] = useState<string>('');
@@ -102,38 +105,39 @@ const RequestPage = () => {
   const [selectedApideckIntegrationId, setSelectedApideckIntegrationId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
+  const filter = { userId : appUser.id || ""}
   useEffect(() => {
     async function fetchDropdownData() {
       setLoading(true);
       try {
         const [bpRes, plaidRes, apideckRes] = await Promise.all([
-          axios.get(API.BUSINESS_PROFILES),
-          axios.get(API.PLAID_ACCOUNTS),
-          axios.get(API.APIDECK_ACCOUNTING),
+          getBusinessProfiles(filter),
+          getPlaidBankAccounts(filter),
+          getAccountingIntegrations(filter),
         ]);
         // Add detailed logging for debugging
         console.log('Business profiles full response:', bpRes);
         console.log('Plaid accounts full response:', plaidRes);
         console.log('Apideck integrations full response:', apideckRes);
         setBusinessProfiles(
-          Array.isArray(bpRes.data?.data)
-            ? bpRes.data.data
-            : Array.isArray(bpRes.data)
-              ? bpRes.data
+          Array.isArray(bpRes)
+            ? bpRes
+            : Array.isArray(bpRes)
+              ? bpRes
               : []
         );
         setPlaidAccounts(
-          Array.isArray(plaidRes.data?.data)
-            ? plaidRes.data.data
-            : Array.isArray(plaidRes.data)
-              ? plaidRes.data
+          Array.isArray(plaidRes)
+            ? plaidRes
+            : Array.isArray(plaidRes)
+              ? plaidRes
               : []
         );
         setApideckIntegrations(
-          Array.isArray(apideckRes.data?.data)
-            ? apideckRes.data.data
-            : Array.isArray(apideckRes.data)
-              ? apideckRes.data
+          Array.isArray(apideckRes)
+            ? apideckRes
+            : Array.isArray(apideckRes)
+              ? apideckRes
               : []
         );
       } catch (err) {

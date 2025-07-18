@@ -5,16 +5,18 @@ import PlaidIntegrationList, { PlaidIntegration } from './plaid-integration-list
 import PlaidIntegrationForm from './plaid-integration-form';
 import { mockPlaidIntegrations, generateMockPlaidIntegration } from '../utils/mock-data';
 import { getPlaidBankAccounts } from '@/api/user.api';
+import { useAuth } from '@/components/layout/providers';
 
 
 export default function PlaidIntegrationTab() {
+  const { appUser } = useAuth();
   const [open, setOpen] = useState(false);
   const [integrations, setIntegrations] = useState<PlaidIntegration[]>([]);
 
   // Helper to load from localStorage or fallback to mock
   async function loadIntegrations() {
     try {
-      const data = await getPlaidBankAccounts();
+      const data = await getPlaidBankAccounts({ userId: appUser.id });
       setIntegrations(data);
     } catch (err) {
       // Optionally handle error
