@@ -42,3 +42,12 @@ export const clearToken = (): void => {
   localStorage.removeItem(TOKEN_KEY);
 };
 
+
+
+export const generateYearOptions = (start: number, end: number): number[] => {
+  const years: number[] = [];
+  for (let y = end; y >= start; y--) {
+    years.push(y);
+  }
+  return years;
+};

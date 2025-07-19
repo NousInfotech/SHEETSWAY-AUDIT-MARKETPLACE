@@ -53,11 +53,10 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import PageContainer from '@/components/layout/page-container'; // Make sure this path is correct
-import axios from '@/lib/axios';
-import { API } from '@/config/api';
 import { createClientRequest } from '@/api/client-request.api';
 import { getBusinessProfiles, getPlaidBankAccounts, getAccountingIntegrations } from '@/api/user.api';
 import { useAuth } from '@/components/layout/providers';
+import { generateYearOptions } from '@/lib/utils';
 
 // Zod schema
 const formSchema = z.object({
@@ -90,19 +89,20 @@ const formSchema = z.object({
   timeZone: z.string().optional(),
   workingHours: z.string().optional(),
   specialFlags: z.array(z.string()).optional(),
-  apideckIntegrationId: z.string().min(1, 'Please select an accounting integration').optional(),
+  accountingIntegrationId: z.string().min(1, 'Please select an accounting integration').optional(),
+  plaidIntegrationId: z.string().min(1, 'Please select an plaid integration').optional(),
 });
 
 type AuditFormValues = z.infer<typeof formSchema>;
 
 const RequestPage = () => {
-  
+
   const { appUser } = useAuth();
 
   const [businessProfiles, setBusinessProfiles] = useState<any[]>([]);
   const [plaidAccounts, setPlaidAccounts] = useState<any[]>([]);
   const [selectedPlaidAccountId, setSelectedPlaidAccountId] = useState<string>('');
-  const [apideckIntegrations, setApideckIntegrations] = useState<any[]>([]);
+  const [accountingIntegrations, setAccountingIntegrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -124,7 +124,7 @@ const RequestPage = () => {
 
         setBusinessProfiles(Array.isArray(bpRes) ? bpRes : []);
         setPlaidAccounts(Array.isArray(plaidRes) ? plaidRes : []);
-        setApideckIntegrations(Array.isArray(apideckRes) ? apideckRes : []);
+        setAccountingIntegrations(Array.isArray(apideckRes) ? apideckRes : []);
       } catch (err) {
         toast.error('Failed to load dropdown data');
         console.error('Dropdown fetch error:', err);
@@ -136,7 +136,7 @@ const RequestPage = () => {
     fetchDropdownData();
   }, [appUser?.id]); // ✅ refetch when appUser becomes available
 
- 
+
 
   const form = useForm<AuditFormValues>({
     resolver: zodResolver(formSchema),
@@ -158,7 +158,8 @@ const RequestPage = () => {
       timeZone: '',
       workingHours: '',
       specialFlags: [],
-      apideckIntegrationId: '',
+      plaidIntegrationId: "",
+      accountingIntegrationId: '',
     },
     mode: 'onChange',
   });
@@ -171,18 +172,17 @@ const RequestPage = () => {
       toast.error('Please select a business profile.');
       return;
     }
-    if (!selectedPlaidAccountId) {
+    if (!data.plaidIntegrationId) {
       toast.error('Please select a Plaid bank account.');
       return;
     }
-    if (!data.apideckIntegrationId) {
+
+    if (!data.accountingIntegrationId) {
       toast.error('Please select an accounting integration.');
       return;
     }
     const payload = {
       ...data,
-      plaidAccountId: selectedPlaidAccountId,
-      // apideckIntegrationId: data.apideckIntegrationId,
     };
     try {
       await createClientRequest(payload);
@@ -198,7 +198,7 @@ const RequestPage = () => {
 
   // --- Render Functions ---
 
-   // ✅ Safe conditional return
+  // ✅ Safe conditional return
   if (!appUser) {
     return <div>Loading...</div>;
   }
@@ -212,6 +212,8 @@ const RequestPage = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
             <div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
+
+
               {/* Financial Year */}
               <FormField
                 control={form.control}
@@ -225,8 +227,7 @@ const RequestPage = () => {
                     <FormMessage />
                   </FormItem>
                 )}
-              />
-              {/* Business Profile Dropdown */}
+              />              {/* Business Profile Dropdown */}
               <FormField
                 control={form.control}
                 name='businessId'
@@ -262,34 +263,42 @@ const RequestPage = () => {
               />
 
               {/* Plaid Account Dropdown */}
-              <FormItem>
-                <FormLabel>Plaid Bank Account</FormLabel>
-                <FormControl>
-                  {loading ? (
-                    <Input disabled placeholder='Loading...' />
-                  ) : plaidAccounts.length === 0 ? (
-                    <Input disabled placeholder='No Plaid accounts found' />
-                  ) : (
-                    <Select
-                      onValueChange={setSelectedPlaidAccountId}
-                      value={selectedPlaidAccountId || ''}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder='Select a Plaid account' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {plaidAccounts.map((pa) => (
-                          <SelectItem key={pa.id} value={pa.id}>
-                            {pa.institution} - {pa.accountName} ({pa.last4})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </FormControl>
-              </FormItem>
-              {/* Type */}
               <FormField
+                control={form.control}
+                name='plaidIntegrationId'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Plaid Bank Account</FormLabel>
+                    <FormControl>
+                      {loading ? (
+                        <Input disabled placeholder='Loading...' />
+                      ) : plaidAccounts.length === 0 ? (
+                        <Input disabled placeholder='No Plaid accounts found' />
+                      ) : (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value || ''}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select a Plaid account' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {plaidAccounts.map((pa) => (
+                              <SelectItem key={pa.id} value={pa.id}>
+                                {pa.institution} - {pa.accountName} ({pa.last4})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Type */}
+              < FormField
                 control={form.control}
                 name='type'
                 render={({ field }) => (
@@ -342,7 +351,25 @@ const RequestPage = () => {
                   <FormItem>
                     <FormLabel>Financial Year</FormLabel>
                     <FormControl>
-                      <Input type='text' placeholder='e.g. 2023' value={field.value ?? ''} onChange={field.onChange} />
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ''}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select a year' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {generateYearOptions(2015, 2030).map((year) => {
+                            const value = new Date(`${year}-01-01T00:00:00.000Z`).toISOString(); // full ISO string
+                            return (
+                              <SelectItem key={year} value={value}>
+                                {year} {/* show only year */}
+                              </SelectItem>
+                            );
+                          })}
+
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -528,27 +555,27 @@ const RequestPage = () => {
               {/* Accounting Integration */}
               <FormField
                 control={form.control}
-                name='apideckIntegrationId'
+                name='accountingIntegrationId'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Accounting Integration</FormLabel>
+                    <FormLabel>Business Profile</FormLabel>
                     <FormControl>
                       {loading ? (
                         <Input disabled placeholder='Loading...' />
-                      ) : apideckIntegrations.length === 0 ? (
-                        <Input disabled placeholder='No accounting integrations found' />
+                      ) : accountingIntegrations.length === 0 ? (
+                        <Input disabled placeholder='No Accounting Profile is Found' />
                       ) : (
                         <Select
                           onValueChange={field.onChange}
-                          value={typeof field.value === 'string' ? field.value : ''}
+                          value={field.value || ''}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder='Select an accounting integration' />
+                            <SelectValue placeholder='Select a Accounting profile' />
                           </SelectTrigger>
                           <SelectContent>
-                            {apideckIntegrations.map((ai) => (
-                              <SelectItem key={ai.id} value={ai.id}>
-                                {ai.service || ai.label || ai.id} ({ai.status})
+                            {accountingIntegrations.map((ac) => (
+                              <SelectItem key={ac.id} value={ac.id}>
+                                {ac.serviceId}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -578,7 +605,7 @@ const RequestPage = () => {
             </div>
           </form>
         </Form>
-      </div>
+      </div >
     );
   };
 
