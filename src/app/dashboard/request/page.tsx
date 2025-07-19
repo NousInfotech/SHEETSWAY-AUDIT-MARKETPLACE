@@ -158,7 +158,7 @@ const RequestPage = () => {
       timeZone: '',
       workingHours: '',
       specialFlags: [],
-      // apideckIntegrationId: '1234',
+      apideckIntegrationId: '',
     },
     mode: 'onChange',
   });
@@ -175,10 +175,10 @@ const RequestPage = () => {
       toast.error('Please select a Plaid bank account.');
       return;
     }
-    // if (!data.apideckIntegrationId) {
-    //   toast.error('Please select an accounting integration.');
-    //   return;
-    // }
+    if (!data.apideckIntegrationId) {
+      toast.error('Please select an accounting integration.');
+      return;
+    }
     const payload = {
       ...data,
       plaidAccountId: selectedPlaidAccountId,
@@ -526,7 +526,7 @@ const RequestPage = () => {
                 )}
               />
               {/* Accounting Integration */}
-              {/* <FormField
+              <FormField
                 control={form.control}
                 name='apideckIntegrationId'
                 render={({ field }) => (
@@ -558,7 +558,7 @@ const RequestPage = () => {
                     <FormMessage />
                   </FormItem>
                 )}
-              /> */}
+              />
             </div>
             <div className='flex justify-end pb-8'>
               <button
