@@ -33,6 +33,7 @@ export default function BusinessProfileTab() {
     setError(null);
     try {
       const data = await getBusinessProfiles({ userId: appUser.id });
+      if (!data) setProfiles([])
       setProfiles(data);
     } catch (err) {
       setError('Failed to load business profiles');
@@ -94,7 +95,21 @@ export default function BusinessProfileTab() {
       ) : error ? (
         <div className="text-red-500">{error}</div>
       ) : profiles.length === 0 ? (
-        <p className="text-gray-500">No business profiles found.</p>
+        <div className="flex flex-col items-center justify-center gap-4 py-12 text-center border border-dashed rounded-xl border-gray-300 dark:border-gray-600">
+          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">No business profiles found</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Start by creating a new business profile to begin your audit journey.
+          </p>
+          <Button
+            variant="default"
+            onClick={() => {
+              setEditProfile(null);
+              setOpen(true);
+            }}
+          >
+            Create Business Profile
+          </Button>
+        </div>
       ) : (
         <BusinessProfileList
           profiles={profiles}
@@ -103,17 +118,21 @@ export default function BusinessProfileTab() {
         />
       )}
 
-      <div className="mb-4">
-        <Button
-          variant="default"
-          onClick={() => {
-            setEditProfile(null);
-            setOpen(true);
-          }}
-        >
-          Create Business Profile
-        </Button>
-      </div>
+      {
+
+        profiles.length > 0 && (
+          <div className="mb-4">
+            <Button
+              variant="default"
+              onClick={() => {
+                setEditProfile(null);
+                setOpen(true);
+              }}
+            >
+              Create Business Profile
+            </Button>
+          </div>)}
+
     </div>
   );
 }

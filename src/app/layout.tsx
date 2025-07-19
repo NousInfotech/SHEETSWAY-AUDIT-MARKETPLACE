@@ -16,7 +16,7 @@ const META_THEME_COLORS = {
 };
 
 export const metadata: Metadata = {
-  title: 'Next Shadcn',
+  title: 'Sheetsway Audit Market Place',
   description: 'Basic dashboard with Next.js and Shadcn'
 };
 
