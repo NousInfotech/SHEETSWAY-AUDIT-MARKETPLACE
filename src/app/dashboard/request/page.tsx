@@ -92,6 +92,36 @@ const formSchema = z.object({
 
 type AuditFormValues = z.infer<typeof formSchema>;
 
+const LANGUAGES: string[] = [
+  "English",
+  "Spanish",
+  "French",
+  "German",
+  "Italian",
+  "Chinese",
+  "Hindi",
+];
+const TIME_ZONES: string[] = [
+  "Europe/Malta",
+  "America/New_York",
+  "Asia/Kolkata",
+  "Europe/London",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+];
+const WORKING_HOURS: string[] = [
+  "8am-4pm",
+  "9am-5pm",
+  "10am-6pm",
+  "Flexible",
+];
+const SPECIAL_FLAGS: string[] = [
+  "urgent",
+  "priority",
+  "confidential",
+  "followup",
+];
+
 const RequestPage = () => {
   console.log('RequestPage rendered');
   // Remove step state and selection logic
@@ -465,7 +495,24 @@ const RequestPage = () => {
                   <FormItem>
                     <FormLabel>Preferred Languages</FormLabel>
                     <FormControl>
-                      <Input type='text' placeholder='Comma separated, e.g. English,Spanish' value={Array.isArray(field.value) ? field.value.join(',') : ''} onChange={e => field.onChange(e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+                      <div className="flex flex-wrap gap-2">
+                        {LANGUAGES.map((lang: string) => (
+                          <label key={lang} className="flex items-center gap-1">
+                            <input
+                              type="checkbox"
+                              checked={field.value?.includes(lang)}
+                              onChange={e => {
+                                if (e.target.checked) {
+                                  field.onChange([...(field.value || []), lang]);
+                                } else {
+                                  field.onChange((field.value || []).filter((l: string) => l !== lang));
+                                }
+                              }}
+                            />
+                            {lang}
+                          </label>
+                        ))}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -479,7 +526,16 @@ const RequestPage = () => {
                   <FormItem>
                     <FormLabel>Time Zone (Optional)</FormLabel>
                     <FormControl>
-                      <Input type='text' placeholder='e.g. Europe/Malta' value={field.value ?? ''} onChange={field.onChange} />
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select a time zone' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TIME_ZONES.map((tz: string) => (
+                            <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -493,7 +549,16 @@ const RequestPage = () => {
                   <FormItem>
                     <FormLabel>Working Hours (Optional)</FormLabel>
                     <FormControl>
-                      <Input type='text' placeholder='e.g. 9am-5pm' value={field.value ?? ''} onChange={field.onChange} />
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select working hours' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {WORKING_HOURS.map((wh: string) => (
+                            <SelectItem key={wh} value={wh}>{wh}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -507,7 +572,24 @@ const RequestPage = () => {
                   <FormItem>
                     <FormLabel>Special Flags (Optional)</FormLabel>
                     <FormControl>
-                      <Input type='text' placeholder='Comma separated, e.g. urgent,priority' value={Array.isArray(field.value) ? field.value.join(',') : ''} onChange={e => field.onChange(e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+                      <div className="flex flex-wrap gap-2">
+                        {SPECIAL_FLAGS.map((flag: string) => (
+                          <label key={flag} className="flex items-center gap-1">
+                            <input
+                              type="checkbox"
+                              checked={field.value?.includes(flag)}
+                              onChange={e => {
+                                if (e.target.checked) {
+                                  field.onChange([...(field.value || []), flag]);
+                                } else {
+                                  field.onChange((field.value || []).filter((f: string) => f !== flag));
+                                }
+                              }}
+                            />
+                            {flag}
+                          </label>
+                        ))}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
