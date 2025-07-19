@@ -11,9 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import type React from 'react';
-import { redirect } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import axios from '@/lib/axios';
+import { useAuth } from '@/components/layout/providers';
 
 interface SignUpViewPageProps {
   isDark?: boolean;
@@ -24,12 +25,16 @@ export default function SignUpViewPage({
   isDark = false,
   onToggleTheme
 }: SignUpViewPageProps) {
+
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const router = useRouter()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +57,8 @@ export default function SignUpViewPage({
       const token = await user.getIdToken();
       localStorage.setItem('token', token);
       await axios.post('/api/v1/users', { name, email, firebaseId });
+      router.push("/dashboard/overview");
+
       // Redirect or show success as needed
     } catch (err: any) {
       setError(err.message);
@@ -73,6 +80,7 @@ export default function SignUpViewPage({
       const token = await user.getIdToken();
       localStorage.setItem('token', token);
       await axios.post('/api/v1/users', { name, email, firebaseId });
+      router.push("/dashboard/overview");
       // Redirect or show success as needed
     } catch (err: any) {
       setError(err.message);

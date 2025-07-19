@@ -8,42 +8,67 @@ import React, { useEffect, useState, createContext } from 'react';
 import { useTheme } from 'next-themes';
 import { ActiveThemeProvider } from '../active-theme';
 import { getProfile } from '@/api/user.api';
+import { usePathname, useRouter } from 'next/navigation';
 
-const AuthContext = createContext<{ firebaseUser: FirebaseUser | null, appUser: { id: string, name: string }, loading: boolean }>({ firebaseUser: null, appUser: { name: "", id: "" }, loading: false });
+type AppUser = { id: string; name: string };
 
-import { usePathname, useRouter } from 'next/navigation'; // for App Router
+const AuthContext = createContext<{
+  firebaseUser: FirebaseUser | null;
+  appUser: AppUser | null;
+  loading: boolean;
+  setProfile: (user?: FirebaseUser) => Promise<void>;
+}>({
+  firebaseUser: null,
+  appUser: null,
+  loading: false,
+  setProfile: async () => { },
+});
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [appUser, setAppUser] = useState<any>(null);
+  const [appUser, setAppUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
   const pathname = usePathname();
 
+  const isAuthRoute = pathname.startsWith('/auth');
+
+  const setProfile = async (userArg?: FirebaseUser) => {
+    const user = userArg ?? auth.currentUser;
+    if (!user) return;
+
+    try {
+      const token = await getIdToken(user);
+      setToken(token);
+
+      // Avoid fetching profile on signup
+      if (pathname !== '/auth/sign-up') {
+        const data = await getProfile(); // custom app profile
+        setAppUser(data);
+        setFirebaseUser(user);
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
+      clearToken();
+      setFirebaseUser(null);
+      setAppUser(null);
+
+      if (!isAuthRoute) {
+        router.push('/auth/sign-in');
+      }
+    }
+  };
+
+
   useEffect(() => {
-    if (pathname === '/auth/signup' || pathname === '/auth/signin') {
+    if (pathname === '/auth/sign-up' || pathname === '/auth/sign-in') {
       setLoading(false);
       return;
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        try {
-          const token = await getIdToken(user);
-          setToken(token);
-
-          const data = await getProfile(); // attempt to get app profile
-          setAppUser(data);
-          setFirebaseUser(user);
-        } catch (err) {
-          console.error('No profile found or error occurred:', err);
-          clearToken();
-          setFirebaseUser(null);
-          setAppUser(null);
-          router.push('/auth/signin');
-        } finally {
-          setLoading(false);
-        }
+        await setProfile(user);
       } else {
         clearToken();
         setFirebaseUser(null);
@@ -56,12 +81,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [pathname]);
 
   return (
-    <AuthContext.Provider value={{ firebaseUser, appUser, loading }}>
+    <AuthContext.Provider value={{ firebaseUser, appUser, loading, setProfile }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
 
 export function useAuth() {
   return React.useContext(AuthContext);
