@@ -11,18 +11,22 @@ import { getProfile } from '@/api/user.api';
 
 const AuthContext = createContext<{ firebaseUser: FirebaseUser | null, appUser: { id: string, name: string }, loading: boolean }>({ firebaseUser: null, appUser: { name: "", id: "" }, loading: false });
 
-import { useRouter } from 'next/navigation'; // for App Router
+import { usePathname, useRouter } from 'next/navigation'; // for App Router
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [appUser, setAppUser] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setLoading(true);
+    if (pathname === '/auth/signup' || pathname === '/auth/signin') {
+      setLoading(false);
+      return;
+    }
 
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
           const token = await getIdToken(user);
@@ -33,10 +37,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setFirebaseUser(user);
         } catch (err) {
           console.error('No profile found or error occurred:', err);
-          clearToken(); // remove invalid token
+          clearToken();
           setFirebaseUser(null);
           setAppUser(null);
-          router.push('/signup'); // redirect to signup page
+          router.push('/auth/signin');
         } finally {
           setLoading(false);
         }
@@ -49,7 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [pathname]);
 
   return (
     <AuthContext.Provider value={{ firebaseUser, appUser, loading }}>
