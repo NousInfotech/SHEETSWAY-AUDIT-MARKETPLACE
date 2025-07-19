@@ -27,6 +27,7 @@ export const createApideckLinkToken = async (): Promise<string> => {
 export interface AccountingIntegrationInput {
   userId: string;
   connectionId: string;
+  consumerId:string;
   serviceId: string;
   unifiedApi: string;
   status: string;

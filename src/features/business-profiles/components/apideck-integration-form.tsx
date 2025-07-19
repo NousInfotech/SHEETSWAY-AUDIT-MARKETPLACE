@@ -45,14 +45,14 @@ export default function ApideckIntegrationForm({ open, onOpenChange, onSubmit }:
   }, [open, linkToken]);
 
   // Debug: Log why the button is disabled
-  useEffect(() => {
-    if (open && (loading || !linkToken)) {
-      // Use a string log to guarantee output
-      console.error(
-        `[ApideckIntegrationForm] Connect button is disabled due to: loading=${loading}, linkTokenPresent=${!!linkToken}, linkTokenValue=${linkToken}`
-      );
-    }
-  }, [open, loading, linkToken]);
+  // useEffect(() => {
+  //   if (open && (loading || !linkToken)) {
+  //     // Use a string log to guarantee output
+  //     console.error(
+  //       `[ApideckIntegrationForm] Connect button is disabled due to: loading=${loading}, linkTokenPresent=${!!linkToken}, linkTokenValue=${linkToken}`
+  //     );
+  //   }
+  // }, [open, loading, linkToken]);
 
   const handleOpenVault = async () => {
     if (!linkToken) {
@@ -65,10 +65,12 @@ export default function ApideckIntegrationForm({ open, onOpenChange, onSubmit }:
         onConnectionChange: async (connection: Connection) => {
           try {
             // Use real userId from auth context
+           
             const integrationData = {
               userId: appUser?.id,
               connectionId: connection.id, // <-- correct field name
               serviceId: connection.service_id,
+              consumerId:connection.service_id,
               unifiedApi: connection.unified_api || connection.service_id,
               status: connection.status || '',
               label: "accounting",

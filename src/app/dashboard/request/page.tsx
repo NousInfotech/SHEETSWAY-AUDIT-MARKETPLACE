@@ -56,11 +56,12 @@ import PageContainer from '@/components/layout/page-container'; // Make sure thi
 import axios from '@/lib/axios';
 import { API } from '@/config/api';
 import { createClientRequest } from '@/api/client-request.api';
-import { getBusinessProfiles, getPlaidBankAccounts,getAccountingIntegrations } from '@/api/user.api';
+import { getBusinessProfiles, getPlaidBankAccounts, getAccountingIntegrations } from '@/api/user.api';
 import { useAuth } from '@/components/layout/providers';
 
 // Zod schema
 const formSchema = z.object({
+  title: z.string().min(1, "Title for Request is Required"),
   businessId: z.string().uuid('Invalid business ID format'),
   type: z.enum(['AUDIT', 'TAX']),
   framework: z.enum(['GAPSME', 'IFRS']),
@@ -89,7 +90,7 @@ const formSchema = z.object({
   timeZone: z.string().optional(),
   workingHours: z.string().optional(),
   specialFlags: z.array(z.string()).optional(),
-  apideckIntegrationId: z.string().min(1, 'Please select an accounting integration'),
+  apideckIntegrationId: z.string().min(1, 'Please select an accounting integration').optional(),
 });
 
 type AuditFormValues = z.infer<typeof formSchema>;
@@ -125,64 +126,52 @@ const SPECIAL_FLAGS: string[] = [
 ];
 
 const RequestPage = () => {
-  console.log('RequestPage rendered');
-  // Remove step state and selection logic
-  const { appUser} = useAuth();
+  
+  const { appUser } = useAuth();
+
   const [businessProfiles, setBusinessProfiles] = useState<any[]>([]);
   const [plaidAccounts, setPlaidAccounts] = useState<any[]>([]);
   const [selectedPlaidAccountId, setSelectedPlaidAccountId] = useState<string>('');
   const [apideckIntegrations, setApideckIntegrations] = useState<any[]>([]);
-  const [selectedApideckIntegrationId, setSelectedApideckIntegrationId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
-  const filter = { userId : appUser.id || ""}
   useEffect(() => {
     async function fetchDropdownData() {
+      if (!appUser?.id) return; // ✅ guard *inside* the effect
+
       setLoading(true);
       try {
+        const filter = { userId: appUser.id };
         const [bpRes, plaidRes, apideckRes] = await Promise.all([
           getBusinessProfiles(filter),
           getPlaidBankAccounts(filter),
           getAccountingIntegrations(filter),
         ]);
-        // Add detailed logging for debugging
-        console.log('Business profiles full response:', bpRes);
-        console.log('Plaid accounts full response:', plaidRes);
-        console.log('Apideck integrations full response:', apideckRes);
-        setBusinessProfiles(
-          Array.isArray(bpRes)
-            ? bpRes
-            : Array.isArray(bpRes)
-              ? bpRes
-              : []
-        );
-        setPlaidAccounts(
-          Array.isArray(plaidRes)
-            ? plaidRes
-            : Array.isArray(plaidRes)
-              ? plaidRes
-              : []
-        );
-        setApideckIntegrations(
-          Array.isArray(apideckRes)
-            ? apideckRes
-            : Array.isArray(apideckRes)
-              ? apideckRes
-              : []
-        );
+
+        console.log('Business profiles:', bpRes);
+        console.log('Plaid accounts:', plaidRes);
+        console.log('Apideck integrations:', apideckRes);
+
+        setBusinessProfiles(Array.isArray(bpRes) ? bpRes : []);
+        setPlaidAccounts(Array.isArray(plaidRes) ? plaidRes : []);
+        setApideckIntegrations(Array.isArray(apideckRes) ? apideckRes : []);
       } catch (err) {
         toast.error('Failed to load dropdown data');
-        console.error('Dropdown data fetch error:', err);
+        console.error('Dropdown fetch error:', err);
       } finally {
         setLoading(false);
       }
     }
+
     fetchDropdownData();
-  }, []);
+  }, [appUser?.id]); // ✅ refetch when appUser becomes available
+
+ 
 
   const form = useForm<AuditFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      title: "",
       businessId: '',
       type: 'AUDIT',
       framework: 'GAPSME',
@@ -199,7 +188,7 @@ const RequestPage = () => {
       timeZone: '',
       workingHours: '',
       specialFlags: [],
-      apideckIntegrationId: '',
+      // apideckIntegrationId: '1234',
     },
     mode: 'onChange',
   });
@@ -216,14 +205,14 @@ const RequestPage = () => {
       toast.error('Please select a Plaid bank account.');
       return;
     }
-    if (!data.apideckIntegrationId) {
-      toast.error('Please select an accounting integration.');
-      return;
-    }
+    // if (!data.apideckIntegrationId) {
+    //   toast.error('Please select an accounting integration.');
+    //   return;
+    // }
     const payload = {
       ...data,
       plaidAccountId: selectedPlaidAccountId,
-      apideckIntegrationId: data.apideckIntegrationId,
+      // apideckIntegrationId: data.apideckIntegrationId,
     };
     try {
       await createClientRequest(payload);
@@ -239,15 +228,34 @@ const RequestPage = () => {
 
   // --- Render Functions ---
 
+   // ✅ Safe conditional return
+  if (!appUser) {
+    return <div>Loading...</div>;
+  }
+
   const renderAuditForm = () => {
     console.log('Rendering dropdowns', businessProfiles, plaidAccounts);
     return (
       <div className='mx-auto w-full max-w-4xl'>
-     
+
         <h2 className='mb-6 text-3xl font-bold tracking-tight'>Financial Audit Request</h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
             <div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
+              {/* Financial Year */}
+              <FormField
+                control={form.control}
+                name='title'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input type='text' placeholder='title for the request' value={field.value ?? ''} onChange={field.onChange} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {/* Business Profile Dropdown */}
               <FormField
                 control={form.control}
@@ -257,9 +265,9 @@ const RequestPage = () => {
                     <FormLabel>Business Profile</FormLabel>
                     <FormControl>
                       {loading ? (
-                        <Input disabled placeholder='Loading...'/>
+                        <Input disabled placeholder='Loading...' />
                       ) : businessProfiles.length === 0 ? (
-                        <Input disabled placeholder='No business profiles found'/>
+                        <Input disabled placeholder='No business profiles found' />
                       ) : (
                         <Select
                           onValueChange={field.onChange}
@@ -288,9 +296,9 @@ const RequestPage = () => {
                 <FormLabel>Plaid Bank Account</FormLabel>
                 <FormControl>
                   {loading ? (
-                    <Input disabled placeholder='Loading...'/>
+                    <Input disabled placeholder='Loading...' />
                   ) : plaidAccounts.length === 0 ? (
-                    <Input disabled placeholder='No Plaid accounts found'/>
+                    <Input disabled placeholder='No Plaid accounts found' />
                   ) : (
                     <Select
                       onValueChange={setSelectedPlaidAccountId}
@@ -600,7 +608,7 @@ const RequestPage = () => {
                 )}
               />
               {/* Accounting Integration */}
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name='apideckIntegrationId'
                 render={({ field }) => (
@@ -632,7 +640,7 @@ const RequestPage = () => {
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
             </div>
             <div className='flex justify-end pb-8'>
               <button
@@ -661,7 +669,7 @@ const RequestPage = () => {
   return (
     <PageContainer>
       {renderAuditForm()}
-    
+
     </PageContainer>
   );
 };
