@@ -11,9 +11,6 @@ import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import axios from '@/lib/axios';
-import { setToken } from '@/lib/utils';
-import { getProfile } from '@/api/user.api';
 
 interface SignInViewPageProps {
   isDark?: boolean;
@@ -39,7 +36,6 @@ export default function SignInViewPage({
       const user = userCredential.user;
       const token = await user.getIdToken();
       localStorage.setItem('token', token);
-      await getProfile();
       router.push('/dashboard/overview');
     } catch (err: any) {
       setError(err.message);
@@ -57,7 +53,6 @@ export default function SignInViewPage({
       const user = result.user;
       const token = await user.getIdToken();
       localStorage.setItem('token', token);
-      await getProfile();
       router.push('/dashboard/overview');
     } catch (err: any) {
       setError(err.message);
