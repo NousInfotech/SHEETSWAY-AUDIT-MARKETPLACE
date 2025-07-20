@@ -119,11 +119,15 @@ export default function ConnectViewPage() {
 
           {currentView === 'calendar' && (
             <CalendarView
-              meetings={meetings}
-              contacts={contacts}
               cancelMeeting={cancelMeeting}
               onBack={handleBack}
             />
+          //   <CalendarView
+          //   meetings={meetings}
+          //   contacts={contacts}
+          //   cancelMeeting={cancelMeeting}
+          //   onBack={handleBack}
+          // />
           )}
         </div>
       </div>
