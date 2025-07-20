@@ -2,16 +2,22 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { z } from 'zod';
 import { plaidIntegrationSchema } from '../utils/zod-schemas';
+import { Button } from '@/components/ui/button';
 
 export type PlaidIntegration = z.infer<typeof plaidIntegrationSchema>;
 
-export default function PlaidIntegrationList({ integrations }: { integrations: PlaidIntegration[] }) {
+export default function PlaidIntegrationList({ integrations, onDelete }: { integrations: PlaidIntegration[], onDelete?: (id: string) => void }) {
   return (
     <div className="space-y-4">
       {integrations.map(account => (
         <Card key={account.id}>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between gap-2">
             <CardTitle>{account.institution}</CardTitle>
+            {onDelete && (
+              <Button size="sm" variant="destructive" onClick={() => onDelete(account.id)}>
+                Delete
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

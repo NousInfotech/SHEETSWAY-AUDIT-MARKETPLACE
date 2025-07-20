@@ -2,18 +2,29 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { z } from 'zod';
 import { apideckIntegrationSchema } from '../utils/zod-schemas';
+import { Button } from '@/components/ui/button';
 
 export type ApideckIntegration = z.infer<typeof apideckIntegrationSchema>;
 
-export default function ApideckIntegrationList({ integrations }: { integrations: ApideckIntegration[] }) {
+export default function ApideckIntegrationList({ integrations, onDelete }: { integrations: ApideckIntegration[], onDelete?: (id: string) => void }) {
+  // Only show integrations that are fully created (id, service, and status must exist)
+  const validIntegrations = integrations.filter(
+    integration => integration.id && integration.service && integration.status
+  );
+  if (validIntegrations.length === 0) return null;
   return (
     <div className="space-y-4">
-      {integrations.map(integration => (
-        <Card key={integration.id}>
-          <CardHeader>
+      {validIntegrations.map(integration => (
+        <Card key={integration.id} className="w-full">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 px-6 py-4">
             <CardTitle>{integration.service}</CardTitle>
+            {onDelete && (
+              <Button size="sm" variant="destructive" onClick={() => onDelete(integration.id)}>
+                Delete
+              </Button>
+            )}
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6 pb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <span className="font-semibold">Status:</span> {integration.status}

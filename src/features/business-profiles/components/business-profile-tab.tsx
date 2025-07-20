@@ -10,6 +10,8 @@ import {
   deleteBusinessProfile,
 } from '@/api/user.api';
 import { useAuth } from '@/components/layout/providers';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 
 interface BusinessProfileType extends BusinessProfileFormValues {
   id?: string;
@@ -25,16 +27,24 @@ export default function BusinessProfileTab() {
   const { appUser } = useAuth();
 
   useEffect(() => {
-    loadProfiles();
-  }, []);
+    const cached = localStorage.getItem('businessProfiles');
+    if (cached) {
+      setProfiles(JSON.parse(cached));
+      setLoading(false);
+    } else if (appUser) {
+      loadProfiles();
+    }
+  }, [appUser]);
 
   async function loadProfiles() {
     setLoading(true);
     setError(null);
     try {
+      if (!appUser) return;
       const data = await getBusinessProfiles({ userId: appUser.id });
       if (!data) setProfiles([])
       setProfiles(data);
+      localStorage.setItem('businessProfiles', JSON.stringify(data));
     } catch (err) {
       setError('Failed to load business profiles');
     } finally {
@@ -43,6 +53,7 @@ export default function BusinessProfileTab() {
   }
 
   async function handleCreateOrUpdateProfile(profile: BusinessProfileFormValues) {
+    setLoading(true);
     try {
       if (editProfile) {
         // Update existing profile
@@ -51,22 +62,30 @@ export default function BusinessProfileTab() {
       } else {
         // Create new profile
         const created = await createBusinessProfile(profile);
-        setProfiles((prev) => [created, ...prev]);
+        const newProfiles = [created, ...profiles];
+        setProfiles(newProfiles);
+        localStorage.setItem('businessProfiles', JSON.stringify(newProfiles));
       }
-
       setEditProfile(null);
       setOpen(false);
     } catch (err) {
       setError('Failed to save business profile');
+    } finally {
+      setLoading(false);
     }
   }
 
   async function handleDelete(id: string) {
+    setLoading(true);
     try {
       await deleteBusinessProfile(id);
-      await loadProfiles();
+      const newProfiles = profiles.filter((p) => p.id !== id);
+      setProfiles(newProfiles);
+      localStorage.setItem('businessProfiles', JSON.stringify(newProfiles));
     } catch (err) {
       setError('Failed to delete business profile');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -91,7 +110,9 @@ export default function BusinessProfileTab() {
       />
 
       {loading ? (
-        <div>Loading...</div>
+        <div className="flex flex-col items-center justify-center py-12">
+          <Spinner size={48} className="text-primary" />
+        </div>
       ) : error ? (
         <div className="text-red-500">{error}</div>
       ) : profiles.length === 0 ? (

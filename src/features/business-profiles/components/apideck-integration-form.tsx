@@ -59,18 +59,21 @@ export default function ApideckIntegrationForm({ open, onOpenChange, onSubmit }:
       toast.error("Vault not ready. Please try again.");
       return;
     }
+    if (!appUser?.id) {
+      toast.error("User not authenticated. Please log in again.");
+      return;
+    }
     try {
       ApideckVault.open({
         token: linkToken,
         onConnectionChange: async (connection: Connection) => {
           try {
             // Use real userId from auth context
-           
             const integrationData = {
-              userId: appUser?.id,
+              userId: appUser.id, // Now guaranteed to be string
               connectionId: connection.id, // <-- correct field name
               serviceId: connection.service_id,
-              consumerId:connection.service_id,
+              consumerId: connection.service_id,
               unifiedApi: connection.unified_api || connection.service_id,
               status: connection.status || '',
               label: "accounting",
@@ -97,7 +100,7 @@ export default function ApideckIntegrationForm({ open, onOpenChange, onSubmit }:
   if (!open) return null;
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full ">
       <CardHeader>
         <CardTitle>
           <div className="flex items-center gap-2">

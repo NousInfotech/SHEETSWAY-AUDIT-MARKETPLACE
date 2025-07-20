@@ -14,7 +14,8 @@ import {
   DollarSign,
   File as FileIcon,
   Calendar as CalendarIcon,
-  UploadCloud
+  UploadCloud,
+  CheckIcon
 } from 'lucide-react';
 
 // Import Shadcn UI Components
@@ -85,9 +86,12 @@ const formSchema = z.object({
   ),
   isAnonymous: z.boolean().default(false),
   isActive: z.boolean().default(true),
-  preferredLanguages: z.array(z.string()).min(1, 'At least one preferred language is required'),
+  preferredLanguages: z.array(z.string()).optional(),
   timeZone: z.string().optional(),
-  workingHours: z.string().optional(),
+  workingHours: z.object({
+    startTime: z.string().min(1, 'Start time is required'),
+    endTime: z.string().min(1, 'End time is required'),
+  }).optional(),
   specialFlags: z.array(z.string()).optional(),
   accountingIntegrationId: z.string().min(1, 'Please select an accounting integration').optional(),
   plaidIntegrationId: z.string().min(1, 'Please select an plaid integration').optional(),
@@ -186,7 +190,7 @@ const RequestPage = () => {
       isActive: true,
       preferredLanguages: [],
       timeZone: '',
-      workingHours: '',
+      workingHours: { startTime: '', endTime: '' },
       specialFlags: [],
       plaidIntegrationId: "",
       accountingIntegrationId: '',
@@ -197,23 +201,34 @@ const RequestPage = () => {
   console.log('formState.errors', form.formState.errors);
 
   async function onSubmit(data: AuditFormValues) {
-    console.log('onSubmit called', data);
-    if (!data.businessId) {
-      toast.error('Please select a business profile.');
-      return;
+    // Prepare specialFlags: if 'other', use the custom value
+    let specialFlags: string[] = [];
+    if (data.specialFlags && data.specialFlags[0] === 'other') {
+      if (data.specialFlags[1]) {
+        specialFlags = [data.specialFlags[1]];
+      }
+    } else if (data.specialFlags && data.specialFlags[0]) {
+      specialFlags = [data.specialFlags[0]];
     }
-    if (!data.plaidIntegrationId) {
-      toast.error('Please select a Plaid bank account.');
-      return;
+    // Filter out any falsy or non-string values
+    specialFlags = specialFlags.filter(flag => typeof flag === 'string' && flag.length > 0);
+
+    // Prepare workingHours as a string 'startTime-endTime' if both are present
+    let workingHours = undefined;
+    if (data.workingHours && data.workingHours.startTime && data.workingHours.endTime) {
+      workingHours = `${data.workingHours.startTime}-${data.workingHours.endTime}`;
     }
 
-    if (!data.accountingIntegrationId) {
-      toast.error('Please select an accounting integration.');
-      return;
-    }
     const payload = {
       ...data,
+      specialFlags,
+      workingHours, // now a string or undefined
+      accouningIntegrationId: data.accountingIntegrationId, // Fix: match backend spelling
+      accountingIntegrationId: undefined, // Remove incorrect key
+      workingHoursStart: undefined,
+      workingHoursEnd: undefined,
     };
+
     try {
       await createClientRequest(payload);
       toast.success('Form submitted successfully!');
@@ -222,7 +237,9 @@ const RequestPage = () => {
       }, 1500);
     } catch (err: any) {
       console.error('Form submission error:', err);
-      toast.error('Form send failed, try again later.');
+      // Show backend error message if available
+      const backendMsg = err?.response?.data?.message || err?.response?.data?.error || err?.message || 'Form send failed, try again later.';
+      toast.error(backendMsg);
     }
   }
 
@@ -292,40 +309,79 @@ const RequestPage = () => {
                 )}
               />
 
-              {/* Plaid Account Dropdown */}
-              <FormField
-                control={form.control}
-                name='plaidIntegrationId'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Plaid Bank Account</FormLabel>
-                    <FormControl>
-                      {loading ? (
-                        <Input disabled placeholder='Loading...' />
-                      ) : plaidAccounts.length === 0 ? (
-                        <Input disabled placeholder='No Plaid accounts found' />
-                      ) : (
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value || ''}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select a Plaid account' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {plaidAccounts.map((pa) => (
-                              <SelectItem key={pa.id} value={pa.id}>
-                                {pa.institution} - {pa.accountName} ({pa.last4})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Plaid Account and Account Integration Side by Side */}
+              <div className="flex gap-4 w-full">
+                <div className="flex-1 min-w-0">
+                  <FormField
+                    control={form.control}
+                    name='plaidIntegrationId'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Plaid Bank Account</FormLabel>
+                        <FormControl>
+                          {loading ? (
+                            <Input disabled placeholder='Loading...' />
+                          ) : plaidAccounts.length === 0 ? (
+                            <Input disabled placeholder='No Plaid accounts found' />
+                          ) : (
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value || ''}
+                            >
+                              <SelectTrigger className="w-full min-w-0" style={{ maxWidth: '100%' }}>
+                                <SelectValue placeholder='Select a Plaid account' className="truncate" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {plaidAccounts.map((pa) => (
+                                  <SelectItem key={pa.id} value={pa.id}>
+                                    <span className="truncate block max-w-[220px]">{pa.institution} - {pa.accountName} ({pa.last4})</span>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <FormField
+                    control={form.control}
+                    name='accountingIntegrationId'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Account Integration</FormLabel>
+                        <FormControl>
+                          {loading ? (
+                            <Input disabled placeholder='Loading...' />
+                          ) : accountingIntegrations.length === 0 ? (
+                            <Input disabled placeholder='No Accounting Profile is Found' />
+                          ) : (
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value || ''}
+                            >
+                              <SelectTrigger className="w-full min-w-0" style={{ maxWidth: '100%' }}>
+                                <SelectValue placeholder='Select an Accounting profile' className="truncate" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {accountingIntegrations.map((ac) => (
+                                  <SelectItem key={ac.id} value={ac.id}>
+                                    <span className="truncate block max-w-[220px]">{ac.serviceId}</span>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
 
               {/* Type */}
               < FormField
@@ -526,7 +582,7 @@ const RequestPage = () => {
                   </FormItem>
                 )}
               />
-              {/* Preferred Languages */}
+              {/* Preferred Languages - Multiselect Popover */}
               <FormField
                 control={form.control}
                 name='preferredLanguages'
@@ -534,24 +590,43 @@ const RequestPage = () => {
                   <FormItem>
                     <FormLabel>Preferred Languages</FormLabel>
                     <FormControl>
-                      <div className="flex flex-wrap gap-2">
-                        {LANGUAGES.map((lang: string) => (
-                          <label key={lang} className="flex items-center gap-1">
-                            <input
-                              type="checkbox"
-                              checked={field.value?.includes(lang)}
-                              onChange={e => {
-                                if (e.target.checked) {
-                                  field.onChange([...(field.value || []), lang]);
-                                } else {
-                                  field.onChange((field.value || []).filter((l: string) => l !== lang));
-                                }
-                              }}
-                            />
-                            {lang}
-                          </label>
-                        ))}
-                      </div>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={
+                              'w-full justify-between ' +
+                              (field.value && field.value.length > 0 ? '' : 'text-muted-foreground')
+                            }
+                          >
+                            {field.value && field.value.length > 0
+                              ? field.value.join(', ')
+                              : 'Select preferred languages'}
+                            <CheckIcon className="ml-2 h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-64 p-2">
+                          <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+                            {LANGUAGES.map((lang) => (
+                              <label key={lang} className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={field.value?.includes(lang) || false}
+                                  onChange={e => {
+                                    if (e.target.checked) {
+                                      field.onChange([...(field.value || []), lang]);
+                                    } else {
+                                      field.onChange((field.value || []).filter((l: string) => l !== lang));
+                                    }
+                                  }}
+                                />
+                                <span>{lang}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -580,93 +655,84 @@ const RequestPage = () => {
                   </FormItem>
                 )}
               />
-              {/* Working Hours */}
-              <FormField
-                control={form.control}
-                name='workingHours'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Working Hours (Optional)</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Select working hours' />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {WORKING_HOURS.map((wh: string) => (
-                            <SelectItem key={wh} value={wh}>{wh}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Special Flags */}
+              {/* Working Hours - Start and End Time Selectors */}
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <FormField
+                    control={form.control}
+                    name='workingHours.startTime'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Working Hours Start</FormLabel>
+                        <FormControl>
+                          <Input type='time' value={field.value || ''} onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex-1">
+                  <FormField
+                    control={form.control}
+                    name='workingHours.endTime'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Working Hours End</FormLabel>
+                        <FormControl>
+                          <Input type='time' value={field.value || ''} onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              {/* Special Flag Dropdown with Other Option */}
               <FormField
                 control={form.control}
                 name='specialFlags'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Special Flags (Optional)</FormLabel>
-                    <FormControl>
-                      <div className="flex flex-wrap gap-2">
-                        {SPECIAL_FLAGS.map((flag: string) => (
-                          <label key={flag} className="flex items-center gap-1">
-                            <input
-                              type="checkbox"
-                              checked={field.value?.includes(flag)}
-                              onChange={e => {
-                                if (e.target.checked) {
-                                  field.onChange([...(field.value || []), flag]);
-                                } else {
-                                  field.onChange((field.value || []).filter((f: string) => f !== flag));
-                                }
-                              }}
+                render={({ field }) => {
+                  const options = ['urgent', 'priority', 'other'];
+                  const value = field.value && field.value[0] ? field.value[0] : '';
+                  return (
+                    <FormItem>
+                      <FormLabel>Special Flag</FormLabel>
+                      <FormControl>
+                        <div>
+                          <Select
+                            onValueChange={val => {
+                              if (val === 'other') {
+                                field.onChange(['other']);
+                              } else {
+                                field.onChange([val]);
+                              }
+                            }}
+                            value={value}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select special flag' />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {options.map(opt => (
+                                <SelectItem key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {value === 'other' && (
+                            <Input
+                              className="mt-2"
+                              placeholder="Type your flag"
+                              value={field.value?.[1] || ''}
+                              onChange={e => field.onChange(['other', e.target.value])}
                             />
-                            {flag}
-                          </label>
-                        ))}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Accounting Integration */}
-              <FormField
-                control={form.control}
-                name='accountingIntegrationId'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Business Profile</FormLabel>
-                    <FormControl>
-                      {loading ? (
-                        <Input disabled placeholder='Loading...' />
-                      ) : accountingIntegrations.length === 0 ? (
-                        <Input disabled placeholder='No Accounting Profile is Found' />
-                      ) : (
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value || ''}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select a Accounting profile' />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {accountingIntegrations.map((ac) => (
-                              <SelectItem key={ac.id} value={ac.id}>
-                                {ac.serviceId}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
             </div>
             <div className='flex justify-end pb-8'>
