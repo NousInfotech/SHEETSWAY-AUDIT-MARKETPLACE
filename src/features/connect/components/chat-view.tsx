@@ -26,6 +26,7 @@ interface ChatViewProps {
   setMessage: (message: string) => void;
   handleSendMessage: () => void;
   onBack: () => void;
+  engagements: any[]; // Accept mock engagements
 }
 
 interface User {
@@ -44,7 +45,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
   setActiveChat,
   setMessage,
   handleSendMessage,
-  onBack
+  onBack,
+  engagements
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showUserList, setShowUserList] = useState(false);
@@ -391,6 +393,11 @@ export const ChatView: React.FC<ChatViewProps> = ({
                         const userId = activeChat.replace('user-', '');
                         const user = users.find((u) => u.id === userId);
                         return user ? user.name : 'Unknown User';
+                      }
+                      // Engagement chat: if activeChat matches an engagementId, show its clientName
+                      const engagement = engagements.find(e => e.id === activeChat);
+                      if (engagement) {
+                        return engagement.clientName;
                       }
                       return (
                         chatChannels.find((c) => c.id === activeChat)?.name ||

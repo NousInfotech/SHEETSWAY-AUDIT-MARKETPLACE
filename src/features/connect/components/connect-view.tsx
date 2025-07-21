@@ -5,11 +5,18 @@ import React, { useState } from 'react';
 import { useConnect } from '@/hooks/use-connect';
 import { DashboardView, ChatView, ScheduleView, CalendarView } from './index';
 import { UserChatView } from './user-chat-view';
+import { useSearchParams } from 'next/navigation';
+import { generateMockEngagements } from '@/features/engagements/data/mock-data';
+import type { Engagement } from '@/features/engagements/types/engagement-types';
 
 export default function ConnectViewPage() {
   // State management
   const [currentView, setCurrentView] = useState('dashboard');
-  // Removed unused state variables
+  const searchParams = useSearchParams();
+  const [engagements, setEngagements] = useState<Engagement[]>([]);
+  React.useEffect(() => {
+    setEngagements(generateMockEngagements());
+  }, []);
 
   // Use custom hook for connect functionality
   const {
@@ -31,6 +38,14 @@ export default function ConnectViewPage() {
     handleScheduleMeeting,
     cancelMeeting
   } = useConnect();
+
+  React.useEffect(() => {
+    const engagementId = searchParams.get('engagementId');
+    if (engagementId) {
+      setActiveChat(engagementId);
+      setCurrentView('chat');
+    }
+  }, [searchParams, setActiveChat]);
 
   const handleNavigate = (view: string) => {
     setCurrentView(view);
@@ -99,6 +114,7 @@ export default function ConnectViewPage() {
               setMessage={setMessage}
               handleSendMessage={handleSendMessage}
               onBack={handleBack}
+              engagements={engagements}
             />
           )}
 

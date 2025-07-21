@@ -34,7 +34,8 @@ import {
   IconBrandGithub,
   IconFilePlus,
   IconBriefcase,
-  IconClock
+  IconClock,
+  IconRefresh
 } from '@tabler/icons-react';
 
 export type Icon = React.ComponentType<IconProps>;
@@ -78,4 +79,5 @@ export const Icons = {
   engagements: IconBriefcase,
   history: IconClock,
   payments: IconCreditCard,
+  refresh: IconRefresh,
 };
