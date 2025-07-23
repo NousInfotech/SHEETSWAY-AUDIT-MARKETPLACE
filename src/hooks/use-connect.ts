@@ -58,7 +58,7 @@ export const useConnect = () => {
 
       setChatMessages((prev) => ({
         ...prev,
-        [activeChat]: [...prev[activeChat], newMessage]
+        [activeChat]: [...(prev[activeChat] || []), newMessage]
       }));
 
       setMessage('');
@@ -76,7 +76,7 @@ export const useConnect = () => {
 
         setChatMessages((prev) => ({
           ...prev,
-          [activeChat]: [...prev[activeChat], agentResponse]
+          [activeChat]: [...(prev[activeChat] || []), agentResponse]
         }));
       }, 2000);
     }
