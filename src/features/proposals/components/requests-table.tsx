@@ -36,11 +36,12 @@ interface RequestsTableProps {
   requests: Request[];
   onRequestSelect: (request: Request) => void;
   onViewProposals: (request: Request) => void;
+  businessProfiles: { id: string; size?: string }[];
 }
 
 
 
-export function RequestsTable({ requests, onRequestSelect, onViewProposals }: RequestsTableProps) {
+export function RequestsTable({ requests, onRequestSelect, onViewProposals, businessProfiles }: RequestsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
@@ -65,24 +66,10 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals }: Re
       )
     },
     {
-      accessorKey: 'clientName',
-      header: 'Client',
-      cell: ({ row }) => (
-        <div className='font-medium'>{row.getValue('clientName')}</div>
-      )
-    },
-    {
       accessorKey: 'framework',
       header: 'Framework',
       cell: ({ row }) => (
         <Badge variant='outline'>{row.getValue('framework')}</Badge>
-      )
-    },
-    {
-      accessorKey: 'businessSize',
-      header: 'Size',
-      cell: ({ row }) => (
-        <Badge variant='secondary'>{row.getValue('businessSize')}</Badge>
       )
     },
     {
@@ -101,11 +88,16 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals }: Re
         );
       },
       cell: ({ row }) => {
-        const budget = row.getValue('budget') as string;
+        const budget = row.getValue('budget');
+        let display = 'Not specified';
+        if (typeof budget === 'string' && budget.trim() !== '') {
+          const num = parseFloat(budget);
+          if (!isNaN(num)) display = formatCurrency(num);
+        } else if (typeof budget === 'number') {
+          display = formatCurrency(budget);
+        }
         return (
-          <div className='text-right font-mono'>
-            {budget ? formatCurrency(parseInt(budget)) : 'Not specified'}
-          </div>
+          <div className='text-right font-mono'>{display}</div>
         );
       }
     },
@@ -125,39 +117,53 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals }: Re
       }
     },
     {
-      accessorKey: 'deliveryDeadline',
-      header: ({ column }) => {
-        return (
-          <Button
-            variant='ghost'
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            Deadline
-            <ArrowUpDown className='ml-2 h-4 w-4' />
-          </Button>
-        );
-      },
+      accessorKey: 'deadline',
+      header: 'Deadline',
       cell: ({ row }) => {
-        const deadline = row.getValue('deliveryDeadline') as string;
-        const daysRemaining = getDaysRemaining(deadline);
+        const deadlineRaw = row.getValue('deadline') || row.getValue('deliveryDeadline');
+        const deadline = typeof deadlineRaw === 'string' ? deadlineRaw : undefined;
+        const daysRemaining = deadline ? getDaysRemaining(deadline) : undefined;
         return (
           <div className='flex flex-col'>
-            <span>{formatDate(deadline)}</span>
-            <span className={`text-xs ${daysRemaining < 7 ? 'text-red-600' : 'text-muted-foreground'}`}>
-              {daysRemaining > 0 ? `${daysRemaining} days left` : 'Overdue'}
+            <span>{deadline ? formatDate(deadline) : '-'}</span>
+            <span className={`text-xs ${daysRemaining !== undefined && daysRemaining < 7 ? 'text-red-600' : 'text-muted-foreground'}`}>
+              {daysRemaining !== undefined && daysRemaining > 0 ? `${daysRemaining} days left` : daysRemaining !== undefined ? 'Overdue' : ''}
             </span>
           </div>
         );
       }
     },
     {
-      accessorKey: 'status',
-      header: 'Status',
+      accessorKey: 'notes',
+      header: 'Notes',
       cell: ({ row }) => {
-        const status = row.getValue('status') as Request['status'];
-        return <Badge variant={getRequestStatusBadgeVariant(status)}>{status}</Badge>;
+        const notes = row.getValue('notes');
+        const safeNotes = typeof notes === 'string' ? notes : '';
+        return (
+          <div className='max-w-xs truncate' title={safeNotes}>
+            {safeNotes || '-'}
+          </div>
+        );
       }
     },
+      // Add Type column
+      {
+        accessorKey: 'type',
+        header: 'Type',
+        cell: ({ row }) => {
+          const type = row.getValue('type');
+          return <Badge variant='outline'>{typeof type === 'string' ? type : '-'}</Badge>;
+        }
+      },
+      // Add Is Active column
+      {
+        accessorKey: 'isActive',
+        header: 'Active',
+        cell: ({ row }) => {
+          const isActive = row.getValue('isActive');
+          return <Badge variant={isActive ? 'default' : 'secondary'}>{isActive ? 'Yes' : 'No'}</Badge>;
+        }
+      },
     {
       id: 'actions',
       cell: ({ row }) => {
@@ -188,7 +194,8 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals }: Re
           </DropdownMenu>
         );
       }
-    }
+    },
+  
   ];
 
   const table = useReactTable({
@@ -203,7 +210,8 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals }: Re
     state: {
       sorting,
       columnFilters
-    }
+    },
+    meta: { businessProfiles },
   });
 
   return (

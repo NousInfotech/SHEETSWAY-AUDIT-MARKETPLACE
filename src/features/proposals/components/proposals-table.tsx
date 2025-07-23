@@ -83,19 +83,7 @@ export function ProposalsTable({
             {isAccepted ? (
               <span>{proposal.auditorName}</span>
             ) : (
-              <>
-                <span>{getRandomAnonUsername(proposal.id)}</span>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className='h-4 w-4 text-muted-foreground cursor-pointer' />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Auditor name is visible once proposal is accepted
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </>
+              <span>Anonymous</span>
             )}
             <Button size='sm' variant='outline' onClick={() => router.push(`/dashboard/profile/${proposal.auditorId}`)}>
               View Profile
