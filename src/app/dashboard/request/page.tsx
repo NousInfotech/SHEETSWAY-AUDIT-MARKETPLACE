@@ -81,7 +81,12 @@ const formSchema = z.object({
   notes: z.string().min(1, 'Notes are required'),
   urgency: z.enum(['NORMAL', 'URGENT']),
   budget: z.preprocess(
-    (val) => val === '' ? undefined : Number(val),
+    (val) => {
+      if (val === '' || val === undefined || val === null) return undefined;
+      if (typeof val === 'string' && val.trim() === '') return undefined;
+      const num = Number(val);
+      return isNaN(num) ? undefined : num;
+    },
     z.number().min(0, 'Budget must be 0 or greater').optional()
   ),
   isAnonymous: z.boolean().default(false),
@@ -89,12 +94,12 @@ const formSchema = z.object({
   preferredLanguages: z.array(z.string()).optional(),
   timeZone: z.string().optional(),
   workingHours: z.object({
-    startTime: z.string().min(1, 'Start time is required'),
-    endTime: z.string().min(1, 'End time is required'),
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
   }).optional(),
   specialFlags: z.array(z.string()).optional(),
-  accountingIntegrationId: z.string().min(1, 'Please select an accounting integration').optional(),
-  plaidIntegrationId: z.string().min(1, 'Please select an plaid integration').optional(),
+  accountingIntegrationId: z.string().optional(),
+  plaidIntegrationId: z.string().optional(),
 });
 
 type AuditFormValues = z.infer<typeof formSchema>;
@@ -219,7 +224,8 @@ const RequestPage = () => {
       workingHours = `${data.workingHours.startTime}-${data.workingHours.endTime}`;
     }
 
-    const payload = {
+    // Build payload and remove plaidIntegrationId/accountingIntegrationId if not set
+    const payload: any = {
       ...data,
       specialFlags,
       workingHours, // now a string or undefined
@@ -228,6 +234,12 @@ const RequestPage = () => {
       workingHoursStart: undefined,
       workingHoursEnd: undefined,
     };
+    if (!data.plaidIntegrationId) {
+      delete payload.plaidIntegrationId;
+    }
+    if (!data.accountingIntegrationId) {
+      delete payload.accouningIntegrationId;
+    }
 
     try {
       await createClientRequest(payload);
@@ -267,7 +279,7 @@ const RequestPage = () => {
                 name='title'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Title</FormLabel>
+                    <FormLabel>Title <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input type='text' placeholder='title for the request' value={field.value ?? ''} onChange={field.onChange} />
                     </FormControl>
@@ -280,7 +292,7 @@ const RequestPage = () => {
                 name='businessId'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Business Profile</FormLabel>
+                    <FormLabel>Business Profile <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       {loading ? (
                         <Input disabled placeholder='Loading...' />
@@ -317,7 +329,7 @@ const RequestPage = () => {
                     name='plaidIntegrationId'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Plaid Bank Account</FormLabel>
+                        <FormLabel>Plaid Bank Account (Optional)</FormLabel>
                         <FormControl>
                           {loading ? (
                             <Input disabled placeholder='Loading...' />
@@ -325,7 +337,7 @@ const RequestPage = () => {
                             <Input disabled placeholder='No Plaid accounts found' />
                           ) : (
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={val => field.onChange(val === '' ? undefined : val)}
                               value={field.value || ''}
                             >
                               <SelectTrigger className="w-full min-w-0" style={{ maxWidth: '100%' }}>
@@ -352,7 +364,7 @@ const RequestPage = () => {
                     name='accountingIntegrationId'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Account Integration</FormLabel>
+                        <FormLabel>Account Integration (Optional)</FormLabel>
                         <FormControl>
                           {loading ? (
                             <Input disabled placeholder='Loading...' />
@@ -360,7 +372,7 @@ const RequestPage = () => {
                             <Input disabled placeholder='No Accounting Profile is Found' />
                           ) : (
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={val => field.onChange(val === '' ? undefined : val)}
                               value={field.value || ''}
                             >
                               <SelectTrigger className="w-full min-w-0" style={{ maxWidth: '100%' }}>
@@ -389,7 +401,7 @@ const RequestPage = () => {
                 name='type'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Request Type</FormLabel>
+                    <FormLabel>Request Type <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className='flex flex-row items-center space-x-6'>
                         <FormItem className='flex items-center space-y-0 space-x-2'>
@@ -412,7 +424,7 @@ const RequestPage = () => {
                 name='framework'
                 render={({ field }) => (
                   <FormItem className='space-y-3'>
-                    <FormLabel>Framework</FormLabel>
+                    <FormLabel>Framework <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className='flex flex-row items-center space-x-6'>
                         <FormItem className='flex items-center space-y-0 space-x-2'>
@@ -435,7 +447,7 @@ const RequestPage = () => {
                 name='financialYear'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Financial Year</FormLabel>
+                    <FormLabel>Financial Year <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}
@@ -495,7 +507,7 @@ const RequestPage = () => {
                 name='deadline'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Deadline</FormLabel>
+                    <FormLabel>Deadline <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input type='datetime-local' value={field.value ?? ''} onChange={field.onChange} />
                     </FormControl>
@@ -509,7 +521,7 @@ const RequestPage = () => {
                 name='notes'
                 render={({ field }) => (
                   <FormItem className='md:col-span-2'>
-                    <FormLabel>Notes / Requirements</FormLabel>
+                    <FormLabel>Notes / Requirements <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Textarea placeholder='Add any specific notes or requirements for this audit...' className='resize-y' rows={4} value={field.value ?? ''} onChange={field.onChange} />
                     </FormControl>
@@ -523,7 +535,7 @@ const RequestPage = () => {
                 name='urgency'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Urgency Level</FormLabel>
+                    <FormLabel>Urgency Level <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className='flex flex-row items-center space-x-6'>
                         <FormItem className='flex items-center space-y-0 space-x-2'>
@@ -548,7 +560,12 @@ const RequestPage = () => {
                   <FormItem>
                     <FormLabel>Budget (Optional)</FormLabel>
                     <FormControl>
-                      <Input type='number' placeholder='0.00' value={field.value ?? ''} onChange={field.onChange} />
+                      <Input
+                        type='number'
+                        placeholder='0.00'
+                        value={field.value === undefined || field.value === null ? '' : String(field.value)}
+                        onChange={e => field.onChange(e.target.value === '' ? undefined : e.target.value)}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -588,7 +605,7 @@ const RequestPage = () => {
                 name='preferredLanguages'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preferred Languages</FormLabel>
+                    <FormLabel>Preferred Languages <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -697,7 +714,7 @@ const RequestPage = () => {
                   const value = field.value && field.value[0] ? field.value[0] : '';
                   return (
                     <FormItem>
-                      <FormLabel>Special Flag</FormLabel>
+                      <FormLabel>Special Flag (Optional)</FormLabel>
                       <FormControl>
                         <div>
                           <Select

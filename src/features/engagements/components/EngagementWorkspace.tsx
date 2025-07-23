@@ -49,13 +49,14 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
           </div>
         </div>
         {/* Messages Icon Button */}
-        <button
-          onClick={() => router.push(`/dashboard/connect?engagementId=${engagement.id}`)}
-          className="p-2 rounded-lg bg-muted hover:bg-muted/70 transition-colors ml-4"
-          aria-label="Open Messages"
+        <a
+          href={`/dashboard/engagements/${engagement.id}/chat`}
+          className="inline-flex items-center gap-2 p-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors ml-4"
+          aria-label="Open Engagement Chat"
         >
-          <MessageCircle className="h-6 w-6 text-foreground" />
-        </button>
+          <MessageCircle className="h-6 w-6" />
+          Connect
+        </a>
       </div>
     </header>
   );
