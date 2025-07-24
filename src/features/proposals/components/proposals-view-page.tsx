@@ -21,6 +21,10 @@ import { listProposals } from '@/api/proposals.api';
 import { format } from 'date-fns';
 import { Spinner } from '@/components/ui/spinner';
 import { useAuth } from '@/components/layout/providers';
+import { getClientRequestDocuments } from '@/api/client-request.api';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import { getPresignedAccessUrl } from '@/api/client-request.api';
 
 // --- MOCK DATA FOR TESTING PURPOSES ---
 // --- END MOCK DATA ---
@@ -78,6 +82,64 @@ export function ProposalsViewPage() {
 
   // Use real data only
   const selectedRequest = requests.find(r => r.id === requestId) || null;
+
+  const [documents, setDocuments] = useState<any[]>([]);
+  useEffect(() => {
+    if (!selectedRequest?.id || selectedRequest.userId !== appUser?.id) {
+      setDocuments([]);
+      return;
+    }
+    getClientRequestDocuments(selectedRequest.id).then(setDocuments).catch(() => setDocuments([]));
+  }, [selectedRequest?.id, selectedRequest?.userId, appUser?.id]);
+
+  // Deduplicate documents by fileUrl
+  const uniqueDocuments = Array.isArray(documents)
+    ? documents.filter((doc, idx, arr) => arr.findIndex(d => d.fileUrl === doc.fileUrl) === idx)
+    : [];
+
+  // Download all documents as ZIP
+  const handleDownloadAll = async () => {
+    const zip = new JSZip();
+    await Promise.all(
+      uniqueDocuments.map(async (doc) => {
+        try {
+          const response = await fetch(doc.fileUrl);
+          const blob = await response.blob();
+          zip.file(doc.fileName || doc.fileKey || `Document-${doc.id || ''}`, blob);
+        } catch (e) {
+          // Optionally handle fetch errors
+        }
+      })
+    );
+    const content = await zip.generateAsync({ type: 'blob' });
+    saveAs(content, 'documents.zip');
+  };
+
+  // State for document preview modal
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<any>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  // Handle document click: fetch presigned access URL and open modal
+  const handlePreviewDoc = async (doc: any) => {
+    setPreviewDoc(doc);
+    setPreviewUrl(null);
+    setPreviewError(null); // Reset error
+    setPreviewOpen(true);
+    try {
+      // Extract S3 key from fileUrl (remove bucket URL prefix)
+      const match = doc.fileUrl.match(/amazonaws\.com\/(.+)$/);
+      const fileKey = match ? match[1] : doc.fileUrl;
+      console.log('doc.fileUrl:', doc.fileUrl);
+      console.log('fileKey:', fileKey);
+      const result = await getPresignedAccessUrl(fileKey, 10000);
+      console.log('Signed URL:', result);
+      setPreviewUrl(result.data);
+    } catch (e) {
+      setPreviewError('Failed to load document preview.');
+    }
+  };
 
   // Defensive filter: only proposals for the current request and user
   const filteredProposalsForRequest = proposalsForRequest.filter(
@@ -166,7 +228,7 @@ export function ProposalsViewPage() {
           <CardContent>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
               {Object.entries(selectedRequest)
-                .filter(([key]) => !['id', 'createdAt', 'updatedAt', 'clientEmail', 'userId'].includes(key))
+                .filter(([key]) => !['id', 'createdAt', 'updatedAt', 'clientEmail', 'userId', 'documents'].includes(key))
                 .map(([key, value]) => {
                   let displayValue = '-';
                   if (Array.isArray(value)) {
@@ -257,6 +319,57 @@ export function ProposalsViewPage() {
                   );
                 })}
             </div>
+            {/* Documents Section (use fetched documents) */}
+            {uniqueDocuments.length > 0 && (
+              <div className='mt-6'>
+                <h3 className='font-semibold text-lg mb-2'>Attached Documents</h3>
+                <ul className='space-y-2'>
+                  {uniqueDocuments.map((doc, idx) => (
+                    <li key={doc.fileKey || doc.id || idx}>
+                      <button
+                        type="button"
+                        className='text-blue-600 underline break-all hover:opacity-80'
+                        onClick={() => handlePreviewDoc(doc)}
+                      >
+                        {doc.fileName || doc.fileKey || 'Document'}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Document Preview Modal */}
+            {previewOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-4 relative">
+                  <button
+                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                    onClick={() => setPreviewOpen(false)}
+                  >
+                    &times;
+                  </button>
+                  <h2 className="text-lg font-semibold mb-4">{previewDoc?.fileName || 'Preview'}</h2>
+                  {/* {!previewUrl && !previewError && <div className="text-center">Loading...</div>} */}
+                  {previewError && <div className="text-center text-red-600">{previewError}</div>}
+                  {previewUrl && previewDoc?.fileName?.toLowerCase().endsWith('.pdf') ? (
+                    <iframe
+                      src={previewUrl}
+                      title="PDF Preview"
+                      className="w-full h-96"
+                      onError={() => setPreviewError('Failed to load PDF preview.')}
+                    />
+                  ) : previewUrl && (
+                    <img
+                      src={previewUrl}
+                      alt={previewDoc?.fileName}
+                      className="max-w-full max-h-96 mx-auto"
+                      onError={() => setPreviewError('Failed to load image preview.')}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

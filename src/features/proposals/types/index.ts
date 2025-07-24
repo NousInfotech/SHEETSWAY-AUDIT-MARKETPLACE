@@ -15,6 +15,8 @@ export interface Request {
   status: 'Open' | 'In Progress' | 'Completed' | 'Cancelled';
   createdAt: string;
   updatedAt: string;
+  userId: string;
+  documents?: { fileName: string; fileUrl: string; fileKey: string }[];
 }
 
 export interface Proposal {
