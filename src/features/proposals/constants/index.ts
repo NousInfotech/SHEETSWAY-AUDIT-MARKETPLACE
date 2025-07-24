@@ -17,7 +17,8 @@ export const mockRequests: Request[] = [
     notes: 'Company has international operations. Need auditor with IFRS expertise.',
     status: 'Open',
     createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
+    updatedAt: '2024-01-15T10:00:00Z',
+    userId: 'user-001'
   },
   {
     id: 'req-002',
@@ -35,7 +36,8 @@ export const mockRequests: Request[] = [
     notes: 'Urgent deadline due to board meeting. Need experienced tax professional.',
     status: 'In Progress',
     createdAt: '2024-04-01T14:30:00Z',
-    updatedAt: '2024-04-05T09:15:00Z'
+    updatedAt: '2024-04-05T09:15:00Z',
+    userId: 'user-002'
   },
   {
     id: 'req-003',
@@ -53,7 +55,8 @@ export const mockRequests: Request[] = [
     notes: 'Retail chain with 15 locations. Need auditor familiar with retail operations.',
     status: 'Open',
     createdAt: '2024-02-01T11:20:00Z',
-    updatedAt: '2024-02-01T11:20:00Z'
+    updatedAt: '2024-02-01T11:20:00Z',
+    userId: 'user-003'
   },
   {
     id: 'req-004',
@@ -71,7 +74,8 @@ export const mockRequests: Request[] = [
     notes: 'Confidential project. NDA required. Need senior auditor with M&A experience.',
     status: 'Open',
     createdAt: '2024-03-10T16:45:00Z',
-    updatedAt: '2024-03-10T16:45:00Z'
+    updatedAt: '2024-03-10T16:45:00Z',
+    userId: 'user-004'
   },
   {
     id: 'req-005',
@@ -89,14 +93,15 @@ export const mockRequests: Request[] = [
     notes: 'Small business with straightforward tax situation. Looking for cost-effective solution.',
     status: 'Completed',
     createdAt: '2024-02-20T08:30:00Z',
-    updatedAt: '2024-04-15T17:00:00Z'
+    updatedAt: '2024-04-15T17:00:00Z',
+    userId: 'user-005'
   }
 ];
 
 export const mockProposals: Proposal[] = [
   {
     id: 'prop-001',
-    requestId: 'req-001',
+    clientRequestId: 'req-001',
     auditorName: 'Sarah Johnson',
     auditorEmail: 'sarah.johnson@auditfirm.com',
     auditorId: 'aud-001',
@@ -119,7 +124,7 @@ export const mockProposals: Proposal[] = [
   },
   {
     id: 'prop-002',
-    requestId: 'req-001',
+    clientRequestId: 'req-001',
     auditorName: 'Michael Chen',
     auditorEmail: 'michael.chen@auditfirm.com',
     auditorId: 'aud-002',
@@ -142,7 +147,7 @@ export const mockProposals: Proposal[] = [
   },
   {
     id: 'prop-003',
-    requestId: 'req-002',
+    clientRequestId: 'req-002',
     auditorName: 'Emily Rodriguez',
     auditorEmail: 'emily.rodriguez@auditfirm.com',
     auditorId: 'aud-003',
@@ -165,7 +170,7 @@ export const mockProposals: Proposal[] = [
   },
   {
     id: 'prop-004',
-    requestId: 'req-003',
+    clientRequestId: 'req-003',
     auditorName: 'David Thompson',
     auditorEmail: 'david.thompson@auditfirm.com',
     auditorId: 'aud-004',
@@ -188,7 +193,7 @@ export const mockProposals: Proposal[] = [
   },
   {
     id: 'prop-005',
-    requestId: 'req-004',
+    clientRequestId: 'req-004',
     auditorName: 'Lisa Wang',
     auditorEmail: 'lisa.wang@auditfirm.com',
     auditorId: 'aud-005',
@@ -211,7 +216,7 @@ export const mockProposals: Proposal[] = [
   },
   {
     id: 'prop-1',
-    requestId: 'req-1',
+    clientRequestId: 'req-1',
     auditorName: 'Jane Doe',
     auditorEmail: 'jane.doe@auditors.com',
     auditorId: 'aud-1',
