@@ -68,7 +68,7 @@ export const useProposalsStore = create<ProposalsStore>((set, get) => ({
 
   getProposalsForRequest: (requestId) => {
     const { proposals } = get();
-    return proposals.filter(proposal => proposal.requestId === requestId);
+    return proposals.filter(proposal => proposal.clientRequestId === requestId);
   },
 
   getEngagementForProposal: (proposalId) => {

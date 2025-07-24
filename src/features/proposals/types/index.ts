@@ -21,7 +21,7 @@ export interface Request {
 
 export interface Proposal {
   id: string;
-  requestId: string;
+  clientRequestId: string; // Added to match backend data
   auditorName: string;
   auditorEmail: string;
   auditorId: string;

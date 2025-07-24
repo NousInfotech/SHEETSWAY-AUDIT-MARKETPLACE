@@ -77,6 +77,7 @@ export function ProposalsViewPage() {
     listProposals({ requestId, userId: appUser.id }).then((data) => {
       setProposalsForRequest(data);
       setLoading(false);
+      console.log('Fetched proposals:', data, 'RequestId:', requestId, 'UserId:', appUser?.id);
     });
   }, [requestId, appUser?.id]);
 
@@ -141,10 +142,11 @@ export function ProposalsViewPage() {
     }
   };
 
-  // Defensive filter: only proposals for the current request and user
+  // Defensive filter: only proposals for the current request
   const filteredProposalsForRequest = proposalsForRequest.filter(
-    (proposal) => proposal.requestId === requestId && (!appUser?.id || proposal.auditorId === appUser.id)
+    (proposal) => proposal.clientRequestId === requestId
   );
+  console.log('Filtered proposals:', filteredProposalsForRequest, 'All proposals:', proposalsForRequest, 'RequestId:', requestId, 'UserId:', appUser?.id);
 
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [showProposalDetails, setShowProposalDetails] = useState(false);

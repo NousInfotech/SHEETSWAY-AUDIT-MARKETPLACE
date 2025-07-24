@@ -91,7 +91,7 @@ export const filterProposalsByRequest = (
   proposals: Proposal[],
   requestId: string
 ): Proposal[] => {
-  return proposals.filter(proposal => proposal.requestId === requestId);
+  return proposals.filter(proposal => proposal.clientRequestId === requestId);
 };
 
 // Get engagement for proposal helper

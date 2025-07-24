@@ -74,7 +74,7 @@ export function ProposalsTable({
 
   const columns: ColumnDef<Proposal>[] = [
     {
-      accessorKey: 'proposalName',
+      accessorKey: 'proposalName', // was 'title'
       header: ({ column }) => {
         return (
           <Button
@@ -117,7 +117,7 @@ export function ProposalsTable({
       }
     },
     {
-      accessorKey: 'quotation',
+      accessorKey: 'proposedBudget',
       header: ({ column }) => {
         return (
           <div className='text-right'>
@@ -132,7 +132,7 @@ export function ProposalsTable({
         );
       },
       cell: ({ row }) => {
-        const amount = row.getValue('quotation');
+        const amount = row.getValue('proposedBudget');
         return (
           <div className='text-right font-mono'>{formatCurrency(Number(amount))}</div>
         );
