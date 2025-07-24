@@ -33,6 +33,8 @@ import {
 import AuditorProfileModal from './auditor-profile-modal';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useRouter } from 'next/navigation';
+import { ProposalDetailsModal } from './proposal-details-modal';
+import { toast } from 'sonner';
 
 interface ProposalsTableProps {
   proposals: Proposal[];
@@ -50,11 +52,29 @@ export function ProposalsTable({
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [openProfileId, setOpenProfileId] = React.useState<string | null>(null);
+  const [openProposal, setOpenProposal] = React.useState<Proposal | null>(null);
   const router = useRouter();
+  const [tableProposals, setTableProposals] = React.useState<Proposal[]>(proposals);
+
+  React.useEffect(() => {
+    setTableProposals(proposals);
+  }, [proposals]);
+
+  const handleAccept = (updatedProposal: Proposal) => {
+    setTableProposals((prev) => prev.map((p) => p.id === updatedProposal.id ? { ...p, status: 'Accepted' } : p));
+    toast.success('Proposal accepted successfully!');
+    if (onAcceptProposal) onAcceptProposal(updatedProposal);
+  };
+
+  const handleReject = (updatedProposal: Proposal) => {
+    setTableProposals((prev) => prev.map((p) => p.id === updatedProposal.id ? { ...p, status: 'Rejected' } : p));
+    toast.success('Proposal rejected successfully!');
+    if (onRejectProposal) onRejectProposal(updatedProposal);
+  };
 
   const columns: ColumnDef<Proposal>[] = [
     {
-      accessorKey: 'title',
+      accessorKey: 'proposalName',
       header: ({ column }) => {
         return (
           <Button
@@ -67,24 +87,28 @@ export function ProposalsTable({
         );
       },
       cell: ({ row }) => (
-        <div className='font-medium max-w-xs truncate' title={row.getValue('title')}>
-          {row.getValue('title')}
+        <div className='font-medium max-w-xs truncate' title={row.getValue('proposalName')}>
+          {row.getValue('proposalName')}
         </div>
       )
     },
     {
-      accessorKey: 'auditorName',
+      accessorKey: 'description',
+      header: 'Description',
+      cell: ({ row }) => (
+        <div className='max-w-xs truncate' title={row.getValue('description')}>
+          {row.getValue('description')}
+        </div>
+      )
+    },
+    {
+      accessorKey: 'auditorId',
       header: 'Auditor',
       cell: ({ row }) => {
         const proposal = row.original;
-        const isAccepted = proposal.status === 'Accepted';
         return (
           <div className='flex items-center gap-2'>
-            {isAccepted ? (
-              <span>{proposal.auditorName}</span>
-            ) : (
-              <span>Anonymous</span>
-            )}
+            <span>Anonymous</span>
             <Button size='sm' variant='outline' onClick={() => router.push(`/dashboard/profile/${proposal.auditorId}`)}>
               View Profile
             </Button>
@@ -93,7 +117,7 @@ export function ProposalsTable({
       }
     },
     {
-      accessorKey: 'proposedBudget',
+      accessorKey: 'quotation',
       header: ({ column }) => {
         return (
           <div className='text-right'>
@@ -101,16 +125,16 @@ export function ProposalsTable({
               variant='ghost'
               onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             >
-              Proposed Budget
+              Budget
               <ArrowUpDown className='ml-2 h-4 w-4' />
             </Button>
           </div>
         );
       },
       cell: ({ row }) => {
-        const amount = parseFloat(row.getValue('proposedBudget'));
+        const amount = row.getValue('quotation');
         return (
-          <div className='text-right font-mono'>{formatCurrency(amount)}</div>
+          <div className='text-right font-mono'>{formatCurrency(Number(amount))}</div>
         );
       }
     },
@@ -119,20 +143,6 @@ export function ProposalsTable({
       header: 'Duration',
       cell: ({ row }) => (
         <div className='font-medium'>{row.getValue('estimatedDuration')}</div>
-      )
-    },
-    {
-      accessorKey: 'startDate',
-      header: 'Start Date',
-      cell: ({ row }) => (
-        <div>{formatDate(row.getValue('startDate'))}</div>
-      )
-    },
-    {
-      accessorKey: 'endDate',
-      header: 'End Date',
-      cell: ({ row }) => (
-        <div>{formatDate(row.getValue('endDate'))}</div>
       )
     },
     {
@@ -147,42 +157,17 @@ export function ProposalsTable({
       id: 'actions',
       cell: ({ row }) => {
         const proposal = row.original;
-        const isPending = proposal.status === 'Pending';
-
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='ghost' className='h-8 w-8 p-0'>
-                <span className='sr-only'>Open menu</span>
-                <MoreHorizontal className='h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {isPending && onAcceptProposal && onRejectProposal && (
-                <>
-                  <DropdownMenuItem onClick={() => onAcceptProposal(proposal)}>
-                    <CheckCircle className='mr-2 h-4 w-4' />
-                    Accept Proposal
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onRejectProposal(proposal)}>
-                    <XCircle className='mr-2 h-4 w-4' />
-                    Reject Proposal
-                  </DropdownMenuItem>
-                </>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Download Proposal</DropdownMenuItem>
-              <DropdownMenuItem>Contact Auditor</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button size='icon' variant='ghost' onClick={() => setOpenProposal(proposal)}>
+            <Eye className='h-5 w-5' />
+          </Button>
         );
       }
     }
   ];
 
   const table = useReactTable({
-    data: proposals,
+    data: tableProposals,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -201,9 +186,9 @@ export function ProposalsTable({
       <div className='flex items-center py-4'>
         <Input
           placeholder='Filter proposals...'
-          value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
+          value={(table.getColumn('proposalName')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
-            table.getColumn('title')?.setFilterValue(event.target.value)
+            table.getColumn('proposalName')?.setFilterValue(event.target.value)
           }
           className='max-w-sm'
         />
@@ -274,6 +259,15 @@ export function ProposalsTable({
           Next
         </Button>
       </div>
+      {openProposal && (
+        <ProposalDetailsModal
+          proposal={openProposal}
+          isOpen={!!openProposal}
+          onClose={() => setOpenProposal(null)}
+          onAcceptProposal={handleAccept}
+          onRejectProposal={handleReject}
+        />
+      )}
     </div>
   );
 } 

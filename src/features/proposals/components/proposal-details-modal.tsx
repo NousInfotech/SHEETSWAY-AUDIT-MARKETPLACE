@@ -21,6 +21,9 @@ import {
 import AuditorProfileModal from './auditor-profile-modal';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import React from 'react';
+import { useRouter } from 'next/navigation';
+import { updateProposalStatus } from '@/api/proposals.api';
+import { toast } from 'sonner';
 
 interface ProposalDetailsModalProps {
   proposal: Proposal | null;
@@ -37,13 +40,48 @@ export function ProposalDetailsModal({
   onAcceptProposal,
   onRejectProposal
 }: ProposalDetailsModalProps) {
-  // Always call hooks first!
-  const [openProfile, setOpenProfile] = React.useState(false);
+  const router = useRouter();
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   if (!proposal) return null;
 
-  const isPending = proposal.status === 'Pending';
-  const isAccepted = proposal.status === 'Accepted';
+  // Button rendering logic
+  const isPending = proposal?.status?.toString().toUpperCase() === 'PENDING';
+  const isAccepted = proposal?.status?.toString().toUpperCase() === 'ACCEPTED';
+  const isRejected = proposal?.status?.toString().toUpperCase() === 'REJECTED';
+
+  async function handleAccept() {
+    if (!proposal) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await updateProposalStatus(proposal.id, 'ACCEPTED');
+      toast.success('Proposal accepted successfully!');
+      if (onAcceptProposal) onAcceptProposal({ ...proposal, status: 'Accepted' });
+      onClose();
+    } catch (e: any) {
+      setError('Failed to accept proposal.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleReject() {
+    if (!proposal) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await updateProposalStatus(proposal.id, 'REJECTED');
+      toast.success('Proposal rejected successfully!');
+      if (onRejectProposal) onRejectProposal({ ...proposal, status: 'Rejected' });
+      onClose();
+    } catch (e: any) {
+      setError('Failed to reject proposal.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -58,18 +96,79 @@ export function ProposalDetailsModal({
                 Proposal Details
               </DialogDescription>
             </div>
-            {/* <Button variant='ghost' size='icon' onClick={onClose}>
-              <X className='h-4 w-4' />
-            </Button> */}
           </div>
         </DialogHeader>
 
         <div className='space-y-6'>
+          {error && <div className='text-red-500'>{error}</div>}
           {/* Status */}
           <div className='flex items-center gap-4'>
             <Badge variant={getProposalStatusBadgeVariant(proposal.status)}>
               {proposal.status}
             </Badge>
+          </div>
+
+          {/* Proposal Fields from Validator */}
+          <div className='grid grid-cols-2 gap-4'>
+            <div>
+              <p className='text-sm text-muted-foreground'>Proposal Title</p>
+              <p className='font-medium'>{proposal.title || proposal.proposalName}</p>
+            </div>
+            <div>
+              <p className='text-sm text-muted-foreground'>Description</p>
+              <p className='font-medium'>{proposal.description}</p>
+            </div>
+            <div>
+              <p className='text-sm text-muted-foreground'>Budget</p>
+              <p className='font-medium'>{formatCurrency(Number(proposal.proposedBudget ?? proposal.quotation))} {proposal.currency ?? ''}</p>
+            </div>
+            <div>
+              <p className='text-sm text-muted-foreground'>Estimated Duration</p>
+              <p className='font-medium'>{proposal.estimatedDuration} days</p>
+            </div>
+            <div>
+              <p className='text-sm text-muted-foreground'>Start Date</p>
+              <p className='font-medium'>{formatDate(proposal.startDate)}</p>
+            </div>
+            <div>
+              <p className='text-sm text-muted-foreground'>End Date</p>
+              <p className='font-medium'>{formatDate(proposal.endDate)}</p>
+            </div>
+            <div>
+              <p className='text-sm text-muted-foreground'>Status</p>
+              <p className='font-medium'>{proposal.status}</p>
+            </div>
+            <div>
+              <p className='text-sm text-muted-foreground'>Request Note</p>
+              <p className='font-medium'>{proposal.requestNote ?? '-'}</p>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Terms */}
+          <div>
+            <h3 className='font-semibold text-lg mb-3'>Terms & Conditions</h3>
+            <ul className='space-y-2'>
+              {Array.isArray(proposal.terms) ? proposal.terms.map((term, idx) => (
+                <li key={idx} className='text-sm'>- {term}</li>
+              )) : <li className='text-sm'>{proposal.terms}</li>}
+            </ul>
+          </div>
+
+          <Separator />
+
+          {/* Deliverables */}
+          <div>
+            <h3 className='font-semibold text-lg mb-3'>Deliverables</h3>
+            <ul className='space-y-2'>
+              {Array.isArray(proposal.deliverables) ? proposal.deliverables.map((deliverable, index) => (
+                <li key={index} className='flex items-start gap-2'>
+                  <div className='w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0' />
+                  <span className='text-sm'>{deliverable}</span>
+                </li>
+              )) : <li className='text-sm'>{proposal.deliverables}</li>}
+            </ul>
           </div>
 
           {/* Auditor Information */}
@@ -80,158 +179,61 @@ export function ProposalDetailsModal({
             </h3>
             <div className='grid grid-cols-2 gap-4 items-center'>
               <div>
-                <p className='text-sm text-muted-foreground'>Auditor Name</p>
+                <p className='text-sm text-muted-foreground'>Auditor</p>
                 <div className='flex items-center gap-2'>
-                  {isAccepted ? (
-                    <>
-                      <span className='font-medium'>{proposal.auditorName}</span>
-                      <Button size='sm' variant='outline' onClick={() => setOpenProfile(true)}>
-                        View Profile
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <span className='font-medium'>{getRandomAnonUsername(proposal.id)}</span>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className='h-4 w-4 text-muted-foreground cursor-pointer' />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            Auditor name is visible once proposal is accepted
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <Button size='sm' variant='outline' onClick={() => setOpenProfile(true)}>
-                        View Profile
-                      </Button>
-                    </>
-                  )}
-                  <AuditorProfileModal open={openProfile} onOpenChange={setOpenProfile} />
+                  <span>Anonymous</span>
+                  <Button size='sm' variant='outline' onClick={() => router.push(`/dashboard/profile/${proposal.auditorId}`)}>
+                    View Profile
+                  </Button>
                 </div>
               </div>
-              <div>
-                <p className='text-sm text-muted-foreground'>Auditor Email</p>
-                <p className='font-medium'>{isAccepted ? proposal.auditorEmail : 'Hidden'}</p>
-              </div>
+             
             </div>
           </div>
 
-          <Separator />
-
-          {/* Proposal Details */}
-          <div>
-            <h3 className='font-semibold text-lg mb-3 flex items-center gap-2'>
-              <FileText className='h-5 w-5' />
-              Proposal Details
-            </h3>
-            <div className='space-y-4'>
-              <div>
-                <p className='text-sm text-muted-foreground mb-1'>Description</p>
-                <p className='text-sm'>{proposal.description}</p>
-              </div>
-
-              <div className='grid grid-cols-2 gap-4'>
-                <div>
-                  <p className='text-sm text-muted-foreground'>Estimated Duration</p>
-                  <p className='font-medium'>{proposal.estimatedDuration}</p>
-                </div>
-                <div>
-                  <p className='text-sm text-muted-foreground'>Proposed Budget</p>
-                  <p className='font-medium text-lg'>{formatCurrency(proposal.proposedBudget)}</p>
-                </div>
-              </div>
+          {/* Accept/Reject Buttons */}
+          {isPending && (
+            <div className="flex gap-2 mt-4">
+              <Button onClick={handleAccept} disabled={loading} variant="default">
+                Accept
+              </Button>
+              <Button onClick={handleReject} disabled={loading} variant="destructive">
+                Reject
+              </Button>
             </div>
-          </div>
-
-          <Separator />
-
-          {/* Timeline */}
-          <div>
-            <h3 className='font-semibold text-lg mb-3 flex items-center gap-2'>
-              <Calendar className='h-5 w-5' />
-              Timeline
-            </h3>
-            <div className='grid grid-cols-2 gap-4'>
-              <div>
-                <p className='text-sm text-muted-foreground'>Start Date</p>
-                <p className='font-medium'>{formatDate(proposal.startDate)}</p>
-              </div>
-              <div>
-                <p className='text-sm text-muted-foreground'>End Date</p>
-                <p className='font-medium'>{formatDate(proposal.endDate)}</p>
-              </div>
+          )}
+          {isAccepted && (
+            <div className="flex gap-2 mt-4">
+              <Button disabled variant="default">
+                Accepted
+              </Button>
             </div>
-          </div>
-
-          <Separator />
-
-          {/* Terms */}
-          <div>
-            <h3 className='font-semibold text-lg mb-3'>Terms & Conditions</h3>
-            <p className='text-sm'>{proposal.terms}</p>
-          </div>
-
-          <Separator />
-
-          {/* Deliverables */}
-          <div>
-            <h3 className='font-semibold text-lg mb-3'>Deliverables</h3>
-            <ul className='space-y-2'>
-              {proposal.deliverables.map((deliverable, index) => (
-                <li key={index} className='flex items-start gap-2'>
-                  <div className='w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0' />
-                  <span className='text-sm'>{deliverable}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Availability Window */}
-          <Separator />
-          <div>
-            <h3 className='font-semibold text-lg mb-3'>Availability Window</h3>
-            <p className='text-sm'>Can start within 3 days</p>
-          </div>
-
-          {/* Extra Section for Questions/Notes */}
-          <Separator />
-          <div>
-            <h3 className='font-semibold text-lg mb-3'>Questions / Notes to Client</h3>
-            <p className='text-sm'>Looking forward to collaborating. Please let me know if you have any specific requirements or questions.</p>
-          </div>
-
-          {/* Timestamps */}
-          <Separator />
-          <div className='grid grid-cols-2 gap-4 text-sm text-muted-foreground'>
-            <div>
-              <p>Created: {formatDate(proposal.createdAt)}</p>
+          )}
+          {isRejected && (
+            <div className="flex gap-2 mt-4">
+              <Button disabled variant="destructive">
+                Rejected
+              </Button>
             </div>
-            <div>
-              <p>Updated: {formatDate(proposal.updatedAt)}</p>
-            </div>
+          )}
+
+          {/* Actions */}
+          <div className='flex justify-end gap-2 pt-4'>
+            <Button variant='outline' onClick={onClose} disabled={loading}>
+              Close
+            </Button>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className='flex justify-end gap-2 pt-4'>
-          <Button variant='outline' onClick={onClose}>
-            Close
-          </Button>
-          {isPending && onAcceptProposal && onRejectProposal && (
-            <>
-              <Button
-                variant='outline'
-                onClick={() => onRejectProposal(proposal)}
-                className='text-red-600 hover:text-red-700'
-              >
-                Reject
-              </Button>
-              <Button onClick={() => onAcceptProposal(proposal)}>
-                Accept Proposal
-              </Button>
-            </>
-          )}
+        {/* Timestamps */}
+        <Separator />
+        <div className='grid grid-cols-2 gap-4 text-sm text-muted-foreground'>
+          <div>
+            <p>Created: {formatDate(proposal.createdAt)}</p>
+          </div>
+          <div>
+            <p>Updated: {formatDate(proposal.updatedAt)}</p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

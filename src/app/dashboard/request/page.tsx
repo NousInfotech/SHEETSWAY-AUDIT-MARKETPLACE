@@ -58,6 +58,7 @@ import { createClientRequest } from '@/api/client-request.api';
 import { getBusinessProfiles, getPlaidBankAccounts, getAccountingIntegrations } from '@/api/user.api';
 import { useAuth } from '@/components/layout/providers';
 import { generateYearOptions } from '@/lib/utils';
+import { Spinner } from '@/components/ui/spinner';
 
 // Zod schema
 const formSchema = z.object({
@@ -175,8 +176,6 @@ const RequestPage = () => {
     fetchDropdownData();
   }, [appUser?.id]); // ✅ refetch when appUser becomes available
 
-
-
   const form = useForm<AuditFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -202,6 +201,14 @@ const RequestPage = () => {
     },
     mode: 'onChange',
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Spinner size={48} className="text-primary" />
+      </div>
+    );
+  }
 
   console.log('formState.errors', form.formState.errors);
 
@@ -322,78 +329,72 @@ const RequestPage = () => {
               />
 
               {/* Plaid Account and Account Integration Side by Side */}
-              <div className="flex gap-4 w-full">
-                <div className="flex-1 min-w-0">
-                  <FormField
-                    control={form.control}
-                    name='plaidIntegrationId'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Plaid Bank Account (Optional)</FormLabel>
-                        <FormControl>
-                          {loading ? (
-                            <Input disabled placeholder='Loading...' />
-                          ) : plaidAccounts.length === 0 ? (
-                            <Input disabled placeholder='No Plaid accounts found' />
-                          ) : (
-                            <Select
-                              onValueChange={val => field.onChange(val === '' ? undefined : val)}
-                              value={field.value || ''}
-                            >
-                              <SelectTrigger className="w-full min-w-0" style={{ maxWidth: '100%' }}>
-                                <SelectValue placeholder='Select a Plaid account' className="truncate" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {plaidAccounts.map((pa) => (
-                                  <SelectItem key={pa.id} value={pa.id}>
-                                    <span className="truncate block max-w-[220px]">{pa.institution} - {pa.accountName} ({pa.last4})</span>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              {(plaidAccounts.length > 0 || accountingIntegrations.length > 0) && (
+                <div className="flex gap-4 w-full">
+                  {plaidAccounts.length > 0 && (
+                    <div className="flex-1 min-w-0">
+                      <FormField
+                        control={form.control}
+                        name='plaidIntegrationId'
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Plaid Bank Account (Optional)</FormLabel>
+                            <FormControl>
+                              <Select
+                                onValueChange={val => field.onChange(val === '' ? undefined : val)}
+                                value={field.value || ''}
+                              >
+                                <SelectTrigger className="w-full min-w-0" style={{ maxWidth: '100%' }}>
+                                  <SelectValue placeholder='Select a Plaid account' className="truncate" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {plaidAccounts.map((pa) => (
+                                    <SelectItem key={pa.id} value={pa.id}>
+                                      <span className="truncate block max-w-[220px]">{pa.institution} - {pa.accountName} ({pa.last4})</span>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                  {accountingIntegrations.length > 0 && (
+                    <div className="flex-1 min-w-0">
+                      <FormField
+                        control={form.control}
+                        name='accountingIntegrationId'
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Account Integration (Optional)</FormLabel>
+                            <FormControl>
+                              <Select
+                                onValueChange={val => field.onChange(val === '' ? undefined : val)}
+                                value={field.value || ''}
+                              >
+                                <SelectTrigger className="w-full min-w-0" style={{ maxWidth: '100%' }}>
+                                  <SelectValue placeholder='Select an Accounting profile' className="truncate" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {accountingIntegrations.map((ac) => (
+                                    <SelectItem key={ac.id} value={ac.id}>
+                                      <span className="truncate block max-w-[220px]">{ac.serviceId}</span>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <FormField
-                    control={form.control}
-                    name='accountingIntegrationId'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Account Integration (Optional)</FormLabel>
-                        <FormControl>
-                          {loading ? (
-                            <Input disabled placeholder='Loading...' />
-                          ) : accountingIntegrations.length === 0 ? (
-                            <Input disabled placeholder='No Accounting Profile is Found' />
-                          ) : (
-                            <Select
-                              onValueChange={val => field.onChange(val === '' ? undefined : val)}
-                              value={field.value || ''}
-                            >
-                              <SelectTrigger className="w-full min-w-0" style={{ maxWidth: '100%' }}>
-                                <SelectValue placeholder='Select an Accounting profile' className="truncate" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {accountingIntegrations.map((ac) => (
-                                  <SelectItem key={ac.id} value={ac.id}>
-                                    <span className="truncate block max-w-[220px]">{ac.serviceId}</span>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
+              )}
 
               {/* Type */}
               < FormField

@@ -34,6 +34,11 @@ export interface Proposal {
   deliverables: string[];
   createdAt: string;
   updatedAt: string;
+  // Backend compatibility fields
+  proposalName?: string;
+  quotation?: number;
+  currency?: string;
+  requestNote?: string;
 }
 
 export interface Engagement {

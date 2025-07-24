@@ -19,6 +19,7 @@ import { getPlaidBankAccounts } from '@/api/user.api';
 import { getAccountingIntegrations } from '@/api/user.api';
 import { listProposals } from '@/api/proposals.api';
 import { format } from 'date-fns';
+import { Spinner } from '@/components/ui/spinner';
 
 // --- MOCK DATA FOR TESTING PURPOSES ---
 // --- END MOCK DATA ---
@@ -43,8 +44,10 @@ export function ProposalsViewPage() {
   const [users, setUsers] = useState<{ id: string; name?: string }[]>([]);
   const [plaidIntegrations, setPlaidIntegrations] = useState<{ id: string; accountName?: string }[]>([]);
   const [accountingIntegrations, setAccountingIntegrations] = useState<{ id: string; serviceId?: string }[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function fetchAll() {
+      setLoading(true);
       try {
         const bp = await getBusinessProfiles({});
         setBusinessProfiles(Array.isArray(bp) ? bp.map((b: any) => ({ id: b.id, name: b.name, size: b.size })) : []);
@@ -64,7 +67,11 @@ export function ProposalsViewPage() {
   const [proposalsForRequest, setProposalsForRequest] = useState<Proposal[]>([]);
   useEffect(() => {
     if (!requestId) return;
-    listProposals({ requestId }).then(setProposalsForRequest);
+    setLoading(true);
+    listProposals({ requestId }).then((data) => {
+      setProposalsForRequest(data);
+      setLoading(false);
+    });
   }, [requestId]);
 
   // Use real data only
@@ -116,6 +123,13 @@ export function ProposalsViewPage() {
 
   // If we have a selected request, show proposals for that request
   if (requestId && selectedRequest) {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-screen w-full">
+          <Spinner size={48} className="text-primary" />
+        </div>
+      );
+    }
     return (
       <div className='container mx-auto py-6 space-y-6'>
         {/* Header with back button */}
@@ -145,7 +159,7 @@ export function ProposalsViewPage() {
           <CardContent>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
               {Object.entries(selectedRequest)
-                .filter(([key]) => !['id', 'createdAt', 'updatedAt', 'clientEmail'].includes(key))
+                .filter(([key]) => !['id', 'createdAt', 'updatedAt', 'clientEmail', 'userId'].includes(key))
                 .map(([key, value]) => {
                   let displayValue = '-';
                   if (Array.isArray(value)) {
@@ -158,7 +172,7 @@ export function ProposalsViewPage() {
                     // Format ISO date strings
                     if (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) {
                       try {
-                        displayValue = format(new Date(value), 'PPpp');
+                        displayValue = format(new Date(value), 'PPP'); // Only date, no time
                       } catch {
                         displayValue = value;
                       }
@@ -199,15 +213,7 @@ export function ProposalsViewPage() {
                       </div>
                     );
                   }
-                  // Friendly labels for ID fields, show short version
-                  if (key === 'userId') {
-                    return (
-                      <div key={key}>
-                        <p className='text-sm text-muted-foreground'>User</p>
-                        <span>{typeof value === 'string' ? `${value.slice(0, 6)}...${value.slice(-4)}` : '-'}</span>
-                      </div>
-                    );
-                  }
+              
                   if (key === 'businessId') {
                     const business = businessProfiles?.find(bp => bp.id === value);
                     return (

@@ -8,6 +8,7 @@ import { getAccountingIntegrations } from '@/api/user.api';
 import { getPlaidBankAccounts } from '@/api/user.api';
 import { useAuth } from '@/components/layout/providers';
 import { Spinner } from '@/components/ui/spinner';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface AccountingDataTabProps {
   data: AccountingData[];
@@ -174,19 +175,19 @@ const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard 
           title="Total Debits" 
-          value={`${totalDebit.toLocaleString()}`} 
+          value={formatCurrency(totalDebit)} 
           icon={TrendingUp} 
           color="text-green-600 dark:text-green-400" 
         />
         <StatCard 
           title="Total Credits" 
-          value={`${totalCredit.toLocaleString()}`} 
+          value={formatCurrency(totalCredit)} 
           icon={TrendingUp} 
           color="text-blue-600 dark:text-blue-400" 
         />
         <StatCard 
           title="Net Balance" 
-          value={`${(totalDebit - totalCredit).toLocaleString()}`} 
+          value={formatCurrency(totalDebit - totalCredit)} 
           icon={BarChart3} 
           color="text-purple-600 dark:text-purple-400" 
         />
@@ -270,13 +271,13 @@ const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                      ${item.debit.toLocaleString()}
+                      {formatCurrency(item.debit)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                      ${item.credit.toLocaleString()}
+                      {formatCurrency(item.credit)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                      ${item.balance.toLocaleString()}
+                      {formatCurrency(item.balance)}
                     </td>
                   </tr>
                 ))}
@@ -299,7 +300,7 @@ const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
               {trialBalance.map(([type, balance]) => (
                 <tr key={type} className="hover:bg-muted dark:hover:bg-card/80">
                   <td className="px-6 py-4 text-sm text-foreground bg-background border-b border-border">{type}</td>
-                  <td className="px-6 py-4 text-sm text-right text-foreground bg-background border-b border-border">${balance.toLocaleString()}</td>
+                  <td className="px-6 py-4 text-sm text-right text-foreground bg-background border-b border-border">{formatCurrency(balance)}</td>
                 </tr>
               ))}
             </tbody>
@@ -332,10 +333,10 @@ const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
                     {item.description}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                    ${item.debit.toLocaleString()}
+                    {formatCurrency(item.debit)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                    ${item.credit.toLocaleString()}
+                    {formatCurrency(item.credit)}
                   </td>
                 </tr>
               ))}

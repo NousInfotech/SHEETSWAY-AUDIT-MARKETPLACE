@@ -5,6 +5,7 @@ import { Download, Upload, Search } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface BankingDataTabProps {
   data: BankingData[];
@@ -69,7 +70,7 @@ const BankingDataTab: React.FC<BankingDataTabProps> = ({ data }) => {
             >
               <div className="font-medium text-foreground">{acc.accountName}</div>
               <div className="text-sm text-muted-foreground">ID: {acc.accountId}</div>
-              <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mt-1">${acc.balance.toLocaleString()}</div>
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400 mt-1">{formatCurrency(acc.balance)}</div>
             </div>
           ))}
         </div>
@@ -190,7 +191,7 @@ const BankingDataTab: React.FC<BankingDataTabProps> = ({ data }) => {
                     {item.description}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                    {item.type === 'debit' ? '-' : '+'}${item.amount.toLocaleString()}
+                    {item.type === 'debit' ? '-' : '+'}{formatCurrency(item.amount)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
@@ -205,7 +206,7 @@ const BankingDataTab: React.FC<BankingDataTabProps> = ({ data }) => {
                     {item.category}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                    ${item.balance.toLocaleString()}
+                    {formatCurrency(item.balance)}
                   </td>
                 </tr>
               ))}

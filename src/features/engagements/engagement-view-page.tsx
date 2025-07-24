@@ -10,6 +10,7 @@ import PaymentsContractsTab from './components/PaymentsContractsTab';
 import ReviewsHistoryTab from './components/ReviewsHistoryTab';
 import EngagementSettingsTab from './components/EngagementSettingsTab';
 import DocumentsTab from './components/DocumentsTab';
+import { Spinner } from '@/components/ui/spinner';
 
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
@@ -22,6 +23,7 @@ const EngagementViewPage = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedEngagements = localStorage.getItem('engagements');
@@ -40,6 +42,7 @@ const EngagementViewPage = () => {
     setPayments(savedPayments ? JSON.parse(savedPayments) : generateMockPayments());
     setContracts(savedContracts ? JSON.parse(savedContracts) : generateMockContracts());
     setReviews(savedReviews ? JSON.parse(savedReviews) : generateMockReviews());
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -147,6 +150,14 @@ const EngagementViewPage = () => {
         return null;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Spinner size={48} className="text-primary" />
+      </div>
+    );
+  }
 
   return (
     

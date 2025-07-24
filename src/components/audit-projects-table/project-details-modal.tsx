@@ -20,9 +20,9 @@ interface ProjectDetailsModalProps {
 
 // Re-using helper functions from columns.tsx for consistency
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('de-DE', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'EUR',
     minimumFractionDigits: 2
   }).format(amount);
 };
