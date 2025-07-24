@@ -59,6 +59,8 @@ import { getBusinessProfiles, getPlaidBankAccounts, getAccountingIntegrations } 
 import { useAuth } from '@/components/layout/providers';
 import { generateYearOptions } from '@/lib/utils';
 import { Spinner } from '@/components/ui/spinner';
+import { FileUploader } from '@/components/file-uploader';
+import { getSignedUploadUrl } from '@/api/client-request.api';
 
 // Zod schema
 const formSchema = z.object({
@@ -144,6 +146,8 @@ const RequestPage = () => {
   const [selectedPlaidAccountId, setSelectedPlaidAccountId] = useState<string>('');
   const [accountingIntegrations, setAccountingIntegrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [documents, setDocuments] = useState<{ fileName: string; fileUrl: string }[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     async function fetchDropdownData() {
@@ -212,6 +216,34 @@ const RequestPage = () => {
 
   console.log('formState.errors', form.formState.errors);
 
+  async function handleFileUpload(files: File[]) {
+    setUploading(true);
+    try {
+      const uploadedDocs: { fileName: string; fileUrl: string }[] = [];
+      for (const file of files) {
+        const { uploadUrl, fileUrl } = await getSignedUploadUrl(file.name, file.type);
+        const s3Response = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': file.type },
+          body: file,
+        });
+        if (!s3Response.ok) {
+          const errorText = await s3Response.text();
+          console.error('S3 upload failed:', s3Response.status, errorText);
+          toast.error(`S3 upload failed: ${s3Response.status}`);
+          throw new Error('S3 upload failed');
+        }
+        uploadedDocs.push({ fileName: file.name, fileUrl });
+      }
+      setDocuments((prev) => [...prev, ...uploadedDocs]);
+      toast.success('Files uploaded successfully!');
+    } catch (err) {
+      toast.error('File upload failed');
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function onSubmit(data: AuditFormValues) {
     // Prepare specialFlags: if 'other', use the custom value
     let specialFlags: string[] = [];
@@ -240,6 +272,7 @@ const RequestPage = () => {
       accountingIntegrationId: undefined, // Remove incorrect key
       workingHoursStart: undefined,
       workingHoursEnd: undefined,
+      documents, // <-- include uploaded documents
     };
     if (!data.plaidIntegrationId) {
       delete payload.plaidIntegrationId;
@@ -752,6 +785,23 @@ const RequestPage = () => {
                   );
                 }}
               />
+            </div>
+            {/* Document Upload Section */}
+            <div className='mb-6'>
+              <label className='block mb-2 font-medium'>Attach Documents (optional)</label>
+              <FileUploader
+                multiple
+                maxFiles={5}
+                onUpload={handleFileUpload}
+                disabled={uploading}
+              />
+              {documents.length > 0 && (
+                <ul className='mt-2 text-sm text-muted-foreground'>
+                  {documents.map((doc, idx) => (
+                    <li key={idx}>{doc.fileName}</li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className='flex justify-end pb-8'>
               <button

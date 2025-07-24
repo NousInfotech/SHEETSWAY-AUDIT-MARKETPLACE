@@ -20,6 +20,7 @@ import { getAccountingIntegrations } from '@/api/user.api';
 import { listProposals } from '@/api/proposals.api';
 import { format } from 'date-fns';
 import { Spinner } from '@/components/ui/spinner';
+import { useAuth } from '@/components/layout/providers';
 
 // --- MOCK DATA FOR TESTING PURPOSES ---
 // --- END MOCK DATA ---
@@ -30,6 +31,7 @@ type ProposalsViewPageProps = {};
 export function ProposalsViewPage() {
   const searchParams = useSearchParams();
   const requestId = searchParams.get('requestId');
+  const { appUser } = useAuth();
 
   const router = useRouter();
   const {
@@ -66,16 +68,21 @@ export function ProposalsViewPage() {
 
   const [proposalsForRequest, setProposalsForRequest] = useState<Proposal[]>([]);
   useEffect(() => {
-    if (!requestId) return;
+    if (!requestId || !appUser?.id) return;
     setLoading(true);
-    listProposals({ requestId }).then((data) => {
+    listProposals({ requestId, userId: appUser.id }).then((data) => {
       setProposalsForRequest(data);
       setLoading(false);
     });
-  }, [requestId]);
+  }, [requestId, appUser?.id]);
 
   // Use real data only
   const selectedRequest = requests.find(r => r.id === requestId) || null;
+
+  // Defensive filter: only proposals for the current request and user
+  const filteredProposalsForRequest = proposalsForRequest.filter(
+    (proposal) => proposal.requestId === requestId && (!appUser?.id || proposal.auditorId === appUser.id)
+  );
 
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [showProposalDetails, setShowProposalDetails] = useState(false);
@@ -256,15 +263,15 @@ export function ProposalsViewPage() {
         {/* Proposals for this request (fetched from backend) */}
         <Card>
           <CardHeader>
-            <CardTitle>Proposals ({proposalsForRequest.length})</CardTitle>
+            <CardTitle>Proposals ({filteredProposalsForRequest.length})</CardTitle>
             <CardDescription>
               Proposals submitted for this request
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {proposalsForRequest.length > 0 ? (
+            {filteredProposalsForRequest.length > 0 ? (
               <ProposalsTable
-                proposals={proposalsForRequest}
+                proposals={filteredProposalsForRequest}
                 onProposalSelect={handleProposalSelect}
                 onAcceptProposal={handleAcceptProposal}
                 onRejectProposal={handleRejectProposal}

@@ -17,7 +17,7 @@ interface ProposalsStore {
   setSelectedRequest: (request: Request | null) => void;
   setSelectedProposal: (proposal: Proposal | null) => void;
   setSelectedEngagement: (engagement: Engagement | null) => void;
-  loadRequests: () => Promise<void>;
+  loadRequests: (userId?: string) => Promise<void>;
   loadProposals: () => Promise<void>;
 
   // Getters
@@ -46,10 +46,11 @@ export const useProposalsStore = create<ProposalsStore>((set, get) => ({
   setSelectedProposal: (proposal) => set({ selectedProposal: proposal }),
   setSelectedEngagement: (engagement) => set({ selectedEngagement: engagement }),
 
-  loadRequests: async () => {
+  loadRequests: async (userId?: string) => {
     set({ loading: true, error: null });
     try {
-      const data = await listClientRequests();
+      const params = userId ? { userId } : {};
+      const data = await listClientRequests(params);
       set({ requests: data, loading: false });
     } catch (error: any) {
       set({ error: error.message || 'Failed to load requests', loading: false });

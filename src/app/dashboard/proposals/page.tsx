@@ -6,16 +6,20 @@ import PageContainer from '@/components/layout/page-container';
 import { ProposalsViewPage } from '@/features/proposals/components';
 import { useProposalsStore } from '@/features/proposals/store';
 import { Spinner } from '@/components/ui/spinner';
+import { useAuth } from '@/components/layout/providers';
 
 export default function ProposalsPage() {
   const searchParams = useSearchParams();
   const requestId = searchParams.get('requestId');
   const { getRequestById, getProposalsForRequest, loadRequests, loadProposals, loading } = useProposalsStore();
+  const { appUser } = useAuth();
 
   useEffect(() => {
-    loadRequests();
+    if (appUser?.id) {
+      loadRequests(appUser.id);
+    }
     loadProposals();
-  }, []);
+  }, [appUser?.id]);
 
   if (loading) {
     return (

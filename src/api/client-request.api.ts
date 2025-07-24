@@ -18,4 +18,10 @@ export const getClientRequestById = async (requestId: string) => {
 export const createClientRequest = async (data: any) => {
   const response = await instance.post(CLIENT_REQUESTS_API, data);
   return response.data;
+};
+
+// Get a signed S3 upload URL for a file
+export const getSignedUploadUrl = async (fileName: string, contentType: string) => {
+  const response = await instance.post('/api/v1/upload/single', { fileName, contentType });
+  return response.data;
 }; 
