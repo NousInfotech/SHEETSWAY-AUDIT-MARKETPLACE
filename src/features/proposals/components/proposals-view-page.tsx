@@ -61,6 +61,9 @@ export function ProposalsViewPage() {
         setPlaidIntegrations(Array.isArray(pi) ? pi.map((p: any) => ({ id: p.id, accountName: p.accountName })) : []);
         const ai = await getAccountingIntegrations({});
         setAccountingIntegrations(Array.isArray(ai) ? ai.map((a: any) => ({ id: a.id, serviceId: a.serviceId })) : []);
+        // Debug logs
+        console.log('Plaid Integrations:', pi);
+        console.log('Accounting Integrations:', ai);
       } catch (e) {
         setBusinessProfiles([]);
         setPlaidIntegrations([]);
@@ -83,6 +86,8 @@ export function ProposalsViewPage() {
 
   // Use real data only
   const selectedRequest = requests.find(r => r.id === requestId) || null;
+  // Debug log for selectedRequest
+  console.log('Selected Request:', selectedRequest);
 
   const [documents, setDocuments] = useState<any[]>([]);
   useEffect(() => {

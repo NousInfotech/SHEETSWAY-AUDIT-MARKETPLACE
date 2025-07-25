@@ -117,7 +117,7 @@ export function ProposalsTable({
       }
     },
     {
-      accessorKey: 'proposedBudget',
+      accessorKey: 'quotation', // was 'proposedBudget'
       header: ({ column }) => {
         return (
           <div className='text-right'>
@@ -125,14 +125,14 @@ export function ProposalsTable({
               variant='ghost'
               onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             >
-              Budget
+              Quotation
               <ArrowUpDown className='ml-2 h-4 w-4' />
             </Button>
           </div>
         );
       },
       cell: ({ row }) => {
-        const amount = row.getValue('proposedBudget');
+        const amount = row.getValue('quotation');
         return (
           <div className='text-right font-mono'>{formatCurrency(Number(amount))}</div>
         );

@@ -150,6 +150,7 @@ const RequestPage = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [documents, setDocuments] = useState<{ fileName: string; fileUrl: string; fileKey: string }[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchDropdownData() {
@@ -248,6 +249,7 @@ const RequestPage = () => {
   }
 
   async function onSubmit(data: AuditFormValues) {
+    setSubmitting(true);
     // Prepare specialFlags: if 'other', use the custom value
     let specialFlags: string[] = [];
     if (data.specialFlags && data.specialFlags[0] === 'other') {
@@ -271,8 +273,7 @@ const RequestPage = () => {
       ...data,
       specialFlags,
       workingHours, // now a string or undefined
-      accouningIntegrationId: data.accountingIntegrationId, // Fix: match backend spelling
-      accountingIntegrationId: undefined, // Remove incorrect key
+      accountingIntegrationId: data.accountingIntegrationId,
       workingHoursStart: undefined,
       workingHoursEnd: undefined,
       documents, // <-- now includes fileKey for each document
@@ -281,7 +282,7 @@ const RequestPage = () => {
       delete payload.plaidIntegrationId;
     }
     if (!data.accountingIntegrationId) {
-      delete payload.accouningIntegrationId;
+      delete payload.accountingIntegrationId;
     }
 
     try {
@@ -295,6 +296,8 @@ const RequestPage = () => {
       // Show backend error message if available
       const backendMsg = err?.response?.data?.message || err?.response?.data?.error || err?.message || 'Form send failed, try again later.';
       toast.error(backendMsg);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -309,7 +312,11 @@ const RequestPage = () => {
     console.log('Rendering dropdowns', businessProfiles, plaidAccounts);
     return (
       <div className='mx-auto w-full max-w-4xl'>
-
+        {submitting && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <Spinner size={48} className="text-primary" />
+          </div>
+        )}
         <h2 className='mb-6 text-3xl font-bold tracking-tight'>Financial Audit Request</h2>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
@@ -809,25 +816,12 @@ const RequestPage = () => {
                 </ul>
               )}
             </div>
-            <div className='flex justify-end pb-8'>
-              <button
-                type='button'
-                style={{ padding: '12px 32px', fontSize: '1.125rem', fontWeight: 600, borderRadius: '8px', background: '#2563eb', color: '#fff', border: 'none', cursor: 'pointer' }}
-                onClick={() => {
-                  console.log('Button clicked');
-                  const handler = form.handleSubmit((data) => {
-                    console.log('form.handleSubmit called');
-                    onSubmit(data);
-                  });
-                  handler();
-                }}
-              >
-                Submit Request
-              </button>
-            </div>
+            <Button type='submit' disabled={submitting} className='w-full'>
+              {submitting ? 'Submitting...' : 'Submit'}
+            </Button>
           </form>
         </Form>
-      </div >
+      </div>
     );
   };
 
