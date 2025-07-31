@@ -19,19 +19,16 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarRail
 } from '@/components/ui/sidebar';
 import { UserAvatarProfile } from '@/components/user-avatar-profile';
 import { navItems } from '@/constants/data';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { auth } from '@/lib/firebase';
 import {
   IconBell,
   IconChevronRight,
@@ -41,16 +38,20 @@ import {
   IconPhotoUp,
   IconUserCircle
 } from '@tabler/icons-react';
+import { signOut } from 'firebase/auth';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
-import { Icons } from '../icons';
-import { OrgSwitcher } from '../org-switcher';
-import { useAuth } from './providers';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import { Button } from '../ui/button';
 import { StaticOrgDisplay } from '../static-org-display';
+import { useAuth } from './providers';
+
+// 1. Import the main Tabler icons map for the default icons
+import { Icons } from '../icons';
+
+// 2. Import the specific Lucide icon for the "Request" item
+import { FilePlus2 } from 'lucide-react';
+
 export const company = {
   name: 'Acme Inc',
   logo: IconPhotoUp,
@@ -75,6 +76,9 @@ export default function AppSidebar() {
 
   const activeTenant = tenants[0];
 
+  const activeStyles =
+    'data-[active=true]:bg-amber-500 data-[active=true]:text-white data-[active=true]:hover:bg-amber-600 data-[active=true]:hover:text-white';
+
   React.useEffect(() => {
     // Side effects based on sidebar state changes
   }, [isOpen]);
@@ -82,59 +86,82 @@ export default function AppSidebar() {
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader>
-        <StaticOrgDisplay app='Audit Marketplace' name='Sheetsway' />
+        <StaticOrgDisplay app='Audit Market Place' name='Sheetsway' />
       </SidebarHeader>
       <SidebarContent className='overflow-x-hidden'>
         <SidebarGroup>
-          <SidebarGroupLabel>Overview</SidebarGroupLabel>
           <SidebarMenu>
             {navItems.map((item) => {
-              const Icon = item.icon ? Icons[item.icon] : Icons.logo;
-              return item?.items && item?.items?.length > 0 ? (
-                <Collapsible
-                  key={item.title}
-                  asChild
-                  defaultOpen={item.isActive}
-                  className='group/collapsible'
-                >
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        tooltip={item.title}
-                        isActive={pathname === item.url}
-                      >
-                        {item.icon && <Icon />}
-                        <span>{item.title}</span>
-                        <IconChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        {item.items?.map((subItem) => (
-                          <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton
-                              asChild
-                              isActive={pathname === subItem.url}
-                            >
-                              <Link href={subItem.url}>
-                                <span>{subItem.title}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-              ) : (
+              // We'll handle both collapsible and direct links
+              const isParentActive =
+                item.items && item.items.length > 0
+                  ? item.items.some((subItem) => pathname === subItem.url)
+                  : false;
+
+              const isDirectlyActive = pathname === item.url;
+              const isActive = isParentActive || isDirectlyActive;
+
+              let iconElement = null;
+
+              // Check if this is our special case for the 'request' icon
+              if (item.icon === 'request') {
+                // If it is, use the Lucide icon with the conditional fill prop
+                iconElement = (
+                  <FilePlus2 fill={isActive ? 'currentColor' : 'none'} />
+                );
+              } else {
+                // Otherwise, use the standard Tabler icon swapping logic
+                const iconKey =
+                  isActive && item.activeIcon ? item.activeIcon : item.icon;
+
+                if (iconKey) {
+                  const IconComponent = Icons[iconKey];
+                  if (IconComponent) {
+                    iconElement = <IconComponent />;
+                  }
+                }
+              }
+
+              if (!iconElement) return null; // Don't render if there's no icon defined
+
+              // Render collapsible menu if it has items
+              if (item.items && item.items.length > 0) {
+                return (
+                  <Collapsible
+                    key={item.title}
+                    asChild
+                    defaultOpen={isParentActive}
+                    className='group/collapsible'
+                  >
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                          tooltip={item.title}
+                          isActive={isParentActive}
+                          className={activeStyles}
+                        >
+                          {iconElement}
+                          <span>{item.title}</span>
+                          <IconChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      {/* You would map sub-items here if needed */}
+                    </SidebarMenuItem>
+                  </Collapsible>
+                );
+              }
+
+              // Render a regular menu item
+              return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
                     tooltip={item.title}
-                    isActive={pathname === item.url}
+                    isActive={isDirectlyActive}
+                    className={activeStyles}
                   >
                     <Link href={item.url}>
-                      <Icon />
+                      {iconElement} {/* Render the chosen icon element */}
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -144,6 +171,7 @@ export default function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>

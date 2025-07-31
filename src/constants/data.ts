@@ -17,14 +17,16 @@ export const navItems: NavItem[] = [
     title: 'Dashboard',
     url: '/dashboard/overview',
     icon: 'dashboard',
+    activeIcon: 'dashboardFilled', // Added
     isActive: false,
     shortcut: ['d', 'd'],
     items: []
   },
   {
     title: 'Request',
-    url: '/dashboard/request',
-    icon: 'request', // IconFilePlus
+    url: '/dashboard/promo',
+    icon: 'request',
+    activeIcon: 'requestFilled', // Added
     isActive: false,
     shortcut: ['r', 'r'],
     items: []
@@ -32,7 +34,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Proposals',
     url: '/dashboard/proposals',
-    icon: 'proposals', // IconFileText
+    icon: 'proposals',
+    activeIcon: 'proposalsFilled', // Added
     isActive: false,
     shortcut: ['p', 'p'],
     items: []
@@ -40,7 +43,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Active Engagements',
     url: '/dashboard/engagements',
-    icon: 'engagements', // IconBriefcase
+    icon: 'engagements',
+    activeIcon: 'engagementsFilled', // Added
     isActive: false,
     shortcut: ['e', 'e'],
     items: []
@@ -48,7 +52,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Payments',
     url: '/dashboard/payments',
-    icon: 'payments', // IconCreditCard
+    icon: 'payments',
+    activeIcon: 'paymentsFilled', // Added
     isActive: false,
     shortcut: ['y', 'y'],
     items: []
@@ -56,7 +61,8 @@ export const navItems: NavItem[] = [
   {
     title: 'History',
     url: '/dashboard/history',
-    icon: 'history', // IconClock
+    icon: 'history',
+    activeIcon: 'historyFilled', // Added
     isActive: false,
     shortcut: ['h', 'h'],
     items: []
@@ -64,7 +70,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Connect',
     url: '/dashboard/connect',
-    icon: 'connect', // IconMessageCircle
+    icon: 'connect',
+    activeIcon: 'connectFilled', // Added
     shortcut: ['c', 'c'],
     isActive: false,
     items: []
@@ -72,9 +79,10 @@ export const navItems: NavItem[] = [
   {
     title: 'Business Profiles & Integrations',
     url: '/dashboard/business-profiles',
-    icon: 'user2', // Valid icon from Icons
+    icon: 'user2',
+    activeIcon: 'user2Filled', // Added
     isActive: false,
-    shortcut: ['b', 'p'],
+    shortcut: ['b', 'b'],
     items: []
   }
 ];

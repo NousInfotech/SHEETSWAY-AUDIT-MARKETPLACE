@@ -1,4 +1,5 @@
 import {
+  // Original Outline Icons
   IconAlertTriangle,
   IconArrowRight,
   IconCheck,
@@ -35,12 +36,23 @@ import {
   IconFilePlus,
   IconBriefcase,
   IconClock,
-  IconRefresh
+  IconRefresh,
+
+  // NEW: Corresponding Filled/Solid Icons for Active State
+  IconLayoutDashboardFilled,
+  IconCirclePlusFilled,
+  IconFileTextFilled,
+  IconBriefcaseFilled,
+  IconCreditCardFilled,
+  IconClockFilled,
+  IconMessageCircleFilled,
+  IconUserFilled, // CORRECTED: The solid version for a user icon
 } from '@tabler/icons-react';
 
 export type Icon = React.ComponentType<IconProps>;
 
 export const Icons = {
+  // --- Original Outline Icons ---
   dashboard: IconLayoutDashboard,
   logo: IconCommand,
   login: IconLogin,
@@ -73,11 +85,21 @@ export const Icons = {
   twitter: IconBrandTwitter,
   check: IconCheck,
   connect: IconMessageCircle,
-
   proposals: IconFileText,
   request: IconFilePlus,
   engagements: IconBriefcase,
   history: IconClock,
   payments: IconCreditCard,
   refresh: IconRefresh,
+
+  // --- NEW: Filled Icons for Active Sidebar State ---
+  // These keys should match the `activeIcon` property in your `navItems` data
+  dashboardFilled: IconLayoutDashboardFilled,
+  requestFilled: IconCirclePlusFilled,
+  proposalsFilled: IconFileTextFilled,
+  engagementsFilled: IconBriefcaseFilled,
+  paymentsFilled: IconCreditCardFilled,
+  historyFilled: IconClockFilled,
+  connectFilled: IconMessageCircleFilled,
+  user2Filled: IconUserFilled, // CORRECTED: Mapped to the correct component
 };
