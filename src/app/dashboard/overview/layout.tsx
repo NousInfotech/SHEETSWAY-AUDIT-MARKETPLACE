@@ -216,6 +216,7 @@ import {
   ChevronLeft,
   ChevronRight as ChevronRightIcon
 } from 'lucide-react';
+import Link from 'next/link';
 import React from 'react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
@@ -291,19 +292,23 @@ export default function OverViewLayout({
   const quickActions = [
     {
       name: 'Create Audit / Tax Request',
-      icon: <Layers size={28} className='text-gray-600' />
+      icon: <Layers size={28} className='text-gray-600' />,
+      link: '/dashboard/request'
     },
     {
       name: 'Upload Files',
-      icon: <Upload size={28} className='text-gray-600' />
+      icon: <Upload size={28} className='text-gray-600' />,
+      link: '/'
     },
     {
       name: 'Schedule Meeting',
-      icon: <CalendarPlus size={28} className='text-gray-600' />
+      icon: <CalendarPlus size={28} className='text-gray-600' />,
+      link: '/dashboard/connect'
     },
     {
       name: 'Contact & Support',
-      icon: <Users size={28} className='text-gray-600' />
+      icon: <Users size={28} className='text-gray-600' />,
+      link: '/dashboard/connect'
     }
   ];
 
@@ -453,15 +458,14 @@ export default function OverViewLayout({
               </h3>
               <div className='mt-4 grid grid-cols-2 gap-4 md:grid-cols-4'>
                 {quickActions.map((action) => (
-                  <div
-                    key={action.name}
-                    className='flex h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-200 p-4 text-center transition-all not-dark:bg-white hover:border-gray-300 hover:shadow-md'
-                  >
-                    {action.icon}
-                    <p className='mt-2 text-xs font-semibold text-gray-700'>
-                      {action.name}
-                    </p>
-                  </div>
+                  <Link href={action.link} key={action.name}>
+                    <div className='flex h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-200 p-4 text-center transition-all not-dark:bg-white hover:border-gray-300 hover:shadow-md'>
+                      {action.icon}
+                      <p className='mt-2 text-xs font-semibold text-gray-700'>
+                        {action.name}
+                      </p>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </div>
