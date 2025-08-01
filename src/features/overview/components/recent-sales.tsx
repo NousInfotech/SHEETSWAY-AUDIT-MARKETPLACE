@@ -47,17 +47,17 @@ const salesData = [
 
 export function RecentSales() {
   return (
-    <Card className='h-full'>
+    <Card className='container h-full shrink-0 overflow-auto md:overflow-hidden'>
       <CardHeader>
         <CardTitle>Recent Projects</CardTitle>
         {/* <CardDescription>You have done 265 projects this month.</CardDescription> */}
-        <div className='flex justify-between'>
+        <div className='flex justify-between w-[450px]'>
           <h6>Project Name</h6>
           <h6>Budget</h6>
         </div>
       </CardHeader>
       <CardContent>
-        <div className='space-y-8'>
+        <div className='space-y-8 w-[450px]'>
           {salesData.map((sale, index) => (
             <div key={index} className='flex items-center'>
               <Avatar className='h-9 w-9'>

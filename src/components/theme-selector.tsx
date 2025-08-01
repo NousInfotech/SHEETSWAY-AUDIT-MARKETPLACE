@@ -54,7 +54,7 @@ export function ThemeSelector() {
   const { activeTheme, setActiveTheme } = useThemeConfig({defaultTheme: 'default'});
 
   return (
-    <div className='flex items-center gap-2'>
+    <div className='hidden md:flex items-center gap-2'>
       <Label htmlFor='theme-selector' className='sr-only'>
         Theme
       </Label>
@@ -64,7 +64,7 @@ export function ThemeSelector() {
           className='justify-start *:data-[slot=select-value]:w-12'
         >
           <span className='text-muted-foreground hidden sm:block'>
-            Select a theme:
+            theme:
           </span>
           <span className='text-muted-foreground block sm:hidden'>Theme</span>
           <SelectValue placeholder='Select a theme' />
