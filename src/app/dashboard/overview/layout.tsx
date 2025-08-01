@@ -401,7 +401,7 @@ export default function OverViewLayout({
               </div>
 
               {/* Progress Card */}
-              <Card className='border-t-8 border-t-amber-400 shadow-sm not-dark:bg-white'>
+              <Card className='border-t-8 border-t-yellow-500 shadow-sm not-dark:bg-white'>
                 <CardHeader>
                   <div className='flex flex-col gap-2 md:flex md:flex-row md:items-center md:justify-between'>
                     <p className='flex flex-col text-sm font-bold md:flex md:flex-row md:items-center md:text-lg'>
@@ -444,7 +444,7 @@ export default function OverViewLayout({
               </Card>
 
               {/* Quick Actions */}
-              <div className='rounded-lg border border-t-8 border-t-blue-500 p-4 shadow-sm not-dark:bg-white'>
+              <div className='rounded-lg border border-t-8 border-t-blue-300 p-4 shadow-sm not-dark:bg-white'>
                 <h3 className='flex items-center text-xl font-bold text-gray-700'>
                   {' '}
                   <span className='mr-2 text-2xl font-black text-blue-500'>
@@ -469,7 +469,7 @@ export default function OverViewLayout({
               {/* === Your Requests Card - CORRECTED LAYOUT === */}
 
               <div className='flex w-full flex-col items-center justify-between gap-2 md:flex md:flex-row'>
-                <div className='h-auto w-full rounded-lg border border-t-8 border-t-green-500 p-2 shadow-md not-dark:bg-white md:h-full md:w-3/4'>
+                <div className='h-auto w-full rounded-lg border border-t-8 border-t-green-300 p-2 shadow-md not-dark:bg-white md:h-full md:w-3/4'>
                   <div className='py-5'>
                     <div className='flex items-center text-lg'>
                       <PlusSquare size={20} className='mr-2 text-green-600' />{' '}
@@ -502,7 +502,7 @@ export default function OverViewLayout({
                   </div>
                 </div>
 
-                <div className='inline-flex h-[255px] w-[200px] overflow-hidden rounded-lg border border-t-8 border-t-green-900 shadow-md'>
+                <div className='inline-flex h-[255px] w-[200px] overflow-hidden rounded-lg border border-t-8 border-t-teal-950 shadow-md'>
                   <Calendar
                     mode='single'
                     selected={date}
@@ -518,7 +518,7 @@ export default function OverViewLayout({
           <div className='col-span-1 grid'>
             <div className='flex flex-col gap-6 lg:col-span-1'>
               {/* Actions Pending */}
-              <Card className='border-t-8 border-t-amber-400 shadow-sm not-dark:bg-white'>
+              <Card className='border-t-8 border-t-yellow-500 shadow-sm not-dark:bg-white'>
                 <CardHeader>
                   <CardTitle className='flex items-center text-lg'>
                     <AlertCircle size={20} className='mr-2 text-amber-500' />{' '}
@@ -541,7 +541,7 @@ export default function OverViewLayout({
               </Card>
 
               {/* Upcoming Meeting */}
-              <Card className='border-t-8 border-t-red-500 shadow-sm not-dark:bg-white'>
+              <Card className='border-t-8 border-t-red-800 shadow-sm not-dark:bg-white'>
                 <CardHeader>
                   <CardTitle className='flex items-center text-lg'>
                     <span className='mr-2 text-xl text-red-500'>📅</span>{' '}
@@ -601,7 +601,7 @@ export default function OverViewLayout({
               </Card>
 
               {/* Updates Card */}
-              <Card className='border-t-8 border-t-green-600 shadow-sm not-dark:bg-white'>
+              <Card className='border-t-8 border-t-emerald-800 shadow-sm not-dark:bg-white'>
                 <CardHeader>
                   <CardTitle className='flex items-center text-lg'>
                     <RefreshCw size={20} className='mr-2 text-green-600' />{' '}
