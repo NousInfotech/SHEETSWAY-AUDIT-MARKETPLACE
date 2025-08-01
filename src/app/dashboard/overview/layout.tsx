@@ -193,6 +193,7 @@
 
 import PageContainer from '@/components/layout/page-container';
 import { useAuth } from '@/components/layout/providers';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -201,6 +202,7 @@ import {
   CardTitle,
   CardDescription
 } from '@/components/ui/card';
+import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react';
 import {
   Layers,
   Upload,
@@ -214,9 +216,11 @@ import {
   ArrowRight,
   BarChart3,
   ChevronLeft,
-  ChevronRight as ChevronRightIcon
+  ChevronRight as ChevronRightIcon,
+  Router
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
@@ -286,6 +290,7 @@ export default function OverViewLayout({
   bar_stats: React.ReactNode;
   area_stats: React.ReactNode;
 }) {
+  const router = useRouter();
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const { firebaseUser } = useAuth();
 
@@ -375,9 +380,12 @@ export default function OverViewLayout({
                     <div>
                       <div>Active Engagements</div>
                       <div className='text-4xl font-bold'>10</div>
-                      <div className='mt-2 flex cursor-pointer items-center text-sm font-semibold text-blue-600'>
+                      <div
+                        onClick={() => router.push('/dashboard/engagements')}
+                        className='mt-2 flex cursor-pointer items-center text-sm font-semibold text-blue-600'
+                      >
                         View Details
-                        <ChevronDown className='ml-1' size={16} />
+                        <IconTrendingUp className='ml-1 size-4' />
                       </div>
                       <p className='text-xs whitespace-nowrap text-gray-500'>
                         see all the active engagements
@@ -388,9 +396,12 @@ export default function OverViewLayout({
                     <div>
                       <div>Open Proposals</div>
                       <div className='text-4xl font-bold'>70</div>
-                      <div className='mt-2 flex cursor-pointer items-center text-sm font-semibold text-blue-600'>
+                      <div
+                        onClick={() => router.push('/dashboard/proposals')}
+                        className='mt-2 flex cursor-pointer items-center text-sm font-semibold text-blue-600'
+                      >
                         View Details
-                        <ChevronDown className='ml-1' size={16} />
+                        <IconTrendingDown className='ml-1 size-4' />
                       </div>
                       <p className='text-xs text-gray-500'>
                         see all the proposals available
@@ -550,8 +561,13 @@ export default function OverViewLayout({
                   </CardTitle>
                   <div className='mt-2 flex items-center justify-between'>
                     <div>
-                      <p className='text-sm font-semibold text-gray-500'>
-                        See all the upcoming meetings 🟠
+                      <p className='flex items-center gap-1'>
+                        <span className='text-sm font-semibold whitespace-nowrap text-gray-500'>
+                          See all the upcoming meetings
+                        </span>
+                        <Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
+                          6
+                        </Badge>
                       </p>
                     </div>
                     <div className='text-right'>
@@ -579,7 +595,10 @@ export default function OverViewLayout({
                         <div>
                           <p className='font-semibold'>{item.auditor}</p>
                           <p className='text-xs text-gray-500'>
-                            New Messages 🟠
+                            New Messages
+                            <Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
+                              3
+                            </Badge>
                           </p>
                         </div>
                         <div className='text-right'>
