@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { FileBadge2, CheckCircle2, ArrowUpRight, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import PrivacyPolicyIcon from '../icons/PrivacyPolicyIcon';
 
 // A small component for the feature list items
 const FeatureListItem = ({ children }: { children: React.ReactNode }) => (
@@ -41,11 +42,12 @@ export const AuditRequestPromo = () => {
           {/* --- Left Column: Textual Content --- */}
           <div className='animate-fade-in-left flex flex-col gap-6'>
             <div className='flex items-start gap-4'>
-              <FileBadge2
+              {/* <FileBadge2
                 size={60}
                 className='mt-1 flex-shrink-0 text-gray-800'
                 strokeWidth={1.25}
-              />
+              /> */}
+              <PrivacyPolicyIcon />
               <h1 className='text-4xl leading-tight font-bold text-gray-900 lg:text-5xl'>
                 Create a New <br />
                 Financial Audit Request
