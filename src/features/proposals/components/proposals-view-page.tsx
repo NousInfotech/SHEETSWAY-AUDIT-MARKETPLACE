@@ -3,7 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, FileText, Users, CheckCircle } from 'lucide-react';
 import { useProposalsStore } from '../store';
@@ -25,6 +31,7 @@ import { getClientRequestDocuments } from '@/api/client-request.api';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { getPresignedAccessUrl } from '@/api/client-request.api';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 // --- MOCK DATA FOR TESTING PURPOSES ---
 // --- END MOCK DATA ---
@@ -46,21 +53,39 @@ export function ProposalsViewPage() {
     getProposalsByStatus
   } = useProposalsStore();
 
-  const [businessProfiles, setBusinessProfiles] = useState<{ id: string; name?: string; size?: string }[]>([]);
+  const [businessProfiles, setBusinessProfiles] = useState<
+    { id: string; name?: string; size?: string }[]
+  >([]);
   const [users, setUsers] = useState<{ id: string; name?: string }[]>([]);
-  const [plaidIntegrations, setPlaidIntegrations] = useState<{ id: string; accountName?: string }[]>([]);
-  const [accountingIntegrations, setAccountingIntegrations] = useState<{ id: string; serviceId?: string }[]>([]);
+  const [plaidIntegrations, setPlaidIntegrations] = useState<
+    { id: string; accountName?: string }[]
+  >([]);
+  const [accountingIntegrations, setAccountingIntegrations] = useState<
+    { id: string; serviceId?: string }[]
+  >([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function fetchAll() {
       setLoading(true);
       try {
         const bp = await getBusinessProfiles({});
-        setBusinessProfiles(Array.isArray(bp) ? bp.map((b: any) => ({ id: b.id, name: b.name, size: b.size })) : []);
+        setBusinessProfiles(
+          Array.isArray(bp)
+            ? bp.map((b: any) => ({ id: b.id, name: b.name, size: b.size }))
+            : []
+        );
         const pi = await getPlaidBankAccounts({});
-        setPlaidIntegrations(Array.isArray(pi) ? pi.map((p: any) => ({ id: p.id, accountName: p.accountName })) : []);
+        setPlaidIntegrations(
+          Array.isArray(pi)
+            ? pi.map((p: any) => ({ id: p.id, accountName: p.accountName }))
+            : []
+        );
         const ai = await getAccountingIntegrations({});
-        setAccountingIntegrations(Array.isArray(ai) ? ai.map((a: any) => ({ id: a.id, serviceId: a.serviceId })) : []);
+        setAccountingIntegrations(
+          Array.isArray(ai)
+            ? ai.map((a: any) => ({ id: a.id, serviceId: a.serviceId }))
+            : []
+        );
         // Debug logs
         console.log('Plaid Integrations:', pi);
         console.log('Accounting Integrations:', ai);
@@ -73,19 +98,28 @@ export function ProposalsViewPage() {
     fetchAll();
   }, []);
 
-  const [proposalsForRequest, setProposalsForRequest] = useState<Proposal[]>([]);
+  const [proposalsForRequest, setProposalsForRequest] = useState<Proposal[]>(
+    []
+  );
   useEffect(() => {
     if (!requestId || !appUser?.id) return;
     setLoading(true);
     listProposals({ requestId, userId: appUser.id }).then((data) => {
       setProposalsForRequest(data);
       setLoading(false);
-      console.log('Fetched proposals:', data, 'RequestId:', requestId, 'UserId:', appUser?.id);
+      console.log(
+        'Fetched proposals:',
+        data,
+        'RequestId:',
+        requestId,
+        'UserId:',
+        appUser?.id
+      );
     });
   }, [requestId, appUser?.id]);
 
   // Use real data only
-  const selectedRequest = requests.find(r => r.id === requestId) || null;
+  const selectedRequest = requests.find((r) => r.id === requestId) || null;
   // Debug log for selectedRequest
   console.log('Selected Request:', selectedRequest);
 
@@ -95,12 +129,17 @@ export function ProposalsViewPage() {
       setDocuments([]);
       return;
     }
-    getClientRequestDocuments(selectedRequest.id).then(setDocuments).catch(() => setDocuments([]));
+    getClientRequestDocuments(selectedRequest.id)
+      .then(setDocuments)
+      .catch(() => setDocuments([]));
   }, [selectedRequest?.id, selectedRequest?.userId, appUser?.id]);
 
   // Deduplicate documents by fileUrl
   const uniqueDocuments = Array.isArray(documents)
-    ? documents.filter((doc, idx, arr) => arr.findIndex(d => d.fileUrl === doc.fileUrl) === idx)
+    ? documents.filter(
+        (doc, idx, arr) =>
+          arr.findIndex((d) => d.fileUrl === doc.fileUrl) === idx
+      )
     : [];
 
   // Download all documents as ZIP
@@ -111,7 +150,10 @@ export function ProposalsViewPage() {
         try {
           const response = await fetch(doc.fileUrl);
           const blob = await response.blob();
-          zip.file(doc.fileName || doc.fileKey || `Document-${doc.id || ''}`, blob);
+          zip.file(
+            doc.fileName || doc.fileKey || `Document-${doc.id || ''}`,
+            blob
+          );
         } catch (e) {
           // Optionally handle fetch errors
         }
@@ -151,7 +193,16 @@ export function ProposalsViewPage() {
   const filteredProposalsForRequest = proposalsForRequest.filter(
     (proposal) => proposal.clientRequestId === requestId
   );
-  console.log('Filtered proposals:', filteredProposalsForRequest, 'All proposals:', proposalsForRequest, 'RequestId:', requestId, 'UserId:', appUser?.id);
+  console.log(
+    'Filtered proposals:',
+    filteredProposalsForRequest,
+    'All proposals:',
+    proposalsForRequest,
+    'RequestId:',
+    requestId,
+    'UserId:',
+    appUser?.id
+  );
 
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [showProposalDetails, setShowProposalDetails] = useState(false);
@@ -159,8 +210,8 @@ export function ProposalsViewPage() {
   // Calculate statistics
   const totalRequests = requests.length;
   const totalProposals = proposals.length;
-  const acceptedProposals = proposals.filter(p => p.status === 'Accepted');
-  const pendingProposals = proposals.filter(p => p.status === 'Pending');
+  const acceptedProposals = proposals.filter((p) => p.status === 'Accepted');
+  const pendingProposals = proposals.filter((p) => p.status === 'Pending');
   const acceptedProposalsCount = acceptedProposals.length;
   const pendingProposalsCount = pendingProposals.length;
 
@@ -201,20 +252,17 @@ export function ProposalsViewPage() {
   if (requestId && selectedRequest) {
     if (loading) {
       return (
-        <div className="flex items-center justify-center min-h-screen w-full">
-          <Spinner size={48} className="text-primary" />
+        <div className='flex min-h-screen w-full items-center justify-center'>
+          <Spinner size={48} className='text-primary' />
         </div>
       );
     }
     return (
-      <div className='container mx-auto py-6 space-y-6'>
+      <div className='container mx-auto space-y-6 py-6'>
         {/* Header with back button */}
         <div className='flex items-center gap-4'>
-          <Button
-            variant='outline'
-            onClick={handleBackToRequests}
-          >
-            <ArrowLeft className='h-4 w-4 mr-2' />
+          <Button variant='outline' onClick={handleBackToRequests}>
+            <ArrowLeft className='mr-2 h-4 w-4' />
             Back to Requests
           </Button>
           <div>
@@ -233,9 +281,19 @@ export function ProposalsViewPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
               {Object.entries(selectedRequest)
-                .filter(([key]) => !['id', 'createdAt', 'updatedAt', 'clientEmail', 'userId', 'documents'].includes(key))
+                .filter(
+                  ([key]) =>
+                    ![
+                      'id',
+                      'createdAt',
+                      'updatedAt',
+                      'clientEmail',
+                      'userId',
+                      'documents'
+                    ].includes(key)
+                )
                 .map(([key, value]) => {
                   let displayValue = '-';
                   if (Array.isArray(value)) {
@@ -260,15 +318,21 @@ export function ProposalsViewPage() {
                   if (key === 'urgency') {
                     return (
                       <div key={key}>
-                        <p className='text-sm text-muted-foreground'>Urgency</p>
-                        <Badge variant={value === 'Urgent' ? 'destructive' : 'outline'}>{displayValue}</Badge>
+                        <p className='text-muted-foreground text-sm'>Urgency</p>
+                        <Badge
+                          variant={
+                            value === 'Urgent' ? 'destructive' : 'outline'
+                          }
+                        >
+                          {displayValue}
+                        </Badge>
                       </div>
                     );
                   }
                   if (key === 'status') {
                     return (
                       <div key={key}>
-                        <p className='text-sm text-muted-foreground'>Status</p>
+                        <p className='text-muted-foreground text-sm'>Status</p>
                         <Badge variant='outline'>{displayValue}</Badge>
                       </div>
                     );
@@ -276,7 +340,9 @@ export function ProposalsViewPage() {
                   if (key === 'framework') {
                     return (
                       <div key={key}>
-                        <p className='text-sm text-muted-foreground'>Framework</p>
+                        <p className='text-muted-foreground text-sm'>
+                          Framework
+                        </p>
                         <Badge variant='outline'>{displayValue}</Badge>
                       </div>
                     );
@@ -284,35 +350,47 @@ export function ProposalsViewPage() {
                   if (key === 'budget') {
                     return (
                       <div key={key}>
-                        <p className='text-sm text-muted-foreground'>Budget</p>
-                        <span>{value ? formatCurrency(Number(value)) : '-'}</span>
+                        <p className='text-muted-foreground text-sm'>Budget</p>
+                        <span>
+                          {value ? formatCurrency(Number(value)) : '-'}
+                        </span>
                       </div>
                     );
                   }
-              
+
                   if (key === 'businessId') {
-                    const business = businessProfiles?.find(bp => bp.id === value);
+                    const business = businessProfiles?.find(
+                      (bp) => bp.id === value
+                    );
                     return (
                       <div key={key}>
-                        <p className='text-sm text-muted-foreground'>Business</p>
+                        <p className='text-muted-foreground text-sm'>
+                          Business
+                        </p>
                         <span>{business?.name || '-'}</span>
                       </div>
                     );
                   }
                   if (key === 'plaidIntegrationId') {
-                    const plaid = plaidIntegrations.find(p => p.id === value);
+                    const plaid = plaidIntegrations.find((p) => p.id === value);
                     return (
                       <div key={key}>
-                        <p className='text-sm text-muted-foreground'>Plaid Integration</p>
+                        <p className='text-muted-foreground text-sm'>
+                          Plaid Integration
+                        </p>
                         <span>{plaid?.accountName || '-'}</span>
                       </div>
                     );
                   }
                   if (key === 'accountingIntegrationId') {
-                    const acc = accountingIntegrations.find(a => a.id === value);
+                    const acc = accountingIntegrations.find(
+                      (a) => a.id === value
+                    );
                     return (
                       <div key={key}>
-                        <p className='text-sm text-muted-foreground'>Accounting Integration</p>
+                        <p className='text-muted-foreground text-sm'>
+                          Accounting Integration
+                        </p>
                         <span>{acc?.serviceId || '-'}</span>
                       </div>
                     );
@@ -320,7 +398,9 @@ export function ProposalsViewPage() {
                   // Default rendering
                   return (
                     <div key={key}>
-                      <p className='text-sm text-muted-foreground'>{key.charAt(0).toUpperCase() + key.slice(1)}</p>
+                      <p className='text-muted-foreground text-sm'>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </p>
                       <span>{displayValue}</span>
                     </div>
                   );
@@ -329,13 +409,15 @@ export function ProposalsViewPage() {
             {/* Documents Section (use fetched documents) */}
             {uniqueDocuments.length > 0 && (
               <div className='mt-6'>
-                <h3 className='font-semibold text-lg mb-2'>Attached Documents</h3>
+                <h3 className='mb-2 text-lg font-semibold'>
+                  Attached Documents
+                </h3>
                 <ul className='space-y-2'>
                   {uniqueDocuments.map((doc, idx) => (
                     <li key={doc.fileKey || doc.id || idx}>
                       <button
-                        type="button"
-                        className='text-blue-600 underline break-all hover:opacity-80'
+                        type='button'
+                        className='break-all text-blue-600 underline hover:opacity-80'
                         onClick={() => handlePreviewDoc(doc)}
                       >
                         {doc.fileName || doc.fileKey || 'Document'}
@@ -348,31 +430,44 @@ export function ProposalsViewPage() {
 
             {/* Document Preview Modal */}
             {previewOpen && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-4 relative">
+              <div className='bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black'>
+                <div className='relative w-full max-w-2xl rounded-lg bg-white p-4 shadow-lg'>
                   <button
-                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                    className='absolute top-2 right-2 text-gray-500 hover:text-gray-800'
                     onClick={() => setPreviewOpen(false)}
                   >
                     &times;
                   </button>
-                  <h2 className="text-lg font-semibold mb-4">{previewDoc?.fileName || 'Preview'}</h2>
+                  <h2 className='mb-4 text-lg font-semibold'>
+                    {previewDoc?.fileName || 'Preview'}
+                  </h2>
                   {/* {!previewUrl && !previewError && <div className="text-center">Loading...</div>} */}
-                  {previewError && <div className="text-center text-red-600">{previewError}</div>}
-                  {previewUrl && previewDoc?.fileName?.toLowerCase().endsWith('.pdf') ? (
+                  {previewError && (
+                    <div className='text-center text-red-600'>
+                      {previewError}
+                    </div>
+                  )}
+                  {previewUrl &&
+                  previewDoc?.fileName?.toLowerCase().endsWith('.pdf') ? (
                     <iframe
                       src={previewUrl}
-                      title="PDF Preview"
-                      className="w-full h-96"
-                      onError={() => setPreviewError('Failed to load PDF preview.')}
+                      title='PDF Preview'
+                      className='h-96 w-full'
+                      onError={() =>
+                        setPreviewError('Failed to load PDF preview.')
+                      }
                     />
-                  ) : previewUrl && (
-                    <img
-                      src={previewUrl}
-                      alt={previewDoc?.fileName}
-                      className="max-w-full max-h-96 mx-auto"
-                      onError={() => setPreviewError('Failed to load image preview.')}
-                    />
+                  ) : (
+                    previewUrl && (
+                      <img
+                        src={previewUrl}
+                        alt={previewDoc?.fileName}
+                        className='mx-auto max-h-96 max-w-full'
+                        onError={() =>
+                          setPreviewError('Failed to load image preview.')
+                        }
+                      />
+                    )
                   )}
                 </div>
               </div>
@@ -383,7 +478,9 @@ export function ProposalsViewPage() {
         {/* Proposals for this request (fetched from backend) */}
         <Card>
           <CardHeader>
-            <CardTitle>Proposals ({filteredProposalsForRequest.length})</CardTitle>
+            <CardTitle>
+              Proposals ({filteredProposalsForRequest.length})
+            </CardTitle>
             <CardDescription>
               Proposals submitted for this request
             </CardDescription>
@@ -397,9 +494,9 @@ export function ProposalsViewPage() {
                 onRejectProposal={handleRejectProposal}
               />
             ) : (
-              <div className='text-center py-8'>
-                <FileText className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
-                <h3 className='text-lg font-semibold mb-2'>No proposals yet</h3>
+              <div className='py-8 text-center'>
+                <FileText className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
+                <h3 className='mb-2 text-lg font-semibold'>No proposals yet</h3>
                 <p className='text-muted-foreground'>
                   No proposals have been submitted for this request.
                 </p>
@@ -422,11 +519,13 @@ export function ProposalsViewPage() {
 
   // Default view - show all requests
   return (
-    <div className='container mx-auto py-6 space-y-6'>
+    <div className='container mx-auto space-y-6 py-6'>
       {/* Header */}
       <div className='flex items-center justify-between'>
         <div>
-          <h1 className='text-3xl font-bold tracking-tight'>Proposals Management</h1>
+          <h1 className='text-3xl font-bold tracking-tight'>
+            Proposals Management
+          </h1>
           <p className='text-muted-foreground'>
             Manage requests and review proposals from auditors
           </p>
@@ -434,28 +533,34 @@ export function ProposalsViewPage() {
       </div>
 
       {/* Statistics Cards */}
-      <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-4'>
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Total Requests</CardTitle>
-            <FileText className='h-4 w-4 text-muted-foreground' />
+            <CardTitle className='text-sm font-medium'>
+              Total Requests
+            </CardTitle>
+            <FileText className='text-muted-foreground h-4 w-4' />
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>{totalRequests}</div>
-            <p className='text-xs text-muted-foreground'>
-              {requests.filter(r => r.status === 'Open').length} open, {requests.filter(r => r.status === 'In Progress').length} in progress
+            <p className='text-muted-foreground text-xs'>
+              {requests.filter((r) => r.status === 'Open').length} open,{' '}
+              {requests.filter((r) => r.status === 'In Progress').length} in
+              progress
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Total Proposals</CardTitle>
-            <Users className='h-4 w-4 text-muted-foreground' />
+            <CardTitle className='text-sm font-medium'>
+              Total Proposals
+            </CardTitle>
+            <Users className='text-muted-foreground h-4 w-4' />
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>{totalProposals}</div>
-            <p className='text-xs text-muted-foreground'>
+            <p className='text-muted-foreground text-xs'>
               {pendingProposalsCount} pending, {acceptedProposalsCount} accepted
             </p>
           </CardContent>
@@ -463,25 +568,30 @@ export function ProposalsViewPage() {
 
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Accepted Proposals</CardTitle>
-            <CheckCircle className='h-4 w-4 text-muted-foreground' />
+            <CardTitle className='text-sm font-medium'>
+              Accepted Proposals
+            </CardTitle>
+            <CheckCircle className='text-muted-foreground h-4 w-4' />
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>{acceptedProposalsCount}</div>
-            <p className='text-xs text-muted-foreground'>
-              {((acceptedProposalsCount / totalProposals) * 100).toFixed(1)}% acceptance rate
+            <p className='text-muted-foreground text-xs'>
+              {((acceptedProposalsCount / totalProposals) * 100).toFixed(1)}%
+              acceptance rate
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Pending Review</CardTitle>
-            <FileText className='h-4 w-4 text-muted-foreground' />
+            <CardTitle className='text-sm font-medium'>
+              Pending Review
+            </CardTitle>
+            <FileText className='text-muted-foreground h-4 w-4' />
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>{pendingProposalsCount}</div>
-            <p className='text-xs text-muted-foreground'>
+            <p className='text-muted-foreground text-xs'>
               Require your attention
             </p>
           </CardContent>
@@ -489,22 +599,34 @@ export function ProposalsViewPage() {
       </div>
 
       {/* All Requests */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Requests</CardTitle>
-          <CardDescription>
-            Click on a request to view its proposals
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <RequestsTable
-            requests={requests}
-            onRequestSelect={handleRequestSelect}
-            onViewProposals={handleViewProposals}
-            businessProfiles={businessProfiles}
-          />
-        </CardContent>
-      </Card>
+
+      <div style={{ position: 'relative', height: '520px'}}>
+        <ScrollArea
+          style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+        >
+          {/* Step 3: The Rigid Content. This part remains the same. */}
+          <div style={{ minWidth: '1230px' }} >
+            <Card className='w-full'>
+              <CardHeader>
+                <CardTitle>All Requests</CardTitle>
+                <CardDescription>
+                  Click on a request to view its proposals
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RequestsTable
+                  requests={requests}
+                  onRequestSelect={handleRequestSelect}
+                  onViewProposals={handleViewProposals}
+                  businessProfiles={businessProfiles}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          <ScrollBar orientation='horizontal' />
+        </ScrollArea>
+      </div>
 
       {/* Modals */}
       <RequestDetailsModal
@@ -523,4 +645,4 @@ export function ProposalsViewPage() {
       />
     </div>
   );
-} 
+}

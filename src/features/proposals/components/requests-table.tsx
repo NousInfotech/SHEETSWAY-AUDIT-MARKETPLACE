@@ -1,7 +1,17 @@
 'use client';
 
 import * as React from 'react';
-import { ColumnDef, ColumnFiltersState, SortingState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable
+} from '@tanstack/react-table';
 import { ArrowUpDown, MoreHorizontal, Eye, FileText } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -24,12 +34,12 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Request } from '../types';
-import { 
-  formatCurrency, 
-  formatDate, 
-  getRequestStatusBadgeVariant, 
+import {
+  formatCurrency,
+  formatDate,
+  getRequestStatusBadgeVariant,
   getDaysRemaining,
-  getUrgencyColor 
+  getUrgencyColor
 } from '../utils';
 
 interface RequestsTableProps {
@@ -39,11 +49,16 @@ interface RequestsTableProps {
   businessProfiles: { id: string; size?: string }[];
 }
 
-
-
-export function RequestsTable({ requests, onRequestSelect, onViewProposals, businessProfiles }: RequestsTableProps) {
+export function RequestsTable({
+  requests,
+  onRequestSelect,
+  onViewProposals,
+  businessProfiles
+}: RequestsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
 
   const columns: ColumnDef<Request>[] = [
     {
@@ -60,7 +75,10 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals, busi
         );
       },
       cell: ({ row }) => (
-        <div className='font-medium max-w-xs truncate' title={row.getValue('title')}>
+        <div
+          className='max-w-xs truncate font-medium'
+          title={row.getValue('title')}
+        >
           {row.getValue('title')}
         </div>
       )
@@ -79,7 +97,9 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals, busi
           <div className='text-right'>
             <Button
               variant='ghost'
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
             >
               Budget
               <ArrowUpDown className='ml-2 h-4 w-4' />
@@ -96,9 +116,7 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals, busi
         } else if (typeof budget === 'number') {
           display = formatCurrency(budget);
         }
-        return (
-          <div className='text-right font-mono'>{display}</div>
-        );
+        return <div className='text-right font-mono'>{display}</div>;
       }
     },
     {
@@ -107,12 +125,16 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals, busi
       cell: ({ row }) => {
         const urgency = row.getValue('urgency') as 'Normal' | 'Urgent';
         return (
-          <Badge 
-  variant={urgency === 'Urgent' ? 'destructive' : 'outline'}
-  className={urgency === 'Urgent' ? 'bg-red-600 text-white' : 'bg-muted text-muted-foreground'}
->
-  {urgency}
-</Badge>
+          <Badge
+            variant={urgency === 'Urgent' ? 'destructive' : 'outline'}
+            className={
+              urgency === 'Urgent'
+                ? 'bg-red-600 text-white'
+                : 'bg-muted text-muted-foreground'
+            }
+          >
+            {urgency}
+          </Badge>
         );
       }
     },
@@ -120,62 +142,83 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals, busi
       accessorKey: 'deadline',
       header: 'Deadline',
       cell: ({ row }) => {
-        const deadlineRaw = row.getValue('deadline') || row.getValue('deliveryDeadline');
-        const deadline = typeof deadlineRaw === 'string' ? deadlineRaw : undefined;
+        const deadlineRaw =
+          row.getValue('deadline') || row.getValue('deliveryDeadline');
+        const deadline =
+          typeof deadlineRaw === 'string' ? deadlineRaw : undefined;
         const daysRemaining = deadline ? getDaysRemaining(deadline) : undefined;
         return (
           <div className='flex flex-col'>
             <span>{deadline ? formatDate(deadline) : '-'}</span>
-            <span className={`text-xs ${daysRemaining !== undefined && daysRemaining < 7 ? 'text-red-600' : 'text-muted-foreground'}`}>
-              {daysRemaining !== undefined && daysRemaining > 0 ? `${daysRemaining} days left` : daysRemaining !== undefined ? 'Overdue' : ''}
+            <span
+              className={`text-xs ${daysRemaining !== undefined && daysRemaining < 7 ? 'text-red-600' : 'text-muted-foreground'}`}
+            >
+              {daysRemaining !== undefined && daysRemaining > 0
+                ? `${daysRemaining} days left`
+                : daysRemaining !== undefined
+                  ? 'Overdue'
+                  : ''}
             </span>
           </div>
         );
       }
     },
+    // {
+    //   accessorKey: 'notes',
+    //   header: 'Notes',
+    //   cell: ({ row }) => {
+    //     const notes = row.getValue('notes');
+    //     const safeNotes = typeof notes === 'string' ? notes : '';
+    //     return (
+    //       <div className='max-w-xs truncate' title={safeNotes}>
+    //         {safeNotes || '-'}
+    //       </div>
+    //     );
+    //   }
+    // },
+    // Add Type column
     {
-      accessorKey: 'notes',
-      header: 'Notes',
+      accessorKey: 'type',
+      header: 'Type',
       cell: ({ row }) => {
-        const notes = row.getValue('notes');
-        const safeNotes = typeof notes === 'string' ? notes : '';
+        const type = row.getValue('type');
         return (
-          <div className='max-w-xs truncate' title={safeNotes}>
-            {safeNotes || '-'}
-          </div>
+          <Badge variant='outline'>
+            {typeof type === 'string' ? type : '-'}
+          </Badge>
         );
       }
     },
-      // Add Type column
-      {
-        accessorKey: 'type',
-        header: 'Type',
-        cell: ({ row }) => {
-          const type = row.getValue('type');
-          return <Badge variant='outline'>{typeof type === 'string' ? type : '-'}</Badge>;
-        }
-      },
-      // Add Is Active column
-      {
-        accessorKey: 'isActive',
-        header: 'Active',
-        cell: ({ row }) => {
-          const isActive = row.getValue('isActive');
-          return <Badge variant={isActive ? 'default' : 'secondary'}>{isActive ? 'Yes' : 'No'}</Badge>;
-        }
-      },
+    // Add Is Active column
+    {
+      accessorKey: 'isActive',
+      header: 'Active',
+      cell: ({ row }) => {
+        const isActive = row.getValue('isActive');
+        return (
+          <Badge variant={isActive ? 'default' : 'secondary'}>
+            {isActive ? 'Yes' : 'No'}
+          </Badge>
+        );
+      }
+    },
     {
       id: 'actions',
+      header: 'Action',
       cell: ({ row }) => {
         const request = row.original;
         return (
-          <Button size='icon' variant='ghost' onClick={() => onViewProposals(request)}>
-            <Eye className='h-5 w-5' />
+          <Button
+            size='sm'
+            variant='ghost'
+            onClick={() => onViewProposals(request)}
+          >
+            {/* <Eye className='h-5 w-5' /> */}
+            View
           </Button>
         );
       }
-    },
-  
+    }
   ];
 
   const table = useReactTable({
@@ -191,11 +234,11 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals, busi
       sorting,
       columnFilters
     },
-    meta: { businessProfiles },
+    meta: { businessProfiles }
   });
 
   return (
-    <div className='w-full'>
+    <div>
       <div className='flex items-center py-4'>
         <Input
           placeholder='Filter requests...'
@@ -274,4 +317,4 @@ export function RequestsTable({ requests, onRequestSelect, onViewProposals, busi
       </div>
     </div>
   );
-} 
+}
