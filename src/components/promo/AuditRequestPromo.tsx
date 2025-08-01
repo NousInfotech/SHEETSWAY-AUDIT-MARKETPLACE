@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { FileBadge2, CheckCircle2, ArrowUpRight, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import PrivacyPolicyIcon from '../icons/PrivacyPolicyIcon';
+import Link from 'next/link';
 
 // A small component for the feature list items
 const FeatureListItem = ({ children }: { children: React.ReactNode }) => (
@@ -81,19 +82,19 @@ export const AuditRequestPromo = () => {
             </div>
 
             <div className='flex items-center gap-4 pt-4'>
-              <Button
-                onClick={() => router.push('/dashboard/request')}
-                size='lg'
-                className='rounded-lg bg-orange-500 px-8 py-6 text-base font-bold text-white shadow-lg shadow-orange-500/30 hover:bg-orange-600'
-              >
-                Start Now
-              </Button>
-              <div className='mr-3 rounded-md bg-indigo-900 p-3 text-white'>
-                <ArrowUpRight
-                  size={20}
-                  onClick={() => router.push('/dashboard/request')}
-                />
-              </div>
+              <Link href='/dashboard/request'>
+                <Button
+                  size='lg'
+                  className='rounded-lg bg-orange-500 px-8 py-6 text-base font-bold text-white shadow-lg shadow-orange-500/30 hover:bg-orange-600'
+                >
+                  Start Now
+                </Button>
+              </Link>
+              <Link href='/dashboard/request'>
+                <div className='mr-3 rounded-md bg-indigo-900 p-3 text-white'>
+                  <ArrowUpRight size={20} />
+                </div>
+              </Link>
               <Button
                 variant='ghost'
                 className='font-bold text-gray-800 hover:bg-transparent'
