@@ -16,8 +16,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Dashboard',
     url: '/dashboard/overview',
-    icon: 'dashboard',
-    activeIcon: 'dashboardFilled', // Added
+    icon: '/assets/icons/dashboard.png',
+    activeIcon: '/assets/icons/dashboard-filled.png',
     isActive: false,
     shortcut: ['d', 'd'],
     items: []
@@ -25,8 +25,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Request',
     url: '/dashboard/promo',
-    icon: 'request',
-    activeIcon: 'requestFilled', // Added
+    icon: '/assets/icons/new-file.png',
+    activeIcon: '/assets/icons/new-file-filled.png', 
     isActive: false,
     shortcut: ['r', 'r'],
     items: []
@@ -34,8 +34,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Proposals',
     url: '/dashboard/proposals',
-    icon: 'proposals',
-    activeIcon: 'proposalsFilled', // Added
+    icon: '/assets/icons/report.png',
+    activeIcon: '/assets/icons/report-filled.png', 
     isActive: false,
     shortcut: ['p', 'p'],
     items: []
@@ -43,8 +43,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Active Engagements',
     url: '/dashboard/engagements',
-    icon: 'engagements',
-    activeIcon: 'engagementsFilled', // Added
+    icon: '/assets/icons/briefcase.png',
+    activeIcon: '/assets/icons/briefcase-filled.png', 
     isActive: false,
     shortcut: ['e', 'e'],
     items: []
@@ -52,8 +52,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Payments',
     url: '/dashboard/payments',
-    icon: 'payments',
-    activeIcon: 'paymentsFilled', // Added
+    icon: '/assets/icons/credit-card.png',
+    activeIcon: '/assets/icons/credit-card-filled.png', 
     isActive: false,
     shortcut: ['y', 'y'],
     items: []
@@ -61,8 +61,8 @@ export const navItems: NavItem[] = [
   {
     title: 'History',
     url: '/dashboard/history',
-    icon: 'history',
-    activeIcon: 'historyFilled', // Added
+    icon: '/assets/icons/time.png',
+    activeIcon: '/assets/icons/time-filled.png', 
     isActive: false,
     shortcut: ['h', 'h'],
     items: []
@@ -70,8 +70,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Connect',
     url: '/dashboard/connect',
-    icon: 'connect',
-    activeIcon: 'connectFilled', // Added
+    icon: '/assets/icons/chat-bubble.png',
+    activeIcon: '/assets/icons/chat-bubble-filled.png', 
     shortcut: ['c', 'c'],
     isActive: false,
     items: []
@@ -79,8 +79,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Business Profiles & Integrations',
     url: '/dashboard/business-profiles',
-    icon: 'user2',
-    activeIcon: 'user2Filled', // Added
+    icon: '/assets/icons/user.png',
+    activeIcon: '/assets/icons/user-filled.png', 
     isActive: false,
     shortcut: ['b', 'b'],
     items: []

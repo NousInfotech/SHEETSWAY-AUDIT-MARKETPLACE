@@ -54,6 +54,7 @@ import { FilePlus2, Search, Sigma } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
 import { useSidebar } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 export const company = {
   name: 'Acme Inc',
@@ -92,11 +93,12 @@ export default function AppSidebar() {
       <SidebarHeader>
         {/* <StaticOrgDisplay app='Audit Market Place' name='Sheetsway' /> */}
         {state === 'expanded' ? (
-        <div className='mx-auto w-[95%]'>
-          <img src='/assets/sheetswaylogo.png' alt='logo' />
-        </div>): (<div className='text-[#dc6713] text-center text-3xl'>
-            S
-          </div>)}
+          <div className='mx-auto w-[95%]'>
+            <img src='/assets/sheetswaylogo.png' alt='logo' />
+          </div>
+        ) : (
+          <div className='text-center text-3xl text-[#dc6713]'>S</div>
+        )}
         {state === 'expanded' ? (
           <>
             <div className='relative mx-auto my-2 w-[95%]'>
@@ -122,32 +124,31 @@ export default function AppSidebar() {
                 item.items && item.items.length > 0
                   ? item.items.some((subItem) => pathname === subItem.url)
                   : false;
-
               const isDirectlyActive = pathname === item.url;
               const isActive = isParentActive || isDirectlyActive;
 
               let iconElement = null;
 
-              // Check if this is our special case for the 'request' icon
-              if (item.icon === 'request') {
-                // If it is, use the Lucide icon with the conditional fill prop
-                iconElement = (
-                  <FilePlus2 fill={isActive ? 'currentColor' : 'none'} />
-                );
-              } else {
-                // Otherwise, use the standard Tabler icon swapping logic
-                const iconKey =
-                  isActive && item.activeIcon ? item.activeIcon : item.icon;
+              // 1. Choose the correct icon path (active or default)
+              const iconPath =
+                isActive && item.activeIcon ? item.activeIcon : item.icon;
 
-                if (iconKey) {
-                  const IconComponent = Icons[iconKey];
-                  if (IconComponent) {
-                    iconElement = <IconComponent />;
-                  }
-                }
+              // 2. If a path exists, create an <img> element
+              const activeIconFilter = 'brightness-0 invert';
+              if (iconPath) {
+                iconElement = (
+                  <img
+                    src={iconPath}
+                    alt={`${item.title} icon`}
+                    className={cn(
+                      'h-5 w-5 transition-all duration-200 dark:brightness-0 dark:invert', // Base styles
+                      isActive && activeIconFilter
+                    )}
+                  />
+                );
               }
 
-              if (!iconElement) return null; // Don't render if there's no icon defined
+              if (!iconElement) return null; // Don't render if there's no icon
 
               // Render collapsible menu if it has items
               if (item.items && item.items.length > 0) {
