@@ -11,7 +11,16 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, FileText, Users, CheckCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  FileText,
+  Users,
+  CheckCircle,
+  Paperclip,
+  X,
+  Eye,
+  Download
+} from 'lucide-react';
 import { useProposalsStore } from '../store';
 import { Request, Proposal } from '../types';
 import { RequestsTable } from './requests-table';
@@ -248,6 +257,33 @@ export function ProposalsViewPage() {
     router.push('/dashboard/proposals');
   };
 
+  // A helper function to render each detail item elegantly
+  type DetailItemProps = {
+    label: string;
+    value: React.ReactNode;
+    className?: string;
+  };
+
+  // 2. Apply the type to your component's props
+  const DetailItem: React.FC<DetailItemProps> = ({
+    label,
+    value,
+    className = ''
+  }) => {
+    return (
+      <div
+        className={`rounded-xl bg-gray-50/50 p-4 dark:bg-white/5 ${className}`}
+      >
+        <p className='mb-1 text-sm font-medium text-gray-500 dark:text-gray-400'>
+          {label}
+        </p>
+        <div className='text-base font-semibold break-words text-gray-900 dark:text-white'>
+          {value}
+        </div>
+      </div>
+    );
+  };
+
   // If we have a selected request, show proposals for that request
   if (requestId && selectedRequest) {
     if (loading) {
@@ -275,13 +311,17 @@ export function ProposalsViewPage() {
         {/* Request Summary Card (fully dynamic) */}
         <Card>
           <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <FileText className='h-5 w-5' />
+            <CardTitle className='flex items-center rounded-full bg-blue-500/10 py-3'>
+              <span className=' p-2 text-blue-500'>
+                <FileText className='h-6 w-6' />
+              </span>
               Request Summary
             </CardTitle>
           </CardHeader>
+
           <CardContent>
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+            {/* Responsive Grid for Details */}
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
               {Object.entries(selectedRequest)
                 .filter(
                   ([key]) =>
@@ -296,29 +336,28 @@ export function ProposalsViewPage() {
                 )
                 .map(([key, value]) => {
                   let displayValue = '-';
-                  if (Array.isArray(value)) {
+                  if (Array.isArray(value))
                     displayValue = value.length > 0 ? value.join(', ') : '-';
-                  } else if (typeof value === 'boolean') {
+                  else if (typeof value === 'boolean')
                     displayValue = value ? 'Yes' : 'No';
-                  } else if (typeof value === 'number') {
+                  else if (typeof value === 'number')
                     displayValue = value.toString();
-                  } else if (typeof value === 'string' && value.trim() !== '') {
-                    // Format ISO date strings
-                    if (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) {
-                      try {
-                        displayValue = format(new Date(value), 'PPP'); // Only date, no time
-                      } catch {
-                        displayValue = value;
-                      }
-                    } else {
-                      displayValue = value;
-                    }
+                  else if (typeof value === 'string' && value.trim() !== '') {
+                    displayValue = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)
+                      ? format(new Date(value), 'PPP')
+                      : value;
                   }
-                  // Special formatting for known enums
-                  if (key === 'urgency') {
-                    return (
-                      <div key={key}>
-                        <p className='text-muted-foreground text-sm'>Urgency</p>
+
+                  // Format label for better readability (e.g., "plaidIntegrationId" -> "Plaid Integration")
+                  const formattedLabel = key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/Id$/, '')
+                    .replace(/^./, (str) => str.toUpperCase());
+
+                  let content;
+                  switch (key) {
+                    case 'urgency':
+                      content = (
                         <Badge
                           variant={
                             value === 'Urgent' ? 'destructive' : 'outline'
@@ -326,149 +365,139 @@ export function ProposalsViewPage() {
                         >
                           {displayValue}
                         </Badge>
-                      </div>
-                    );
-                  }
-                  if (key === 'status') {
-                    return (
-                      <div key={key}>
-                        <p className='text-muted-foreground text-sm'>Status</p>
-                        <Badge variant='outline'>{displayValue}</Badge>
-                      </div>
-                    );
-                  }
-                  if (key === 'framework') {
-                    return (
-                      <div key={key}>
-                        <p className='text-muted-foreground text-sm'>
-                          Framework
-                        </p>
-                        <Badge variant='outline'>{displayValue}</Badge>
-                      </div>
-                    );
-                  }
-                  if (key === 'budget') {
-                    return (
-                      <div key={key}>
-                        <p className='text-muted-foreground text-sm'>Budget</p>
+                      );
+                      break;
+                    case 'status':
+                    case 'framework':
+                      content = <Badge variant='default'>{displayValue}</Badge>;
+                      break;
+
+                    case 'budget':
+                      content = (
                         <span>
                           {value ? formatCurrency(Number(value)) : '-'}
                         </span>
-                      </div>
-                    );
+                      );
+                      break;
+                    case 'businessId':
+                      const business = businessProfiles?.find(
+                        (bp) => bp.id === value
+                      );
+                      content = <span>{business?.name || '-'}</span>;
+                      break;
+                    case 'plaidIntegrationId':
+                      const plaid = plaidIntegrations?.find(
+                        (p) => p.id === value
+                      );
+                      content = <span>{plaid?.accountName || '-'}</span>;
+                      break;
+                    case 'accountingIntegrationId':
+                      const acc = accountingIntegrations?.find(
+                        (a) => a.id === value
+                      );
+                      content = <span>{acc?.serviceId || '-'}</span>;
+                      break;
+                    default:
+                      content = <span>{displayValue}</span>;
                   }
 
-                  if (key === 'businessId') {
-                    const business = businessProfiles?.find(
-                      (bp) => bp.id === value
-                    );
-                    return (
-                      <div key={key}>
-                        <p className='text-muted-foreground text-sm'>
-                          Business
-                        </p>
-                        <span>{business?.name || '-'}</span>
-                      </div>
-                    );
-                  }
-                  if (key === 'plaidIntegrationId') {
-                    const plaid = plaidIntegrations.find((p) => p.id === value);
-                    return (
-                      <div key={key}>
-                        <p className='text-muted-foreground text-sm'>
-                          Plaid Integration
-                        </p>
-                        <span>{plaid?.accountName || '-'}</span>
-                      </div>
-                    );
-                  }
-                  if (key === 'accountingIntegrationId') {
-                    const acc = accountingIntegrations.find(
-                      (a) => a.id === value
-                    );
-                    return (
-                      <div key={key}>
-                        <p className='text-muted-foreground text-sm'>
-                          Accounting Integration
-                        </p>
-                        <span>{acc?.serviceId || '-'}</span>
-                      </div>
-                    );
-                  }
-                  // Default rendering
                   return (
-                    <div key={key}>
-                      <p className='text-muted-foreground text-sm'>
-                        {key.charAt(0).toUpperCase() + key.slice(1)}
-                      </p>
-                      <span>{displayValue}</span>
-                    </div>
+                    <DetailItem
+                      key={key}
+                      label={formattedLabel}
+                      value={content}
+                    />
                   );
                 })}
             </div>
-            {/* Documents Section (use fetched documents) */}
-            {uniqueDocuments.length > 0 && (
-              <div className='mt-6'>
-                <h3 className='mb-2 text-lg font-semibold'>
+
+            {/* Attached Documents Section */}
+            {uniqueDocuments && uniqueDocuments.length > 0 && (
+              <div className='mt-8 border-t border-gray-200/80 pt-6 dark:border-gray-700/60'>
+                <h3 className='mb-4 flex items-center gap-3 text-lg font-bold text-gray-800 dark:text-white'>
+                  <Paperclip className='h-5 w-5 text-gray-500' />
                   Attached Documents
                 </h3>
-                <ul className='space-y-2'>
-                  {uniqueDocuments.map((doc, idx) => (
-                    <li key={doc.fileKey || doc.id || idx}>
-                      <button
-                        type='button'
-                        className='break-all text-blue-600 underline hover:opacity-80'
-                        onClick={() => handlePreviewDoc(doc)}
-                      >
-                        {doc.fileName || doc.fileKey || 'Document'}
-                      </button>
+                <ul className='space-y-3'>
+                  {uniqueDocuments.map((doc) => (
+                    <li
+                      key={doc.fileKey || doc.id}
+                      className='flex items-center justify-between rounded-xl border border-gray-200/80 bg-white/60 p-3 pr-4 shadow-sm transition-all hover:border-blue-500/50 hover:shadow-lg dark:border-gray-700/60 dark:bg-white/5'
+                    >
+                      <span className='truncate pr-4 font-medium text-gray-700 dark:text-gray-200'>
+                        {doc.fileName || 'Document'}
+                      </span>
+                      <div className='flex items-center gap-2'>
+                        <button
+                          onClick={() => handlePreviewDoc(doc)}
+                          className='rounded-full p-2 text-gray-500 transition-colors hover:bg-blue-500/10 hover:text-blue-600'
+                          aria-label='Preview'
+                        >
+                          <Eye />
+                        </button>
+                        <a
+                          href={`/download-path/${doc.fileKey}`}
+                          download
+                          className='rounded-full p-2 text-gray-500 transition-colors hover:bg-green-500/10 hover:text-green-600'
+                          aria-label='Download'
+                        >
+                          <Download />
+                        </a>
+                      </div>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {/* Document Preview Modal */}
+            {/* Stunning Document Preview Modal */}
             {previewOpen && (
-              <div className='bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black'>
-                <div className='relative w-full max-w-2xl rounded-lg bg-white p-4 shadow-lg'>
-                  <button
-                    className='absolute top-2 right-2 text-gray-500 hover:text-gray-800'
-                    onClick={() => setPreviewOpen(false)}
-                  >
-                    &times;
-                  </button>
-                  <h2 className='mb-4 text-lg font-semibold'>
-                    {previewDoc?.fileName || 'Preview'}
-                  </h2>
-                  {/* {!previewUrl && !previewError && <div className="text-center">Loading...</div>} */}
-                  {previewError && (
-                    <div className='text-center text-red-600'>
-                      {previewError}
-                    </div>
-                  )}
-                  {previewUrl &&
-                  previewDoc?.fileName?.toLowerCase().endsWith('.pdf') ? (
-                    <iframe
-                      src={previewUrl}
-                      title='PDF Preview'
-                      className='h-96 w-full'
-                      onError={() =>
-                        setPreviewError('Failed to load PDF preview.')
-                      }
-                    />
-                  ) : (
-                    previewUrl && (
-                      <img
-                        src={previewUrl}
-                        alt={previewDoc?.fileName}
-                        className='mx-auto max-h-96 max-w-full'
-                        onError={() =>
-                          setPreviewError('Failed to load image preview.')
-                        }
-                      />
-                    )
-                  )}
+              <div
+                className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm'
+                onClick={() => setPreviewOpen(false)}
+              >
+                <div
+                  className='relative flex max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-gray-50 shadow-2xl dark:bg-gray-800'
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <header className='flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700'>
+                    <h2 className='truncate pr-4 text-lg font-bold text-gray-900 dark:text-white'>
+                      {previewDoc?.fileName || 'Preview'}
+                    </h2>
+                    <button
+                      onClick={() => setPreviewOpen(false)}
+                      className='rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-500/10 hover:text-gray-900 dark:hover:text-white'
+                      aria-label='Close'
+                    >
+                      <X className='h-5 w-5' />
+                    </button>
+                  </header>
+                  <main className='flex-grow overflow-auto p-4'>
+                    {previewError && (
+                      <div className='flex h-full items-center justify-center text-red-500'>
+                        {previewError}
+                      </div>
+                    )}
+                    {!previewUrl && !previewError && (
+                      <div className='flex h-full items-center justify-center text-gray-500'>
+                        Loading...
+                      </div>
+                    )}
+                    {previewUrl &&
+                      (previewDoc?.fileName?.toLowerCase().endsWith('.pdf') ? (
+                        <iframe
+                          src={previewUrl}
+                          title='PDF Preview'
+                          className='h-full min-h-[70vh] w-full rounded-lg bg-white'
+                        />
+                      ) : (
+                        <img
+                          src={previewUrl}
+                          alt={previewDoc?.fileName}
+                          className='mx-auto h-full w-full object-contain'
+                        />
+                      ))}
+                  </main>
                 </div>
               </div>
             )}
@@ -600,12 +629,11 @@ export function ProposalsViewPage() {
 
       {/* All Requests */}
 
-      <div style={{ position: 'relative', height: '520px'}}>
+      <div style={{ position: 'relative', height: '520px' }}>
         <ScrollArea
           style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
         >
-          {/* Step 3: The Rigid Content. This part remains the same. */}
-          <div style={{ minWidth: '1230px' }} >
+          <div style={{ minWidth: '1230px' }}>
             <Card className='w-full'>
               <CardHeader>
                 <CardTitle>All Requests</CardTitle>
