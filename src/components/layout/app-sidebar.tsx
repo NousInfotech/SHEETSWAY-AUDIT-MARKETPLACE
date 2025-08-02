@@ -50,7 +50,9 @@ import { useAuth } from './providers';
 import { Icons } from '../icons';
 
 // 2. Import the specific Lucide icon for the "Request" item
-import { FilePlus2 } from 'lucide-react';
+import { FilePlus2, Search } from 'lucide-react';
+import { Input } from '../ui/input';
+import { Separator } from '../ui/separator';
 
 export const company = {
   name: 'Acme Inc',
@@ -86,7 +88,19 @@ export default function AppSidebar() {
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader>
-        <StaticOrgDisplay app='Audit Market Place' name='Sheetsway' />
+        {/* <StaticOrgDisplay app='Audit Market Place' name='Sheetsway' /> */}
+        <div className='mx-auto w-[95%]'>
+          <img src='/assets/sheetswaylogo.png' alt='logo' />
+        </div>
+        <div className='relative mx-auto my-2 w-[95%]'>
+          <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+
+          <Input placeholder='search ...' className='pl-10' />
+        </div>
+
+        <div className='flex w-full justify-center'>
+          <Separator className='!w-[95%]' />
+        </div>
       </SidebarHeader>
       <SidebarContent className='overflow-x-hidden'>
         <SidebarGroup>
