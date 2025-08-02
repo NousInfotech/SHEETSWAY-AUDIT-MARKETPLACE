@@ -1,28 +1,65 @@
+// src/lib/connect-utils.ts
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-// Local storage utilities
+
+// --- LOCAL STORAGE UTILITIES (CORRECTED) ---
+
+/**
+ * Loads data from localStorage. It safely handles both JSON strings and plain strings.
+ * @param key The key to look for in localStorage.
+ * @param defaultValue The value to return if the key is not found.
+ * @returns The parsed data or the default value.
+ */
 export const loadFromLocalStorage = <T>(key: string, defaultValue: T): T => {
-  if (typeof window === 'undefined') return defaultValue;
+  if (typeof window === 'undefined') {
+    return defaultValue;
+  }
 
   try {
     const item = window.localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
+
+    if (!item) {
+      return defaultValue;
+    }
+
+    // Attempt to parse the item as JSON.
+    // If it fails, it's likely a plain string (e.g., "dark" from next-themes).
+    // In that case, we return the item as-is.
+    try {
+      return JSON.parse(item);
+    } catch (e) {
+      // The value was not valid JSON, so return it directly.
+      // We cast to 'any' then to 'T' to satisfy TypeScript's strict typing.
+      return item as any as T;
+    }
   } catch (error) {
-    // TODO: Implement proper error handling
     console.error(`Error loading from localStorage key "${key}":`, error);
     return defaultValue;
   }
 };
 
+/**
+ * Saves data to localStorage. It stringifies objects/arrays but saves plain strings as-is.
+ * @param key The key to save the value under.
+ * @param value The value to save (can be a string, object, array, etc.).
+ */
 export const saveToLocalStorage = <T>(key: string, value: T): void => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined') {
+    return;
+  }
 
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    // If the value is already a string, store it directly.
+    // Otherwise, stringify it to store it as a JSON string.
+    const valueToStore = typeof value === 'string' ? value : JSON.stringify(value);
+    window.localStorage.setItem(key, valueToStore);
   } catch (error) {
-    // TODO: Implement proper error handling
     console.error(`Error saving to localStorage key "${key}":`, error);
   }
 };
+
+
+// --- UI AND FORMATTING UTILITIES (UNCHANGED) ---
 
 // Status and color utilities
 export const getStatusColor = (status: string) => {

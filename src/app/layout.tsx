@@ -1,8 +1,8 @@
 import Providers from '@/components/layout/providers';
 import { Toaster } from '@/components/ui/sonner';
-import { fontVariables } from '@/lib/font';
+import { fontVariables } from '@/lib/font'; 
 import ThemeProvider from '@/components/layout/ThemeToggle/theme-provider';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils'; 
 import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
 import NextTopLoader from 'nextjs-toploader';
@@ -17,71 +17,50 @@ const META_THEME_COLORS = {
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Sheetsway', 
-    default: 'Sheetsway', 
+    template: 'Sheetsway | %s',
+    default: 'Sheetsway'
   },
   description: 'The premier audit marketplace for modern businesses.',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png'
+  }
 };
 
 export const viewport: Viewport = {
-  themeColor: META_THEME_COLORS.light
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: META_THEME_COLORS.light },
+    { media: '(prefers-color-scheme: dark)', color: META_THEME_COLORS.dark }
+  ]
 };
 
-// export default async function RootLayout({
-//   children
-// }: {
-//   children: React.ReactNode;
-// }) {
-//   const cookieStore = await cookies();
-//   const activeThemeValue = cookieStore.get('active_theme')?.value;
-//   const isScaled = activeThemeValue?.endsWith('-scaled');
-
-//   return (
-//     <html lang='en' suppressHydrationWarning>
-//       <head>
-//         <script
-//           dangerouslySetInnerHTML={{
-//             __html: `
-//               try {
-//                 if (localStorage.theme === 'dark' || ((!('theme' in localStorage) || localStorage.theme === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-//                   document.querySelector('meta[name="theme-color"]').setAttribute('content', '${META_THEME_COLORS.dark}')
-//                 }
-//               } catch (_) {}
-//             `
-//           }}
-//         />
-//       </head>
-//       <body
-//         className={cn(
-//           'bg-background overflow-hidden overscroll-none font-sans antialiased',
-//           activeThemeValue ? `theme-${activeThemeValue}` : '',
-//           isScaled ? 'theme-scaled' : '',
-//           fontVariables
-//         )}
-//       >
-//         <NextTopLoader showSpinner={false} />
-//         <NuqsAdapter>
-//           <ThemeProvider
-//             attribute='class'
-//             defaultTheme='system'
-//             enableSystem
-//             disableTransitionOnChange
-//             enableColorScheme
-//           >
-//             <Providers activeThemeValue={activeThemeValue as string}>
-//               <Toaster />
-//               {children}
-//             </Providers>
-//           </ThemeProvider>
-//         </NuqsAdapter>
-//       </body>
-//     </html>
-//   );
-// }
-
-
-
-
+// This script prevents the "theme flicker" by applying the correct theme
+// before the page is fully rendered.
+const ThemeScript = () => {
+  const script = `
+    (function() {
+      function getInitialColorMode() {
+        const persistedColorPreference = window.localStorage.getItem('theme');
+        const hasPersistedPreference = typeof persistedColorPreference === 'string';
+        if (hasPersistedPreference) {
+          return persistedColorPreference;
+        }
+        const mql = window.matchMedia('(prefers-color-scheme: dark)');
+        const hasMediaQueryPreference = typeof mql.matches === 'boolean';
+        if (hasMediaQueryPreference) {
+          return mql.matches ? 'dark' : 'light';
+        }
+        return 'light'; // Your default theme
+      }
+      const colorMode = getInitialColorMode();
+      if (colorMode === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    })()
+  `;
+  return <script dangerouslySetInnerHTML={{ __html: script }} />;
+};
 
 export default async function RootLayout({
   children
@@ -92,23 +71,23 @@ export default async function RootLayout({
   const activeThemeValue = cookieStore.get('active_theme')?.value;
   const isScaled = activeThemeValue?.endsWith('-scaled');
 
-  // We have removed the manual <head> tag from here.
-  // Next.js will now automatically create it and add your title and favicon.
   return (
     <html lang='en' suppressHydrationWarning>
       <body
         className={cn(
+          // <-- Using cn() to combine classes
           'bg-background overflow-hidden overscroll-none font-sans antialiased',
+          fontVariables, // <-- Applying the CSS font variable to the body
           activeThemeValue ? `theme-${activeThemeValue}` : '',
-          isScaled ? 'theme-scaled' : '',
-          fontVariables
+          isScaled ? 'theme-scaled' : ''
         )}
       >
+        <ThemeScript /> {/* Flicker-prevention script */}
         <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
           <ThemeProvider
             attribute='class'
-            defaultTheme='system'
+            defaultTheme='light'
             enableSystem
             disableTransitionOnChange
             enableColorScheme

@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
-  title: 'Sheetsway',
+  title: 'Dashboard',
   description: 'The premier audit marketplace for modern businesses.'
 };
 
