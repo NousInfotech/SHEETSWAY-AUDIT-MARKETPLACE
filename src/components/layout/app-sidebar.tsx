@@ -50,9 +50,10 @@ import { useAuth } from './providers';
 import { Icons } from '../icons';
 
 // 2. Import the specific Lucide icon for the "Request" item
-import { FilePlus2, Search } from 'lucide-react';
+import { FilePlus2, Search, Sigma } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';
+import { useSidebar } from '@/components/ui/sidebar';
 
 export const company = {
   name: 'Acme Inc',
@@ -67,6 +68,7 @@ const tenants = [
 ];
 
 export default function AppSidebar() {
+  const { state } = useSidebar();
   const pathname = usePathname();
   const { isOpen } = useMediaQuery();
   const router = useRouter();
@@ -89,15 +91,24 @@ export default function AppSidebar() {
     <Sidebar collapsible='icon'>
       <SidebarHeader>
         {/* <StaticOrgDisplay app='Audit Market Place' name='Sheetsway' /> */}
+        {state === 'expanded' ? (
         <div className='mx-auto w-[95%]'>
           <img src='/assets/sheetswaylogo.png' alt='logo' />
-        </div>
-        <div className='relative mx-auto my-2 w-[95%]'>
-          <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
-
-          <Input placeholder='search ...' className='pl-10' />
-        </div>
-
+        </div>): (<div className='text-[#dc6713] text-center text-3xl'>
+            S
+          </div>)}
+        {state === 'expanded' ? (
+          <>
+            <div className='relative mx-auto my-2 w-[95%]'>
+              <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+              <Input placeholder='search ...' className='pl-10' />
+            </div>
+          </>
+        ) : (
+          <div className='flex justify-center'>
+            <Search className='h-4 w-4' />
+          </div>
+        )}
         <div className='flex w-full justify-center'>
           <Separator className='!w-[95%]' />
         </div>
