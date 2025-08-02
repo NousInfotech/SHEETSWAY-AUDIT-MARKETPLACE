@@ -202,6 +202,7 @@ import {
   CardTitle,
   CardDescription
 } from '@/components/ui/card';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { IconTrendingDown, IconTrendingUp } from '@tabler/icons-react';
 import {
   Layers,
@@ -292,7 +293,7 @@ export default function OverViewLayout({
 }) {
   const router = useRouter();
   const [date, setDate] = React.useState<Date | undefined>(new Date());
-  const { firebaseUser } = useAuth();
+  const { appUser, firebaseUser } = useAuth();
 
   const quickActions = [
     {
@@ -366,289 +367,321 @@ export default function OverViewLayout({
 
   return (
     <PageContainer>
-      <div className='container flex flex-1 flex-col space-y-6 rounded-lg p-4 not-dark:bg-gray-50/75'>
-        <div className='grid h-full w-full grid-cols-1 gap-3 lg:grid-cols-3'>
-          <div className='col-span-2 grid h-full w-full'>
-            <div className='flex h-full w-full flex-col justify-between gap-5'>
-              <div className='flex h-fit w-full flex-col items-center justify-between gap-2 pt-2 md:flex md:flex-row'>
-                <h2 className='text-3xl font-bold tracking-tight whitespace-nowrap'>
-                  Hi, Welcome Back 👋
-                </h2>
+      <div style={{ position: 'relative', width: '100%', height: '578px' }}>
+        <ScrollArea
+          style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+        >
+          <div
+            style={{ minWidth: '1200px' }}
+            className='flex flex-1 shrink-0 flex-col space-y-6 rounded-lg p-4 not-dark:bg-gray-50/75'
+          >
+            <div className='grid h-full w-full grid-cols-3 gap-3'>
+              <div className='col-span-2 grid h-full w-full'>
+                <div className='flex h-full w-full flex-col justify-between gap-5'>
+                  <div className='flex h-fit w-full items-center justify-between gap-2 pt-2'>
+                    <div className='flex flex-col'>
+                      <span className='text-3xl font-bold tracking-tight whitespace-nowrap'>
+                        Hi, Welcome Back 👋
+                      </span>
+                      <span className='italic'>
+                        {firebaseUser?.displayName || appUser?.name || ''} !!
+                      </span>
+                    </div>
 
-                <div className='flex flex-col items-center gap-2 md:flex md:flex-row'>
-                  <div className='w-full rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
-                    <div>
-                      <div>Active Engagements</div>
-                      <div className='text-4xl font-bold'>10</div>
-                      <div
-                        onClick={() => router.push('/dashboard/engagements')}
-                        className='mt-2 flex cursor-pointer items-center text-sm font-semibold text-blue-600'
-                      >
-                        View Details
-                        <IconTrendingUp className='ml-1 size-4' />
+                    <div className='flex items-center gap-2'>
+                      <div className='w-full rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
+                        <div>
+                          <div>Active Engagements</div>
+                          <div className='text-4xl font-bold'>10</div>
+                          <div
+                            onClick={() =>
+                              router.push('/dashboard/engagements')
+                            }
+                            className='mt-2 flex cursor-pointer items-center text-sm font-semibold text-blue-600'
+                          >
+                            View Details
+                            <IconTrendingUp className='ml-1 size-4' />
+                          </div>
+                          <p className='text-xs whitespace-nowrap text-gray-500'>
+                            see all the active engagements
+                          </p>
+                        </div>
                       </div>
-                      <p className='text-xs whitespace-nowrap text-gray-500'>
-                        see all the active engagements
-                      </p>
-                    </div>
-                  </div>
-                  <div className='w-full rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
-                    <div>
-                      <div>Open Proposals</div>
-                      <div className='text-4xl font-bold'>70</div>
-                      <div
-                        onClick={() => router.push('/dashboard/proposals')}
-                        className='mt-2 flex cursor-pointer items-center text-sm font-semibold text-blue-600'
-                      >
-                        View Details
-                        <IconTrendingDown className='ml-1 size-4' />
+                      <div className='w-full rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
+                        <div>
+                          <div>Open Proposals</div>
+                          <div className='text-4xl font-bold'>70</div>
+                          <div
+                            onClick={() => router.push('/dashboard/proposals')}
+                            className='mt-2 flex cursor-pointer items-center text-sm font-semibold text-blue-600'
+                          >
+                            View Details
+                            <IconTrendingDown className='ml-1 size-4' />
+                          </div>
+                          <p className='text-xs text-gray-500'>
+                            see all the proposals available
+                          </p>
+                        </div>
                       </div>
-                      <p className='text-xs text-gray-500'>
-                        see all the proposals available
-                      </p>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Progress Card */}
-              <Card className='border-t-8 border-t-yellow-500 shadow-sm not-dark:bg-white'>
-                <CardHeader>
-                  <div className='flex flex-col gap-2 md:flex md:flex-row md:items-center md:justify-between'>
-                    <p className='flex flex-col text-sm font-bold md:flex md:flex-row md:items-center md:text-lg'>
-                      <BarChart3 size={20} className='mr-2 text-amber-500' />
-                      <span>Progress: </span>
-                      <span className='ml-1 font-normal'>
-                        Report is ready for your confirmation
-                      </span>
-                    </p>
-
-                    <p className='text-sm'>
-                      deadline:{' '}
-                      <span className='font-semibold text-gray-800'>
-                        3rd July 2025 - 22 days
-                      </span>
-                    </p>
-                    <Button
-                      size='sm'
-                      className='w-fit rounded-full bg-blue-600 text-sm text-white hover:bg-blue-700'
-                    >
-                      Extend
-                    </Button>
-                  </div>
-                  <div className='flex flex-col md:flex md:flex-row md:items-center md:justify-between'>
-                    <Button
-                      variant='outline'
-                      className='h-8 w-fit rounded-lg text-gray-700'
-                    >
-                      Engagement Name <ChevronDown size={16} className='ml-2' />
-                    </Button>
-                    <div className='text-sm font-semibold'>
-                      Status:{' '}
-                      <span className='text-amber-500'>
-                        Pending Client Response
-                      </span>
-                    </div>
-                  </div>
-                  <ProgressStepper />
-                </CardHeader>
-              </Card>
-
-              {/* Quick Actions */}
-              <div className='rounded-lg border border-t-8 border-t-blue-300 p-4 shadow-sm not-dark:bg-white'>
-                <h3 className='flex items-center text-xl font-bold text-gray-700'>
-                  {' '}
-                  <span className='mr-2 text-2xl font-black text-blue-500'>
-                    »
-                  </span>{' '}
-                  Quick Actions
-                </h3>
-                <div className='mt-4 grid grid-cols-2 gap-4 md:grid-cols-4'>
-                  {quickActions.map((action) => (
-                    <Link href={action.link} key={action.name}>
-                      <div className='flex h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-200 p-4 text-center transition-all not-dark:bg-white hover:border-gray-300 hover:shadow-md'>
-                        {action.icon}
-                        <p className='mt-2 text-xs font-semibold text-gray-700'>
-                          {action.name}
+                  {/* Progress Card */}
+                  <Card className='border-t-8 border-t-yellow-500 shadow-sm not-dark:bg-white'>
+                    <CardHeader>
+                      <div className='flex gap-2 md:items-center md:justify-between'>
+                        <p className='flex text-sm font-bold md:items-center md:text-lg'>
+                          <BarChart3
+                            size={20}
+                            className='mr-2 text-amber-500'
+                          />
+                          <span>Progress: </span>
+                          <span className='ml-1 font-normal'>
+                            Report is ready for your confirmation
+                          </span>
                         </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
 
-              {/* === Your Requests Card - CORRECTED LAYOUT === */}
-
-              <div className='flex w-full flex-col items-center justify-between gap-2 md:flex md:flex-row'>
-                <div className='h-auto w-full rounded-lg border border-t-8 border-t-green-300 p-2 shadow-md not-dark:bg-white md:h-full md:w-3/4'>
-                  <div className='py-5'>
-                    <div className='flex items-center text-lg'>
-                      <PlusSquare size={20} className='mr-2 text-green-600' />{' '}
-                      Your Requests
-                    </div>
-                  </div>
-
-                  <div className='flex w-full flex-col items-center gap-2 md:flex md:flex-row'>
-                    <div className='w-full rounded-xl border p-4 shadow not-dark:bg-white'>
-                      <div className='my-2 flex items-center justify-between'>
-                        <h3>Total Requests</h3>
-                        <Upload size={16} className='text-gray-400' />
-                      </div>
-                      <p className='my-2 text-4xl font-bold'>5</p>
-                      <p className='my-2 text-xs text-gray-500'>
-                        3 open, 1 in progress
-                      </p>
-                    </div>
-
-                    <div className='w-full rounded-xl border p-4 shadow not-dark:bg-white'>
-                      <div className='my-2 flex items-center justify-between'>
-                        <h3>Total Proposals</h3>
-                        <Users size={16} className='text-gray-400' />
-                      </div>
-                      <p className='my-2 text-4xl font-bold'>5</p>
-                      <p className='my-2 text-xs text-gray-500'>
-                        2 pending, 2 accepted
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='inline-flex h-[255px] w-[200px] overflow-hidden rounded-lg border border-t-8 border-t-teal-950 shadow-md'>
-                  <Calendar
-                    mode='single'
-                    selected={date}
-                    onSelect={setDate}
-                    className='h-[425px] origin-top-left scale-60 not-dark:bg-white'
-                    captionLayout='dropdown'
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className='col-span-1 grid'>
-            <div className='flex flex-col gap-6 lg:col-span-1'>
-              {/* Actions Pending */}
-              <Card className='border-t-8 border-t-yellow-500 shadow-sm not-dark:bg-white'>
-                <CardHeader>
-                  <CardTitle className='flex items-center text-lg'>
-                    <AlertCircle size={20} className='mr-2 text-amber-500' />{' '}
-                    Actions Pending
-                  </CardTitle>
-                  <div className='mt-4 space-y-3'>
-                    {pendingActions.map((action, i) => (
-                      <div
-                        key={i}
-                        className='flex items-center justify-between text-sm'
-                      >
-                        <p className='pr-2 text-gray-600'>{action.text}</p>
-                        <Button className='h-6 flex-shrink-0 rounded-full bg-amber-100 px-3 text-xs font-semibold text-amber-600 hover:bg-amber-200'>
-                          go to
+                        <p className='text-sm'>
+                          deadline:{' '}
+                          <span className='font-semibold text-gray-800'>
+                            3rd July 2025 - 22 days
+                          </span>
+                        </p>
+                        <Button
+                          size='sm'
+                          className='w-fit rounded-full bg-blue-600 text-sm text-white hover:bg-blue-700'
+                        >
+                          Extend
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                </CardHeader>
-              </Card>
+                      <div className='flex md:items-center md:justify-between'>
+                        <Button
+                          variant='outline'
+                          className='h-8 w-fit rounded-lg text-gray-700'
+                        >
+                          Engagement Name{' '}
+                          <ChevronDown size={16} className='ml-2' />
+                        </Button>
+                        <div className='text-sm font-semibold'>
+                          Status:{' '}
+                          <span className='text-amber-500'>
+                            Pending Client Response
+                          </span>
+                        </div>
+                      </div>
+                      <ProgressStepper />
+                    </CardHeader>
+                  </Card>
 
-              {/* Upcoming Meeting */}
-              <Card className='border-t-8 border-t-red-800 shadow-sm not-dark:bg-white'>
-                <CardHeader>
-                  <CardTitle className='flex items-center text-lg'>
-                    <span className='mr-2 text-xl text-red-500'>📅</span>{' '}
-                    Upcoming Meeting
-                    <ArrowRight className='ml-auto text-gray-400' size={16} />
-                  </CardTitle>
-                  <div className='mt-2 flex items-center justify-between'>
-                    <div>
-                      <p className='flex items-center gap-1'>
-                        <span className='text-sm font-semibold whitespace-nowrap text-gray-500'>
-                          See all the upcoming meetings
-                        </span>
-                        <Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
-                          6
-                        </Badge>
-                      </p>
-                    </div>
-                    <div className='text-right'>
-                      <p className='text-lg font-bold text-orange-500'>
-                        25th June 2025
-                      </p>
-                      <p className='text-sm text-gray-600'>10:30am (GMT+1)</p>
+                  {/* Quick Actions */}
+                  <div className='rounded-lg border border-t-8 border-t-blue-300 p-4 shadow-sm not-dark:bg-white'>
+                    <h3 className='flex items-center text-xl font-bold text-gray-700'>
+                      {' '}
+                      <span className='mr-2 text-2xl font-black text-blue-500'>
+                        »
+                      </span>{' '}
+                      Quick Actions
+                    </h3>
+                    <div className='mt-4 grid grid-cols-4 gap-4'>
+                      {quickActions.map((action) => (
+                        <Link href={action.link} key={action.name}>
+                          <div className='flex h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-200 p-4 text-center transition-all not-dark:bg-white hover:border-gray-300 hover:shadow-md'>
+                            {action.icon}
+                            <p className='mt-2 text-xs font-semibold text-gray-700'>
+                              {action.name}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
                     </div>
                   </div>
-                </CardHeader>
-              </Card>
 
-              {/* Mail Card */}
-              <Card className='border-t-8 border-t-blue-500 shadow-sm not-dark:bg-white'>
-                <CardHeader>
-                  <CardTitle className='flex items-center text-lg'>
-                    <Mail size={20} className='mr-2 text-blue-500' /> Mail
-                  </CardTitle>
-                  <div className='mt-4 space-y-3'>
-                    {mailItems.map((item, i) => (
-                      <div
-                        key={i}
-                        className='flex items-center justify-between gap-2 text-sm'
-                      >
+                  {/* === Your Requests Card - CORRECTED LAYOUT === */}
+
+                  <div className='flex w-full items-center justify-between gap-2'>
+                    <div className='h-auto w-full rounded-lg border border-t-8 border-t-green-300 p-2 shadow-md not-dark:bg-white md:h-full md:w-3/4'>
+                      <div className='py-5'>
+                        <div className='flex items-center text-lg'>
+                          <PlusSquare
+                            size={20}
+                            className='mr-2 text-green-600'
+                          />{' '}
+                          Your Requests
+                        </div>
+                      </div>
+
+                      <div className='flex w-full items-center gap-2'>
+                        <div className='w-full rounded-xl border p-4 shadow not-dark:bg-white'>
+                          <div className='my-2 flex items-center justify-between'>
+                            <h3>Total Requests</h3>
+                            <Upload size={16} className='text-gray-400' />
+                          </div>
+                          <p className='my-2 text-4xl font-bold'>5</p>
+                          <p className='my-2 text-xs text-gray-500'>
+                            3 open, 1 in progress
+                          </p>
+                        </div>
+
+                        <div className='w-full rounded-xl border p-4 shadow not-dark:bg-white'>
+                          <div className='my-2 flex items-center justify-between'>
+                            <h3>Total Proposals</h3>
+                            <Users size={16} className='text-gray-400' />
+                          </div>
+                          <p className='my-2 text-4xl font-bold'>5</p>
+                          <p className='my-2 text-xs text-gray-500'>
+                            2 pending, 2 accepted
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className='inline-flex min-h-[255px] h-[255px] min-w-[200px] w-[200px] overflow-hidden rounded-lg border border-t-8 border-t-teal-950 shadow-md'>
+                      <Calendar
+                        mode='single'
+                        selected={date}
+                        onSelect={setDate}
+                        className='h-[425px] origin-top-left scale-60 not-dark:bg-white'
+                        captionLayout='dropdown'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='col-span-1 grid'>
+                <div className='flex flex-col gap-6 lg:col-span-1'>
+                  {/* Actions Pending */}
+                  <Card className='border-t-8 border-t-yellow-500 shadow-sm not-dark:bg-white'>
+                    <CardHeader>
+                      <CardTitle className='flex items-center text-lg'>
+                        <AlertCircle
+                          size={20}
+                          className='mr-2 text-amber-500'
+                        />{' '}
+                        Actions Pending
+                      </CardTitle>
+                      <div className='mt-4 space-y-3'>
+                        {pendingActions.map((action, i) => (
+                          <div
+                            key={i}
+                            className='flex items-center justify-between text-sm'
+                          >
+                            <p className='pr-2 text-gray-600'>{action.text}</p>
+                            <Button className='h-6 flex-shrink-0 rounded-full bg-amber-100 px-3 text-xs font-semibold text-amber-600 hover:bg-amber-200'>
+                              go to
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardHeader>
+                  </Card>
+
+                  {/* Upcoming Meeting */}
+                  <Card className='border-t-8 border-t-red-800 shadow-sm not-dark:bg-white'>
+                    <CardHeader>
+                      <CardTitle className='flex items-center text-lg'>
+                        <span className='mr-2 text-xl text-red-500'>📅</span>{' '}
+                        Upcoming Meeting
+                        <ArrowRight
+                          className='ml-auto text-gray-400'
+                          size={16}
+                        />
+                      </CardTitle>
+                      <div className='mt-2 flex items-center justify-between'>
                         <div>
-                          <p className='font-semibold'>{item.auditor}</p>
-                          <p className='text-xs text-gray-500'>
-                            New Messages
+                          <p className='flex items-center gap-1'>
+                            <span className='text-sm font-semibold whitespace-nowrap text-gray-500'>
+                              See all the upcoming meetings
+                            </span>
                             <Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
-                              3
+                              6
                             </Badge>
                           </p>
                         </div>
                         <div className='text-right'>
-                          <p className='font-semibold'>{item.engagement}</p>
-                          <p className='text-xs text-gray-500'>
-                            latest: {item.time}
+                          <p className='text-lg font-bold text-orange-500'>
+                            25th June 2025
+                          </p>
+                          <p className='text-sm text-gray-600'>
+                            10:30am (GMT+1)
                           </p>
                         </div>
-                        <Button
-                          variant='outline'
-                          className='h-7 flex-shrink-0 rounded-full border-blue-600 px-4 font-semibold text-blue-600 hover:bg-blue-50'
-                        >
-                          open
-                        </Button>
                       </div>
-                    ))}
-                  </div>
-                </CardHeader>
-              </Card>
+                    </CardHeader>
+                  </Card>
 
-              {/* Updates Card */}
-              <Card className='border-t-8 border-t-emerald-800 shadow-sm not-dark:bg-white'>
-                <CardHeader>
-                  <CardTitle className='flex items-center text-lg'>
-                    <RefreshCw size={20} className='mr-2 text-green-600' />{' '}
-                    Updates
-                  </CardTitle>
-                  <ul className='mt-4 list-inside list-disc space-y-2.5 text-sm text-gray-700'>
-                    {updates.map((update, i) => (
-                      <li key={i} className='flex justify-between'>
-                        <span>{update.text}</span>
-                        <span className='flex-shrink-0 pl-2 text-xs whitespace-nowrap text-gray-400'>
-                          {update.time}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardHeader>
-              </Card>
+                  {/* Mail Card */}
+                  <Card className='border-t-8 border-t-blue-500 shadow-sm not-dark:bg-white'>
+                    <CardHeader>
+                      <CardTitle className='flex items-center text-lg'>
+                        <Mail size={20} className='mr-2 text-blue-500' /> Mail
+                      </CardTitle>
+                      <div className='mt-4 space-y-3'>
+                        {mailItems.map((item, i) => (
+                          <div
+                            key={i}
+                            className='flex items-center justify-between gap-2 text-sm'
+                          >
+                            <div>
+                              <p className='font-semibold'>{item.auditor}</p>
+                              <p className='text-xs text-gray-500'>
+                                New Messages
+                                <Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
+                                  3
+                                </Badge>
+                              </p>
+                            </div>
+                            <div className='text-right'>
+                              <p className='font-semibold'>{item.engagement}</p>
+                              <p className='text-xs text-gray-500'>
+                                latest: {item.time}
+                              </p>
+                            </div>
+                            <Button
+                              variant='outline'
+                              className='h-7 flex-shrink-0 rounded-full border-blue-600 px-4 font-semibold text-blue-600 hover:bg-blue-50'
+                            >
+                              open
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardHeader>
+                  </Card>
+
+                  {/* Updates Card */}
+                  <Card className='border-t-8 border-t-emerald-800 shadow-sm not-dark:bg-white'>
+                    <CardHeader>
+                      <CardTitle className='flex items-center text-lg'>
+                        <RefreshCw size={20} className='mr-2 text-green-600' />{' '}
+                        Updates
+                      </CardTitle>
+                      <ul className='mt-4 list-inside list-disc space-y-2.5 text-sm text-gray-700'>
+                        {updates.map((update, i) => (
+                          <li key={i} className='flex justify-between'>
+                            <span>{update.text}</span>
+                            <span className='flex-shrink-0 pl-2 text-xs whitespace-nowrap text-gray-400'>
+                              {update.time}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardHeader>
+                  </Card>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* --- CHARTS Section (Unchanged as requested) --- */}
-        <div className='mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7'>
-          <div className='col-span-4'>{bar_stats}</div>
-          <div className='col-span-4 md:col-span-3'>{sales}</div>
-          <div className='col-span-4'>{area_stats}</div>
-          <div className='col-span-4 md:col-span-3'>{pie_stats}</div>
-        </div>
+            {/* --- CHARTS Section (Unchanged as requested) --- */}
+            {/* <div className='mt-6 grid w-[50%] grid-cols-1 gap-4 md:w-full md:grid-cols-2'>
+              <div>{bar_stats}</div>
+              <div>{sales}</div>
+              <div>{area_stats}</div>
+              <div>{pie_stats}</div>
+            </div> */}
+          </div>
+          <ScrollBar orientation='horizontal' />
+        </ScrollArea>
       </div>
     </PageContainer>
   );
