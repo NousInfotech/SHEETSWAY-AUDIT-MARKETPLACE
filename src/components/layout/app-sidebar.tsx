@@ -97,7 +97,9 @@ export default function AppSidebar() {
             <img src='/assets/sheetswaylogo.png' alt='logo' />
           </div>
         ) : (
-          <div className='text-center text-3xl text-[#dc6713]'>S</div>
+          <div>
+            <img src='/favicon/favicon.svg' alt='logo' className='h-6 w-6 mx-auto'/>
+          </div>
         )}
         {state === 'expanded' ? (
           <>
