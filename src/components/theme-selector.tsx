@@ -54,10 +54,10 @@ const MONO_THEMES = [
 export function ThemeSelector() {
 
   
-  const { activeTheme, setActiveTheme } = useThemeConfig({defaultTheme: 'amber'});
+  const { activeTheme, setActiveTheme } = useThemeConfig({defaultTheme: 'default'});
 
   useEffect(() => {
-    setActiveTheme('amber');
+    setActiveTheme('default');
   }, [setActiveTheme]);
 
   return (
