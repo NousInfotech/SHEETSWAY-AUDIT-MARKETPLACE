@@ -22,9 +22,9 @@ export const metadata: Metadata = {
   },
   description: 'The premier audit marketplace for modern businesses.',
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png'
+    icon: '/favicon/favicon.svg',
+    shortcut: '/favicon/favicon-16x16.png',
+    apple: '/favicon/apple-touch-icon.png'
   }
 };
 
