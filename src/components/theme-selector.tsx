@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { useEffect } from 'react';
 
 const DEFAULT_THEMES = [
   {
@@ -51,7 +52,13 @@ const MONO_THEMES = [
 ];
 
 export function ThemeSelector() {
-  const { activeTheme, setActiveTheme } = useThemeConfig({defaultTheme: 'default'});
+
+  
+  const { activeTheme, setActiveTheme } = useThemeConfig({defaultTheme: 'amber'});
+
+  useEffect(() => {
+    setActiveTheme('amber');
+  }, [setActiveTheme]);
 
   return (
     <div className='hidden md:flex items-center gap-2'>
