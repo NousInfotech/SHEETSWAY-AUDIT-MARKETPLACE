@@ -101,21 +101,21 @@ export function ProposalsTable({
         </div>
       )
     },
-    {
-      accessorKey: 'auditorId',
-      header: 'Auditor',
-      cell: ({ row }) => {
-        const proposal = row.original;
-        return (
-          <div className='flex items-center gap-2'>
-            <span>Anonymous</span>
-            <Button size='sm' variant='outline' onClick={() => router.push(`/dashboard/profile/${proposal.auditorId}`)}>
-              View Profile
-            </Button>
-          </div>
-        );
-      }
-    },
+    // {
+    //   accessorKey: 'auditorId',
+    //   header: 'Auditor',
+    //   cell: ({ row }) => {
+    //     const proposal = row.original;
+    //     return (
+    //       <div className='flex items-center gap-2'>
+    //         <span>Anonymous</span>
+    //         <Button size='sm' variant='outline' onClick={() => router.push(`/dashboard/profile/${proposal.auditorId}`)}>
+    //           View Profile
+    //         </Button>
+    //       </div>
+    //     );
+    //   }
+    // },
     {
       accessorKey: 'quotation', // was 'proposedBudget'
       header: ({ column }) => {

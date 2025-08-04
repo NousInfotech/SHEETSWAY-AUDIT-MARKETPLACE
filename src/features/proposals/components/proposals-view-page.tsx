@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -42,12 +42,6 @@ import { saveAs } from 'file-saver';
 import { getPresignedAccessUrl } from '@/api/client-request.api';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
-// --- MOCK DATA FOR TESTING PURPOSES ---
-// --- END MOCK DATA ---
-
-// Remove selectedRequestId, selectedRequest, proposalsForRequest from props
-type ProposalsViewPageProps = {};
-
 export function ProposalsViewPage() {
   const searchParams = useSearchParams();
   const requestId = searchParams.get('requestId');
@@ -61,6 +55,13 @@ export function ProposalsViewPage() {
     setSelectedProposal,
     getProposalsByStatus
   } = useProposalsStore();
+
+
+
+  
+
+
+
 
   const [businessProfiles, setBusinessProfiles] = useState<
     { id: string; name?: string; size?: string }[]
@@ -202,6 +203,7 @@ export function ProposalsViewPage() {
   const filteredProposalsForRequest = proposalsForRequest.filter(
     (proposal) => proposal.clientRequestId === requestId
   );
+
   console.log(
     'Filtered proposals:',
     filteredProposalsForRequest,
@@ -215,6 +217,48 @@ export function ProposalsViewPage() {
 
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [showProposalDetails, setShowProposalDetails] = useState(false);
+
+
+
+
+
+  const [requestsDivHeight, setRequestsDivHeight] = useState<number | 'auto'>(
+    'auto'
+  );
+  const [proposalsDivHeight, setProposalsDivHeight] = useState<number | 'auto'>(
+    'auto'
+  );
+
+  // 3. A ref that we will attach to the content we want to measure
+  const requestsDivWrapperRef = useRef<HTMLDivElement>(null);
+  const proposalsDivWrapperRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    // Check if the ref is attached to the div
+    if (requestsDivWrapperRef.current) {
+      // 'scrollHeight' gives us the full height of the content, even if it's overflowing
+      const height = requestsDivWrapperRef.current.scrollHeight;
+      setRequestsDivHeight(height);
+    }
+    // This effect will re-run if the 'requests' array changes,
+    // ensuring the height is recalculated if the table grows or shrinks.
+  }, [requests, showRequestDetails, showProposalDetails]);
+
+  useLayoutEffect(() => {
+    // Check if the ref is attached to the div
+    if (proposalsDivWrapperRef.current) {
+      // 'scrollHeight' gives us the full height of the content, even if it's overflowing
+      const height = proposalsDivWrapperRef.current.scrollHeight;
+      setProposalsDivHeight(height);
+    }
+    // This effect will re-run if the 'requests' array changes,
+    // ensuring the height is recalculated if the table grows or shrinks.
+  }, [proposals, showRequestDetails, showProposalDetails]);
+
+
+
+
+
 
   // Calculate statistics
   const totalRequests = requests.length;
@@ -508,34 +552,51 @@ export function ProposalsViewPage() {
         </Card>
 
         {/* Proposals for this request (fetched from backend) */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              Proposals ({filteredProposalsForRequest.length})
-            </CardTitle>
-            <CardDescription>
-              Proposals submitted for this request
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {filteredProposalsForRequest.length > 0 ? (
-              <ProposalsTable
-                proposals={filteredProposalsForRequest}
-                onProposalSelect={handleProposalSelect}
-                onAcceptProposal={handleAcceptProposal}
-                onRejectProposal={handleRejectProposal}
-              />
-            ) : (
-              <div className='py-8 text-center'>
-                <FileText className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
-                <h3 className='mb-2 text-lg font-semibold'>No proposals yet</h3>
-                <p className='text-muted-foreground'>
-                  No proposals have been submitted for this request.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <div style={{ position: 'relative', minHeight: '308px', height: proposalsDivHeight }} >
+          <ScrollArea
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0
+            }}
+          >
+            <div ref={proposalsDivWrapperRef} style={{ minWidth: '1230px' }}>
+              <Card className='w-full'>
+                <CardHeader>
+                  <CardTitle>
+                    Proposals ({filteredProposalsForRequest.length})
+                  </CardTitle>
+                  <CardDescription>
+                    Proposals submitted for this request
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {filteredProposalsForRequest.length > 0 ? (
+                    <ProposalsTable
+                      proposals={filteredProposalsForRequest}
+                      onProposalSelect={handleProposalSelect}
+                      onAcceptProposal={handleAcceptProposal}
+                      onRejectProposal={handleRejectProposal}
+                    />
+                  ) : (
+                    <div className='py-8 text-center'>
+                      <FileText className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
+                      <h3 className='mb-2 text-lg font-semibold'>
+                        No proposals yet
+                      </h3>
+                      <p className='text-muted-foreground'>
+                        No proposals have been submitted for this request.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            <ScrollBar orientation='horizontal' />
+          </ScrollArea>
+        </div>
 
         {/* Proposal Details Modal */}
         <ProposalDetailsModal
@@ -632,11 +693,11 @@ export function ProposalsViewPage() {
 
       {/* All Requests */}
 
-      <div style={{ position: 'relative', height: '520px' }}>
+      <div style={{ position: 'relative', minHeight: '390px', height: requestsDivHeight }}>
         <ScrollArea
           style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
         >
-          <div style={{ minWidth: '1230px' }}>
+          <div ref={requestsDivWrapperRef} style={{ minWidth: '1230px' }}>
             <Card className='w-full'>
               <CardHeader>
                 <CardTitle>All Requests</CardTitle>
@@ -677,3 +738,5 @@ export function ProposalsViewPage() {
     </div>
   );
 }
+
+// 308px, 390px
