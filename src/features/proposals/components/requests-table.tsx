@@ -140,7 +140,7 @@ export function RequestsTable({
     },
     {
       accessorKey: 'deadline',
-      header: 'Deadline',
+      header: 'Duration',
       cell: ({ row }) => {
         const deadlineRaw =
           row.getValue('deadline') || row.getValue('deliveryDeadline');
