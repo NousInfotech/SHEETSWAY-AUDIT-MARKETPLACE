@@ -189,6 +189,7 @@
 
 // ########################################################################################################
 
+
 'use client';
 
 import PageContainer from '@/components/layout/page-container';
@@ -435,9 +436,9 @@ export default function OverViewLayout({
                             size={20}
                             className='mr-2 text-amber-500'
                           />
-                          <span>Progress: </span>
+                          
                           <span className='ml-1 font-normal'>
-                            Report is ready for your confirmation
+                            Progress: <span className='text-sm text-amber-500'>Report is ready for your confirmation</span>
                           </span>
                         </p>
 
@@ -535,7 +536,7 @@ export default function OverViewLayout({
                       </div>
                     </div>
 
-                    <div className='inline-flex min-h-[255px] h-[255px] min-w-[200px] w-[200px] overflow-hidden rounded-lg border border-t-8 border-t-teal-950 shadow-md'>
+                    <div className='inline-flex h-[255px] min-h-[255px] w-[200px] min-w-[200px] overflow-hidden rounded-lg border border-t-8 border-t-teal-950 shadow-md'>
                       <Calendar
                         mode='single'
                         selected={date}

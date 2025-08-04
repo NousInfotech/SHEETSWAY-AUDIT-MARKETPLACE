@@ -1018,7 +1018,7 @@ const RequestPage = () => {
               <label className='mb-2 block font-medium'>
                 Attach Documents (optional)
               </label>
-              <p className='py-1 text-sm text-red-400'>
+              <p className='py-1 text-sm text-amber-500'>
                 Upload your latest monthly statement. Allowed formats: .PDF,
                 .CSV. Max file size: 5MB
               </p>

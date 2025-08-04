@@ -288,8 +288,11 @@ export function ProposalsViewPage() {
   if (requestId && selectedRequest) {
     if (loading) {
       return (
-        <div className='flex min-h-screen w-full items-center justify-center'>
-          <Spinner size={48} className='text-primary' />
+        // <div className='flex min-h-screen w-full items-center justify-center'>
+        //   <Spinner size={48} className='text-primary' />
+        // </div>
+        <div className='flex h-[80vh] w-full items-center justify-center'>
+          <div className='proposalPage-loader' />
         </div>
       );
     }
@@ -312,7 +315,7 @@ export function ProposalsViewPage() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center rounded-full bg-blue-500/10 py-3'>
-              <span className=' p-2 text-blue-500'>
+              <span className='p-2 text-blue-500'>
                 <FileText className='h-6 w-6' />
               </span>
               Request Summary
