@@ -19,10 +19,14 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail
 } from '@/components/ui/sidebar';
 import { UserAvatarProfile } from '@/components/user-avatar-profile';
@@ -98,7 +102,11 @@ export default function AppSidebar() {
           </div>
         ) : (
           <div>
-            <img src='/favicon/favicon.svg' alt='logo' className='h-6 w-6 mx-auto'/>
+            <img
+              src='/favicon/favicon.svg'
+              alt='logo'
+              className='mx-auto h-6 w-6'
+            />
           </div>
         )}
         {state === 'expanded' ? (
@@ -119,6 +127,7 @@ export default function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className='overflow-x-hidden'>
         <SidebarGroup>
+          {/* <SidebarGroupLabel>Overview</SidebarGroupLabel> */}
           <SidebarMenu>
             {navItems.map((item) => {
               // We'll handle both collapsible and direct links
@@ -173,7 +182,23 @@ export default function AppSidebar() {
                           <IconChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
-                      {/* You would map sub-items here if needed */}
+                      {/*  sub-menu-items below if needed */}
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {item.items?.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.title}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={pathname === subItem.url}
+                              >
+                                <Link href={subItem.url}>
+                                  <span>{subItem.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
                     </SidebarMenuItem>
                   </Collapsible>
                 );
