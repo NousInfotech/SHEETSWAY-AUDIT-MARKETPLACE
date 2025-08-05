@@ -209,6 +209,7 @@ export function RequestsTable({
         const request = row.original;
         return (
           <Button
+          className='cursor-pointer'
             size='sm'
             variant='ghost'
             onClick={() => onViewProposals(request)}

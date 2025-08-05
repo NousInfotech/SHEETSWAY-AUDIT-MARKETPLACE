@@ -158,8 +158,9 @@ export function ProposalsTable({
       cell: ({ row }) => {
         const proposal = row.original;
         return (
-          <Button size='icon' variant='ghost' onClick={() => setOpenProposal(proposal)}>
-            <Eye className='h-5 w-5' />
+          <Button className='cursor-pointer' size='sm' variant='ghost' onClick={() => setOpenProposal(proposal)}>
+            {/* <Eye className='h-5 w-5' /> */}
+            View
           </Button>
         );
       }
