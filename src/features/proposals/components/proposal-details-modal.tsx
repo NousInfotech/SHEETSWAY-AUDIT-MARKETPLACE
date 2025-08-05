@@ -182,10 +182,11 @@ export function ProposalDetailsModal({
                 <p className='text-sm text-muted-foreground'>Auditor</p>
                 <div className='flex items-center gap-2'>
                   <span>Anonymous</span>
-                  <Button size='sm' variant='outline' onClick={() => router.push(`/dashboard/profile/${proposal.auditorId}`)}>
+                  <Button disabled size='sm' variant='outline' onClick={() => router.push(`/dashboard/profile/${proposal.auditorId}`)}>
                     View Profile
                   </Button>
                 </div>
+                  <small className='text-xs text-amber-500 whitespace-nowrap'>you can view the profile once you got approved</small>
               </div>
              
             </div>
@@ -239,3 +240,13 @@ export function ProposalDetailsModal({
     </Dialog>
   );
 } 
+
+
+
+
+
+// #############################################################################################
+
+
+
+
