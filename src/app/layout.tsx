@@ -82,7 +82,8 @@ export default async function RootLayout({
           isScaled ? 'theme-scaled' : ''
         )}
       >
-        <ThemeScript /> {/* Flicker-prevention script */}
+        {/* Flicker-prevention script */}
+        {/* <ThemeScript />  */}
         <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
           <ThemeProvider

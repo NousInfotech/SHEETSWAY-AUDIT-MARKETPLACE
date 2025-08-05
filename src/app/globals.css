@@ -164,10 +164,10 @@
 
 /* //proposal page loader */
 /* HTML: <div class="loader"></div> */
-.proposalPage-loader {
+.classic-loader {
   width: 60px;
   aspect-ratio: 2;
-  --_g: no-repeat radial-gradient(circle closest-side,#2b55e0 90%,#0000);
+  --_g: no-repeat radial-gradient(circle closest-side,#ff8c00 90%,#0000);
   background: 
     var(--_g) 0%   50%,
     var(--_g) 50%  50%,

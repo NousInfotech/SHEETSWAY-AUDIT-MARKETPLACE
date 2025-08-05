@@ -33,7 +33,7 @@ export default function ProposalsPage() {
       //   <Spinner size={48} className="text-primary" />
       // </div>
       <div className='flex h-[80vh] w-full items-center justify-center'>
-        <div className='proposalPage-loader' />
+        <div className='classic-loader' />
       </div>
     );
   }

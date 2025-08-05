@@ -1,14 +1,18 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import PlaidIntegrationList, { PlaidIntegration } from './plaid-integration-list';
+import PlaidIntegrationList, {
+  PlaidIntegration
+} from './plaid-integration-list';
 import PlaidIntegrationForm from './plaid-integration-form';
-import { mockPlaidIntegrations, generateMockPlaidIntegration } from '../utils/mock-data';
+import {
+  mockPlaidIntegrations,
+  generateMockPlaidIntegration
+} from '../utils/mock-data';
 import { getPlaidBankAccounts } from '@/api/user.api';
 import { useAuth } from '@/components/layout/providers';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
-
 
 export default function PlaidIntegrationTab() {
   const { appUser } = useAuth();
@@ -62,34 +66,43 @@ export default function PlaidIntegrationTab() {
   }
 
   return (
-    <div className="space-y-6">
-      <PlaidIntegrationForm open={open} onOpenChange={setOpen} onSubmit={handleConnect} />
+    <div className='space-y-6'>
+      <PlaidIntegrationForm
+        open={open}
+        onOpenChange={setOpen}
+        onSubmit={handleConnect}
+      />
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <Spinner size={48} className="text-primary" />
+        <div className='flex flex-col items-center justify-center py-12'>
+          <Spinner size={48} className='text-primary' />
         </div>
       ) : error ? (
-        <div className="text-red-500">{error}</div>
+        <div className='text-red-500'>{error}</div>
       ) : integrations.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 py-12 text-center border border-dashed rounded-xl border-gray-300 dark:border-gray-600">
-          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">No Plaid integrations found</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className='flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-gray-300 py-12 text-center dark:border-gray-600'>
+          <p className='text-lg font-medium text-gray-600 dark:text-gray-300'>
+            No Plaid integrations found
+          </p>
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
             Start by connecting a new Plaid integration.
           </p>
-          <Button variant="default" onClick={() => setOpen(true)}>
+          <Button variant='default' onClick={() => setOpen(true)}>
             Connect Plaid
           </Button>
         </div>
       ) : (
-        <PlaidIntegrationList integrations={integrations} onDelete={handleDelete} />
+        <PlaidIntegrationList
+          integrations={integrations}
+          onDelete={handleDelete}
+        />
       )}
       {integrations.length > 0 && !loading && (
-        <div className="mb-4">
-          <Button variant="default" onClick={() => setOpen(true)}>
+        <div className='mb-4'>
+          <Button variant='default' onClick={() => setOpen(true)}>
             Connect Plaid
           </Button>
         </div>
       )}
     </div>
   );
-} 
+}

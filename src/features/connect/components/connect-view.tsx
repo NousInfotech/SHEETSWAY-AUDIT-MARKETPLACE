@@ -8,8 +8,10 @@ import { UserChatView } from './user-chat-view';
 import { useSearchParams } from 'next/navigation';
 import { generateMockEngagements } from '@/features/engagements/data/mock-data';
 import type { Engagement } from '@/features/engagements/types/engagement-types';
+import { useMounted } from '@/hooks/use-mounted';
 
 export default function ConnectViewPage() {
+  const hasMounted = useMounted()
   // State management
   const [currentView, setCurrentView] = useState('dashboard');
   const searchParams = useSearchParams();
@@ -54,6 +56,10 @@ export default function ConnectViewPage() {
   const handleBack = () => {
     setCurrentView('dashboard');
   };
+
+  if (!hasMounted) {
+    return null; // Or <YourPageSkeleton />
+  }
 
   return (
     <div className={`min-h-screen transition-colors ${isDark ? 'dark' : ''}`}>

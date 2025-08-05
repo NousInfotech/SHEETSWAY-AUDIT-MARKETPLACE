@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { useEffect } from 'react';
 
 const DEFAULT_THEMES = [
   {
@@ -52,16 +51,12 @@ const MONO_THEMES = [
 ];
 
 export function ThemeSelector() {
-
-  
-  const { activeTheme, setActiveTheme } = useThemeConfig({defaultTheme: 'default'});
-
-  useEffect(() => {
-    setActiveTheme('default');
-  }, [setActiveTheme]);
+  const { activeTheme, setActiveTheme } = useThemeConfig({
+    defaultTheme: 'default'
+  });
 
   return (
-    <div className='hidden md:flex items-center gap-2'>
+    <div className='hidden items-center md:flex md:gap-2'>
       <Label htmlFor='theme-selector' className='sr-only'>
         Theme
       </Label>
@@ -70,10 +65,8 @@ export function ThemeSelector() {
           id='theme-selector'
           className='justify-start *:data-[slot=select-value]:w-12'
         >
-          <span className='text-muted-foreground hidden sm:block'>
-            theme:
-          </span>
-          <span className='text-muted-foreground block sm:hidden'>Theme</span>
+          <span className='text-muted-foreground hidden sm:block'>theme:</span>
+
           <SelectValue placeholder='Select a theme' />
         </SelectTrigger>
         <SelectContent align='end'>

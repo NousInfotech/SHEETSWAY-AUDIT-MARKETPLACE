@@ -1,7 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import ApideckIntegrationList, { ApideckIntegration } from './apideck-integration-list';
+import ApideckIntegrationList, {
+  ApideckIntegration
+} from './apideck-integration-list';
 import ApideckIntegrationForm from './apideck-integration-form';
 import { useAuth } from '@/components/layout/providers';
 import { getAccountingIntegrations } from '@/api/user.api';
@@ -42,7 +44,10 @@ export default function ApideckIntegrationTab() {
 
   function saveIntegrations(newIntegrations: ApideckIntegration[]) {
     setIntegrations(newIntegrations);
-    localStorage.setItem('apideckIntegrations', JSON.stringify(newIntegrations));
+    localStorage.setItem(
+      'apideckIntegrations',
+      JSON.stringify(newIntegrations)
+    );
   }
 
   function handleConnect(newIntegration: ApideckIntegration) {
@@ -61,30 +66,39 @@ export default function ApideckIntegrationTab() {
 
   // Only show integrations that are fully created (id, service, and status must exist)
   const validIntegrations = integrations.filter(
-    integration => integration.id && integration.service && integration.status
+    (integration) => integration.id && integration.service && integration.status
   );
 
   return (
-    <div className="space-y-6">
-      <ApideckIntegrationForm open={open} onOpenChange={setOpen} onSubmit={handleConnect} />
+    <div className='space-y-6'>
+      <ApideckIntegrationForm
+        open={open}
+        onOpenChange={setOpen}
+        onSubmit={handleConnect}
+      />
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <Spinner size={48} className="text-primary" />
+        <div className='flex flex-col items-center justify-center py-12'>
+          <Spinner size={48} className='text-primary' />
         </div>
       ) : error ? (
-        <div className="text-red-500">{error}</div>
+        <div className='text-red-500'>{error}</div>
       ) : validIntegrations.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 py-12 text-center border border-dashed rounded-xl border-gray-300 dark:border-gray-600">
-          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">No accounting integrations found</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className='flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-gray-300 py-12 text-center dark:border-gray-600'>
+          <p className='text-lg font-medium text-gray-600 dark:text-gray-300'>
+            No accounting integrations found
+          </p>
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
             Start by connecting a new accounting integration.
           </p>
-          <Button variant="default" onClick={() => setOpen(true)}>
+          <Button variant='default' onClick={() => setOpen(true)}>
             Connect Accounting
           </Button>
         </div>
       ) : (
-        <ApideckIntegrationList integrations={validIntegrations} onDelete={handleDelete} />
+        <ApideckIntegrationList
+          integrations={validIntegrations}
+          onDelete={handleDelete}
+        />
       )}
       {/* {integrations.length > 0 && !loading && (
         <div className="mb-4">
@@ -95,4 +109,4 @@ export default function ApideckIntegrationTab() {
       )} */}
     </div>
   );
-} 
+}

@@ -1,7 +1,21 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Engagement, AccountingData, BankingData, Payment, Contract, Review } from './types/engagement-types';
-import { generateMockEngagements, generateMockAccountingData, generateMockBankingData, generateMockPayments, generateMockContracts, generateMockReviews } from './data/mock-data';
+import {
+  Engagement,
+  AccountingData,
+  BankingData,
+  Payment,
+  Contract,
+  Review
+} from './types/engagement-types';
+import {
+  generateMockEngagements,
+  generateMockAccountingData,
+  generateMockBankingData,
+  generateMockPayments,
+  generateMockContracts,
+  generateMockReviews
+} from './data/mock-data';
 import ActiveEngagements from './components/ActiveEngagements';
 import EngagementWorkspace from './components/EngagementWorkspace';
 import AccountingDataTab from './components/AccountingDataTab';
@@ -15,7 +29,8 @@ import { Spinner } from '@/components/ui/spinner';
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
   const [currentPage, setCurrentPage] = useState('engagements');
-  const [selectedEngagement, setSelectedEngagement] = useState<Engagement | null>(null);
+  const [selectedEngagement, setSelectedEngagement] =
+    useState<Engagement | null>(null);
   const [currentWorkspaceTab, setCurrentWorkspaceTab] = useState('accounting');
   const [engagements, setEngagements] = useState<Engagement[]>([]);
   const [accountingData, setAccountingData] = useState<AccountingData[]>([]);
@@ -37,10 +52,22 @@ const EngagementViewPage = () => {
         ? JSON.parse(savedEngagements)
         : generateMockEngagements()
     );
-    setAccountingData(savedAccountingData ? JSON.parse(savedAccountingData) : generateMockAccountingData());
-    setBankingData(savedBankingData ? JSON.parse(savedBankingData) : generateMockBankingData());
-    setPayments(savedPayments ? JSON.parse(savedPayments) : generateMockPayments());
-    setContracts(savedContracts ? JSON.parse(savedContracts) : generateMockContracts());
+    setAccountingData(
+      savedAccountingData
+        ? JSON.parse(savedAccountingData)
+        : generateMockAccountingData()
+    );
+    setBankingData(
+      savedBankingData
+        ? JSON.parse(savedBankingData)
+        : generateMockBankingData()
+    );
+    setPayments(
+      savedPayments ? JSON.parse(savedPayments) : generateMockPayments()
+    );
+    setContracts(
+      savedContracts ? JSON.parse(savedContracts) : generateMockContracts()
+    );
     setReviews(savedReviews ? JSON.parse(savedReviews) : generateMockReviews());
     setLoading(false);
   }, []);
@@ -97,8 +124,10 @@ const EngagementViewPage = () => {
     setSelectedEngagement(null);
   };
   const updateEngagement = (updatedEngagement: Engagement) => {
-    setEngagements(prev => 
-      prev.map(eng => eng.id === updatedEngagement.id ? updatedEngagement : eng)
+    setEngagements((prev) =>
+      prev.map((eng) =>
+        eng.id === updatedEngagement.id ? updatedEngagement : eng
+      )
     );
     setSelectedEngagement(updatedEngagement);
   };
@@ -138,12 +167,28 @@ const EngagementViewPage = () => {
             onTabChange={setCurrentWorkspaceTab}
             onBack={handleBackToEngagements}
           >
-            {currentWorkspaceTab === 'accounting' && <AccountingDataTab data={accountingData} />}
-            {currentWorkspaceTab === 'banking' && <BankingDataTab data={bankingData} />}
-            {currentWorkspaceTab === 'payments' && <PaymentsContractsTab payments={payments} contracts={contracts} />}
-            {currentWorkspaceTab === 'reviews' && <ReviewsHistoryTab reviews={reviews} engagementId={selectedEngagement.id} />}
+            {currentWorkspaceTab === 'accounting' && (
+              <AccountingDataTab data={accountingData} />
+            )}
+            {currentWorkspaceTab === 'banking' && (
+              <BankingDataTab data={bankingData} />
+            )}
+            {currentWorkspaceTab === 'payments' && (
+              <PaymentsContractsTab payments={payments} contracts={contracts} />
+            )}
+            {currentWorkspaceTab === 'reviews' && (
+              <ReviewsHistoryTab
+                reviews={reviews}
+                engagementId={selectedEngagement.id}
+              />
+            )}
             {currentWorkspaceTab === 'documents' && <DocumentsTab />}
-            {currentWorkspaceTab === 'settings' && <EngagementSettingsTab engagement={selectedEngagement} onUpdate={updateEngagement} />}
+            {currentWorkspaceTab === 'settings' && (
+              <EngagementSettingsTab
+                engagement={selectedEngagement}
+                onUpdate={updateEngagement}
+              />
+            )}
           </EngagementWorkspace>
         ) : null;
       default:
@@ -153,19 +198,17 @@ const EngagementViewPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Spinner size={48} className="text-primary" />
+      <div className='flex min-h-[60vh] items-center justify-center'>
+        <Spinner size={48} className='text-primary' />
       </div>
     );
   }
 
   return (
-    
-    <div className="min-h-screen w-full bg-background text-foreground transition-colors">
+    <div className='bg-background text-foreground min-h-screen w-full transition-colors'>
       {renderCurrentPage()}
     </div>
-   
   );
 };
 
-export default EngagementViewPage; 
+export default EngagementViewPage;

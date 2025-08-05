@@ -224,8 +224,11 @@ const RequestPage = () => {
 
   if (loading) {
     return (
-      <div className='flex min-h-[60vh] items-center justify-center'>
-        <Spinner size={48} className='text-primary' />
+      // <div className='flex min-h-[60vh] items-center justify-center'>
+      //   <Spinner size={48} className='text-primary' />
+      // </div>
+      <div className='flex h-[80vh] w-full items-center justify-center'>
+        <div className='classic-loader' />
       </div>
     );
   }

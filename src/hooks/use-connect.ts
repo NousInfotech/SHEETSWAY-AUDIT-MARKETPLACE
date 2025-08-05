@@ -13,8 +13,12 @@ import {
   generateMeetingTitle,
   getMeetingDuration
 } from '@/lib/connect-utils';
+import { useTheme } from 'next-themes';
 
 export const useConnect = () => {
+  // ✅ Get theme from the central provider
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
   // Chat state
   const [chatMessages, setChatMessages] = useState<
     Record<string, ChatMessage[]>
@@ -29,21 +33,15 @@ export const useConnect = () => {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
 
-  // Theme state
-  const [isDark, setIsDark] = useState<boolean>(
-    loadFromLocalStorage('theme', false)
-  );
-
-  // Effects
+  // ✅ Corrected Effect: No longer responsible for the theme
   useEffect(() => {
-    saveToLocalStorage('theme', isDark);
     saveToLocalStorage('chatMessages', chatMessages);
     saveToLocalStorage('meetings', meetings);
-  }, [isDark, chatMessages, meetings]);
+  }, [chatMessages, meetings]);
 
-  // Handlers
+  // ✅ Corrected theme toggler
   const toggleTheme = () => {
-    setIsDark(!isDark);
+    setTheme(isDark ? 'light' : 'dark');
   };
 
   const handleSendMessage = () => {

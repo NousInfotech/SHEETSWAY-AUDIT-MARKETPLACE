@@ -2,12 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import BusinessProfileList from './business-profile-list';
-import BusinessProfileForm, { BusinessProfileFormValues } from './business-profile-form';
+import BusinessProfileForm, {
+  BusinessProfileFormValues
+} from './business-profile-form';
 import {
   getBusinessProfiles,
   createBusinessProfile,
   updateBusinessProfile,
-  deleteBusinessProfile,
+  deleteBusinessProfile
 } from '@/api/user.api';
 import { useAuth } from '@/components/layout/providers';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,7 +21,9 @@ interface BusinessProfileType extends BusinessProfileFormValues {
 
 export default function BusinessProfileTab() {
   const [open, setOpen] = useState(false);
-  const [editProfile, setEditProfile] = useState<BusinessProfileType | null>(null);
+  const [editProfile, setEditProfile] = useState<BusinessProfileType | null>(
+    null
+  );
   const [profiles, setProfiles] = useState<BusinessProfileType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +46,7 @@ export default function BusinessProfileTab() {
     try {
       if (!appUser) return;
       const data = await getBusinessProfiles({ userId: appUser.id });
-      if (!data) setProfiles([])
+      if (!data) setProfiles([]);
       setProfiles(data);
       localStorage.setItem('businessProfiles', JSON.stringify(data));
     } catch (err) {
@@ -52,7 +56,9 @@ export default function BusinessProfileTab() {
     }
   }
 
-  async function handleCreateOrUpdateProfile(profile: BusinessProfileFormValues) {
+  async function handleCreateOrUpdateProfile(
+    profile: BusinessProfileFormValues
+  ) {
     setLoading(true);
     try {
       if (editProfile) {
@@ -100,7 +106,7 @@ export default function BusinessProfileTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       <BusinessProfileForm
         open={open}
         onOpenChange={handleFormOpenChange}
@@ -110,19 +116,25 @@ export default function BusinessProfileTab() {
       />
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <Spinner size={48} className="text-primary" />
+        // <div className="flex flex-col items-center justify-center py-12">
+        //   <Spinner size={48} className="text-primary" />
+        // </div>
+        <div className='flex flex-col items-center justify-center py-36'>
+          <div className='classic-loader' />
         </div>
       ) : error ? (
-        <div className="text-red-500">{error}</div>
+        <div className='text-red-500'>{error}</div>
       ) : profiles.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 py-12 text-center border border-dashed rounded-xl border-gray-300 dark:border-gray-600">
-          <p className="text-lg font-medium text-gray-600 dark:text-gray-300">No business profiles found</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Start by creating a new business profile to begin your audit journey.
+        <div className='flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-gray-300 py-12 text-center dark:border-gray-600'>
+          <p className='text-lg font-medium text-gray-600 dark:text-gray-300'>
+            No business profiles found
+          </p>
+          <p className='text-sm text-gray-500 dark:text-gray-400'>
+            Start by creating a new business profile to begin your audit
+            journey.
           </p>
           <Button
-            variant="default"
+            variant='default'
             onClick={() => {
               setEditProfile(null);
               setOpen(true);
@@ -139,21 +151,19 @@ export default function BusinessProfileTab() {
         />
       )}
 
-      {
-
-        profiles.length > 0 && (
-          <div className="mb-4">
-            <Button
-              variant="default"
-              onClick={() => {
-                setEditProfile(null);
-                setOpen(true);
-              }}
-            >
-              Create Business Profile
-            </Button>
-          </div>)}
-
+      {profiles.length > 0 && (
+        <div className='mb-4'>
+          <Button
+            variant='default'
+            onClick={() => {
+              setEditProfile(null);
+              setOpen(true);
+            }}
+          >
+            Create Business Profile
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

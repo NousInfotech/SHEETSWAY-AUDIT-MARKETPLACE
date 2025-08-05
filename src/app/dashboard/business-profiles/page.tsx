@@ -3,9 +3,9 @@ import BusinessProfileTab from '@/features/business-profiles/components/business
 import PlaidIntegrationTab from '@/features/business-profiles/components/plaid-integration-tab';
 import ApideckIntegrationTab from '@/features/business-profiles/components/apideck-integration-tab';
 
-export const metadata = {
-  title: 'Business Profiles & Integrations',
-};
+// export const metadata = {
+//   title: 'Business Profiles & Integrations',
+// };
 
 export default function BusinessProfilesPage() {
   return (
