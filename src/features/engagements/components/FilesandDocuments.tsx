@@ -1050,7 +1050,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
   handleCancelAddLibrary,
   handleInitiateDeleteLibrary
 }) => (
-  <div className='flex h-full flex-col bg-slate-50'>
+  <div className='flex h-full flex-col not-dark:bg-slate-50'>
     <div className='border-b p-4'>
       <h2 className='flex items-center text-xl font-semibold'>
         <LayoutList className='mr-3 h-6 w-6 text-orange-600' /> Libraries
@@ -1278,7 +1278,7 @@ const SubfolderView: React.FC<SubfolderViewProps> = ({
       {filteredSubfolders.map((subfolder) => (
         <div
           key={subfolder.id}
-          className={`cursor-pointer rounded-lg border p-3 text-center transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${selectedSubfolder?.id === subfolder.id && !showAllFilesInLibrary ? 'border-b-4 border-b-blue-500 bg-blue-100 shadow-sm' : 'border-transparent bg-gray-100 hover:bg-gray-200'}`}
+          className={`cursor-pointer rounded-lg border p-3 text-center transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${selectedSubfolder?.id === subfolder.id && !showAllFilesInLibrary ? 'border-b-4 border-b-blue-500 not-dark:bg-blue-100 shadow-sm' : 'border-transparent not-dark:bg-gray-100 hover:bg-gray-200'}`}
           onClick={() =>
             handleSingleClick(() => handleSubfolderSelect(subfolder.id))
           }
@@ -1387,7 +1387,7 @@ const FileListView: React.FC<FileListViewProps> = ({
 
     <div className='overflow-x-auto rounded-lg border'>
       <Table>
-        <TableHeader className='bg-gray-50'>
+        <TableHeader className='not-dark:bg-gray-50'>
           <TableRow>
             <TableHead className='w-[50px] px-4'>
               <Checkbox
@@ -1911,7 +1911,7 @@ export default function FilesandDocuments() {
   };
 
   return (
-    <div className='flex h-auto bg-white font-sans'>
+    <div className='flex h-auto not-dark:bg-white font-sans'>
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side='left' className='w-80 p-0 md:hidden'>
           <SheetHeader>
