@@ -110,7 +110,9 @@ import {
   Upload,
   Settings,
   Library,
-  LayoutList
+  LayoutList,
+  Check,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -138,7 +140,9 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 
-// TYPE DEFINITIONS
+// =================================================================================
+// TYPE DEFINITIONS AND DATA
+// =================================================================================
 type FileData = {
   id: string;
   name: string;
@@ -149,7 +153,6 @@ type FileData = {
 type Subfolder = { id: string; name: string; files: FileData[] };
 type LibraryData = { id: string; name: string; subfolders: Subfolder[] };
 
-// HELPER TO GENERATE INITIAL DATA WITH IDs
 const createInitialData = (): LibraryData[] => [
   {
     id: crypto.randomUUID(),
@@ -219,7 +222,185 @@ const createInitialData = (): LibraryData[] => [
 const ALL_DOCUMENTS_ID = '__ALL_DOCUMENTS__';
 const CLICK_DELAY = 250; // ms
 
+// =================================================================================
+// STABLE SIDEBAR COMPONENT (EXTRACTED)
+// =================================================================================
+type SidebarContentProps = {
+  libraries: LibraryData[];
+  selectedLibraryId: string;
+  renamingInfo: { id: string; type: 'library' | 'subfolder' } | null;
+  isAddingLibrary: boolean;
+  newLibraryName: string;
+  // ===== FIX APPLIED HERE =====
+  renameInputRef: React.RefObject<HTMLInputElement | null>;
+  addLibraryInputRef: React.RefObject<HTMLInputElement | null>;
+  // ============================
+  handleLibrarySelect: (id: string) => void;
+  handleSingleClick: (action: () => void) => void;
+  handleDoubleClick: (action: () => void) => void;
+  setRenamingInfo: (
+    info: { id: string; type: 'library' | 'subfolder' } | null
+  ) => void;
+  handleRename: (newName: string) => void;
+  handleRenameKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  setIsAddingLibrary: (isAdding: boolean) => void;
+  setNewLibraryName: (name: string) => void;
+  handleAddLibraryKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  handleConfirmAddLibrary: () => void;
+  handleCancelAddLibrary: () => void;
+};
+
+const SidebarContent: React.FC<SidebarContentProps> = ({
+  libraries,
+  selectedLibraryId,
+  renamingInfo,
+  isAddingLibrary,
+  newLibraryName,
+  renameInputRef,
+  addLibraryInputRef,
+  handleLibrarySelect,
+  handleSingleClick,
+  handleDoubleClick,
+  setRenamingInfo,
+  handleRename,
+  handleRenameKeyDown,
+  setIsAddingLibrary,
+  setNewLibraryName,
+  handleAddLibraryKeyDown,
+  handleConfirmAddLibrary,
+  handleCancelAddLibrary
+}) => (
+  <div className='flex h-full flex-col not-dark:bg-slate-50'>
+    <div className='border-b p-4'>
+      <h2 className='flex items-center text-xl font-semibold'>
+        <LayoutList className='mr-3 h-6 w-6 text-orange-600' /> Libraries
+      </h2>
+    </div>
+    <nav className='flex-1 space-y-1 overflow-y-auto px-2 py-4'>
+      <button
+        onClick={() => handleLibrarySelect(ALL_DOCUMENTS_ID)}
+        className={`flex w-full items-center rounded-md p-2 text-left text-sm font-medium transition-colors ${selectedLibraryId === ALL_DOCUMENTS_ID ? 'border-l-4 border-orange-500 bg-orange-100 font-bold text-orange-600' : 'text-gray-700 hover:bg-gray-100'}`}
+      >
+        <Folder className='mr-3 h-5 w-5 flex-shrink-0' /> All Documents
+      </button>
+      <div className='pt-2'></div>
+      {libraries.map((library) => (
+        <div
+          key={library.id}
+          className={`flex w-full cursor-pointer items-center justify-between rounded-md p-2 text-left text-sm font-medium transition-colors ${selectedLibraryId === library.id ? 'border-l-4 border-orange-500 bg-orange-100 font-bold text-orange-600' : 'text-gray-700 hover:bg-gray-100'}`}
+          onClick={() =>
+            handleSingleClick(() => handleLibrarySelect(library.id))
+          }
+          onDoubleClick={() =>
+            handleDoubleClick(() =>
+              setRenamingInfo({ id: library.id, type: 'library' })
+            )
+          }
+        >
+          {renamingInfo?.id === library.id ? (
+            <Input
+              defaultValue={library.name}
+              ref={renameInputRef}
+              onBlur={(e) => handleRename(e.target.value)}
+              onKeyDown={handleRenameKeyDown}
+              className='h-8'
+              onClick={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <>
+              <span className='flex items-center truncate'>
+                <Folder className='mr-3 h-5 w-5 flex-shrink-0' />
+                <span className='truncate'>{library.name}</span>
+              </span>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  asChild
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    className='h-6 w-6 flex-shrink-0'
+                  >
+                    <MoreVertical className='h-4 w-4' />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenuItem
+                    className='text-red-500 focus:bg-red-50 focus:text-red-500'
+                    onClick={() => toast.error('Delete not implemented.')}
+                  >
+                    <Trash2 className='mr-2 h-4 w-4' /> Delete Library
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
+        </div>
+      ))}
+      {isAddingLibrary ? (
+        <div className='flex items-center gap-2 p-2'>
+          <Input
+            ref={addLibraryInputRef}
+            placeholder='New library name...'
+            className='h-8'
+            value={newLibraryName}
+            onChange={(e) => setNewLibraryName(e.target.value)}
+            onKeyDown={handleAddLibraryKeyDown}
+          />
+          <Button
+            variant='ghost'
+            size='icon'
+            className='h-8 w-8 text-green-600 hover:text-green-600'
+            onClick={handleConfirmAddLibrary}
+          >
+            <Check className='h-4 w-4' />
+          </Button>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='h-8 w-8 text-red-600 hover:text-red-600'
+            onClick={handleCancelAddLibrary}
+          >
+            <X className='h-4 w-4' />
+          </Button>
+        </div>
+      ) : (
+        <Button
+          variant='ghost'
+          className='mt-2 w-full justify-start text-gray-600'
+          onClick={() => setIsAddingLibrary(true)}
+        >
+          <Plus className='mr-2 h-4 w-4' /> Add Library
+        </Button>
+      )}
+    </nav>
+    <div className='space-y-2 border-t p-3'>
+      <div className='flex items-center p-2 text-sm font-semibold text-gray-600'>
+        <Settings className='mr-2 h-4 w-4' /> Library Settings
+      </div>
+      <Button
+        variant='ghost'
+        className='w-full justify-start text-gray-600'
+        onClick={() => toast.info('Saving structure...')}
+      >
+        <Save className='mr-2 h-4 w-4' /> Save Library Structure
+      </Button>
+      <Button
+        variant='ghost'
+        className='w-full justify-start text-gray-600'
+        onClick={() => toast.info('Importing structure...')}
+      >
+        <Upload className='mr-2 h-4 w-4' /> Import Library Structure
+      </Button>
+    </div>
+  </div>
+);
+
+// =================================================================================
 // MAIN COMPONENT
+// =================================================================================
 export default function FilesandDocuments() {
   const [libraries, setLibraries] = useState<LibraryData[]>(createInitialData);
   const [selectedLibraryId, setSelectedLibraryId] = useState<string>(
@@ -228,7 +409,6 @@ export default function FilesandDocuments() {
   const [selectedSubfolderId, setSelectedSubfolderId] = useState<string | null>(
     libraries[4].subfolders[2].id
   );
-
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [folderSearchTerm, setFolderSearchTerm] = useState('');
   const [fileSearchTerm, setFileSearchTerm] = useState('');
@@ -239,7 +419,11 @@ export default function FilesandDocuments() {
     id: string;
     type: 'library' | 'subfolder';
   } | null>(null);
+  const [isAddingLibrary, setIsAddingLibrary] = useState(false);
+  const [newLibraryName, setNewLibraryName] = useState('');
+
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const addLibraryInputRef = useRef<HTMLInputElement>(null);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -248,6 +432,12 @@ export default function FilesandDocuments() {
       renameInputRef.current?.select();
     }
   }, [renamingInfo]);
+
+  useEffect(() => {
+    if (isAddingLibrary) {
+      addLibraryInputRef.current?.focus();
+    }
+  }, [isAddingLibrary]);
 
   useEffect(() => {
     return () => {
@@ -277,7 +467,7 @@ export default function FilesandDocuments() {
   };
 
   const handleLibrarySelect = (libraryId: string) => {
-    if (renamingInfo) return;
+    if (renamingInfo || isAddingLibrary) return;
     setSelectedLibraryId(libraryId);
     setSelectedSubfolderId(null);
     setShowAllFilesInLibrary(false);
@@ -295,17 +485,32 @@ export default function FilesandDocuments() {
     setSelectedFiles([]);
   };
 
-  const handleAddLibrary = () => {
-    const newLibraryName = prompt('Enter the name for the new library:');
-    if (newLibraryName && newLibraryName.trim()) {
-      const newLibrary: LibraryData = {
-        id: crypto.randomUUID(),
-        name: newLibraryName.trim(),
-        subfolders: []
-      };
-      setLibraries((prev) => [...prev, newLibrary]);
-      toast.success(`Library "${newLibraryName.trim()}" created.`);
+  const handleConfirmAddLibrary = () => {
+    if (!newLibraryName.trim()) {
+      toast.error('Library name cannot be empty.');
+      return;
     }
+    const newLibrary: LibraryData = {
+      id: crypto.randomUUID(),
+      name: newLibraryName.trim(),
+      subfolders: []
+    };
+    setLibraries((prev) => [...prev, newLibrary]);
+    toast.success(`Library "${newLibraryName.trim()}" created.`);
+    setNewLibraryName('');
+    setIsAddingLibrary(false);
+  };
+
+  const handleCancelAddLibrary = () => {
+    setNewLibraryName('');
+    setIsAddingLibrary(false);
+  };
+
+  const handleAddLibraryKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === 'Enter') handleConfirmAddLibrary();
+    if (e.key === 'Escape') handleCancelAddLibrary();
   };
 
   const handleRename = (newName: string) => {
@@ -400,106 +605,6 @@ export default function FilesandDocuments() {
     [selectedLibrary, folderSearchTerm]
   );
 
-  const SidebarContent = () => (
-    <div className='flex h-full flex-col not-dark:bg-slate-50/50'>
-      <div className='border-b p-4'>
-        <h2 className='flex items-center text-xl font-semibold'>
-          <LayoutList className='mr-3 h-6 w-6 text-orange-600' /> Libraries
-        </h2>
-      </div>
-      <nav className='flex-1 space-y-1 overflow-y-auto px-2 py-4'>
-        <button
-          onClick={() => handleLibrarySelect(ALL_DOCUMENTS_ID)}
-          className={`flex w-full items-center rounded-md p-2 text-left text-sm font-medium transition-colors ${selectedLibraryId === ALL_DOCUMENTS_ID ? 'border-l-4 border-orange-500 bg-orange-100 font-bold text-orange-600' : 'text-gray-700 hover:bg-gray-100'}`}
-        >
-          <Folder className='mr-3 h-5 w-5 flex-shrink-0' /> All Documents
-        </button>
-        <div className='pt-2'></div>
-        {libraries.map((library) => (
-          <div
-            key={library.id}
-            className={`flex w-full cursor-pointer items-center justify-between rounded-md p-2 text-left text-sm font-medium transition-colors ${selectedLibraryId === library.id ? 'border-l-4 border-orange-500 bg-orange-100 font-bold text-orange-600' : 'text-gray-700 hover:bg-gray-100'}`}
-            onClick={() =>
-              handleSingleClick(() => handleLibrarySelect(library.id))
-            }
-            onDoubleClick={() =>
-              handleDoubleClick(() =>
-                setRenamingInfo({ id: library.id, type: 'library' })
-              )
-            }
-          >
-            {renamingInfo?.id === library.id ? (
-              <Input
-                defaultValue={library.name}
-                ref={renameInputRef}
-                onBlur={(e) => handleRename(e.target.value)}
-                onKeyDown={handleRenameKeyDown}
-                className='h-8'
-                onClick={(e) => e.stopPropagation()}
-                onDoubleClick={(e) => e.stopPropagation()}
-              />
-            ) : (
-              <>
-                <span className='flex items-center truncate'>
-                  <Folder className='mr-3 h-5 w-5 flex-shrink-0' />
-                  <span className='truncate'>{library.name}</span>
-                </span>
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    asChild
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='h-6 w-6 flex-shrink-0'
-                    >
-                      <MoreVertical className='h-4 w-4' />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenuItem
-                      className='text-red-500 focus:bg-red-50 focus:text-red-500'
-                      onClick={() => toast.error('Delete not implemented.')}
-                    >
-                      <Trash2 className='mr-2 h-4 w-4' /> Delete Library
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            )}
-          </div>
-        ))}
-        <Button
-          variant='ghost'
-          className='mt-2 w-full justify-start text-gray-600'
-          onClick={handleAddLibrary}
-        >
-          <Plus className='mr-2 h-4 w-4' /> Add Library
-        </Button>
-      </nav>
-      <div className='space-y-2 border-t p-3'>
-        <div className='flex items-center p-2 text-sm font-semibold text-gray-600'>
-          <Settings className='mr-2 h-4 w-4' /> Library Settings
-        </div>
-        <Button
-          variant='ghost'
-          className='w-full justify-start text-gray-600'
-          onClick={() => toast.info('Saving structure...')}
-        >
-          <Save className='mr-2 h-4 w-4' /> Save Library Structure
-        </Button>
-        <Button
-          variant='ghost'
-          className='w-full justify-start text-gray-600'
-          onClick={() => toast.info('Importing structure...')}
-        >
-          <Upload className='mr-2 h-4 w-4' /> Import Library Structure
-        </Button>
-      </div>
-    </div>
-  );
-
   const SubfolderView = () => (
     <section className='mb-8' aria-labelledby='subfolders-heading'>
       <div className='mb-4 flex flex-col justify-between gap-2 md:flex-row md:items-center'>
@@ -534,7 +639,7 @@ export default function FilesandDocuments() {
         {filteredSubfolders.map((subfolder) => (
           <div
             key={subfolder.id}
-            className={`cursor-pointer rounded-lg border p-3 text-center transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${selectedSubfolder?.id === subfolder.id && !showAllFilesInLibrary ? 'border-b-5 border-b-blue-500 shadow-sm not-dark:bg-blue-100' : 'border border-transparent not-dark:bg-gray-100 hover:bg-gray-200'}`}
+            className={`cursor-pointer rounded-lg border p-3 text-center transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${selectedSubfolder?.id === subfolder.id && !showAllFilesInLibrary ? 'border-b-4 border-b-blue-500 not-dark:bg-blue-100 shadow-sm' : 'border-transparent not-dark:bg-gray-100 hover:bg-gray-200'}`}
             onClick={() =>
               handleSingleClick(() => handleSubfolderSelect(subfolder.id))
             }
@@ -544,15 +649,11 @@ export default function FilesandDocuments() {
               )
             }
           >
-            {/* <Folder
-              className={`mx-auto h-12 w-12 ${selectedSubfolder?.id === subfolder.id ? 'text-blue-600' : 'text-blue-500'}`}
-            /> */}
             <img
               src='/assets/file-icons/open-folder.png'
               alt=''
-              className={`mx-auto h-12 w-12 ${selectedSubfolder?.id === subfolder.id ? '' : ''}`}
+              className={`mx-auto h-12 w-12`}
             />
-
             {renamingInfo?.id === subfolder.id ? (
               <Input
                 defaultValue={subfolder.name}
@@ -696,22 +797,41 @@ export default function FilesandDocuments() {
     );
   };
 
+  const sidebarProps: SidebarContentProps = {
+    libraries,
+    selectedLibraryId,
+    renamingInfo,
+    isAddingLibrary,
+    newLibraryName,
+    renameInputRef,
+    addLibraryInputRef,
+    handleLibrarySelect,
+    handleSingleClick,
+    handleDoubleClick,
+    setRenamingInfo,
+    handleRename,
+    handleRenameKeyDown,
+    setIsAddingLibrary,
+    setNewLibraryName,
+    handleAddLibraryKeyDown,
+    handleConfirmAddLibrary,
+    handleCancelAddLibrary
+  };
+
   return (
-    <div className='flex h-auto rounded-md border font-sans not-dark:bg-white'>
+    <div className='flex h-auto font-sans not-dark:bg-white'>
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side='left' className='w-80 p-0 md:hidden'>
           <SheetHeader>
             <SheetTitle className='sr-only'>Libraries</SheetTitle>
           </SheetHeader>
-          <SidebarContent />
+          <SidebarContent {...sidebarProps} />
         </SheetContent>
       </Sheet>
-
       <aside className='hidden md:flex md:w-80 md:flex-col md:border-r'>
-        <SidebarContent />
+        <SidebarContent {...sidebarProps} />
       </aside>
-
-      <main className='flex flex-1 flex-col p-4 md:p-6'>
+      <main className='flex flex-1 flex-col overflow-y-auto p-4 md:p-6'>
         <header className='mb-6 flex items-center justify-between'>
           <h1 className='truncate pr-4 text-2xl font-bold text-gray-800'>
             {(selectedLibraryId === ALL_DOCUMENTS_ID
@@ -736,3 +856,10 @@ export default function FilesandDocuments() {
     </div>
   );
 }
+
+
+
+
+
+
+
