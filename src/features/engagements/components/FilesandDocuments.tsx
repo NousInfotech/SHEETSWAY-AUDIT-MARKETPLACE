@@ -534,7 +534,7 @@ export default function FilesandDocuments() {
         {filteredSubfolders.map((subfolder) => (
           <div
             key={subfolder.id}
-            className={`cursor-pointer rounded-lg p-3 text-center transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${selectedSubfolder?.id === subfolder.id && !showAllFilesInLibrary ? 'border-b-5 border-b-blue-500 bg-blue-100 shadow-sm' : 'border border-transparent bg-gray-100 hover:bg-gray-200'}`}
+            className={`cursor-pointer rounded-lg border p-3 text-center transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${selectedSubfolder?.id === subfolder.id && !showAllFilesInLibrary ? 'border-b-5 border-b-blue-500 shadow-sm not-dark:bg-blue-100' : 'border border-transparent not-dark:bg-gray-100 hover:bg-gray-200'}`}
             onClick={() =>
               handleSingleClick(() => handleSubfolderSelect(subfolder.id))
             }
@@ -697,7 +697,7 @@ export default function FilesandDocuments() {
   };
 
   return (
-    <div className='flex h-auto not-dark:bg-white font-sans border rounded-md'>
+    <div className='flex h-auto rounded-md border font-sans not-dark:bg-white'>
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side='left' className='w-80 p-0 md:hidden'>
           <SheetHeader>
