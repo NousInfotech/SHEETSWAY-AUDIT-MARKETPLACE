@@ -20,6 +20,7 @@ export const createClientRequest = async (data: any) => {
   return response.data;
 };
 
+
 // Get a signed S3 upload URL for a file
 export const getSignedUploadUrl = async (fileName: string, contentType: string, folder?: string) => {
   const response = await instance.post('/api/v1/upload/single', { fileName, contentType, folder });

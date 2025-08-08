@@ -23,6 +23,13 @@ export const PROPOSALS_API = '/api/v1/proposals/';
 export const PROPOSAL_STATUS_API = (proposalId: string) => `/api/v1/proposals/${proposalId}/status`;
 export const PROPOSAL_BY_ID_API = (proposalId: string) => `/api/v1/proposals/${proposalId}`;
 
+
+// engagements
+
+export const ENGAGEMENT_API = '/api/v1/engagements';
+export const ENGAGEMENT_BY_ID_API = (engagementId: string) => `/api/v1/engagements/${engagementId}`;
+
+
 // Centralized API object (optional, for easier import)
 export const API = {
   BUSINESS_PROFILES: BUSINESS_PROFILES_API,

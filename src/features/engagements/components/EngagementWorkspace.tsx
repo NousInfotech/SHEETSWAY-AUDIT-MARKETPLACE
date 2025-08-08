@@ -77,7 +77,7 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
             const Icon = tab.icon;
             return (
               <button
-              disabled={tab.label === "Documents" }
+              // disabled={tab.label === "Documents" }
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
                 className={`flex items-center gap-2 px-3 py-4 text-sm font-medium border-b-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${

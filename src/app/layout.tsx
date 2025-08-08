@@ -10,6 +10,8 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import './globals.css';
 import './theme.css';
 
+import "@fontsource/great-vibes";
+
 const META_THEME_COLORS = {
   light: '#ffffff',
   dark: '#09090b'

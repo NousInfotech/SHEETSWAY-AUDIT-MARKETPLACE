@@ -25,6 +25,7 @@ import ReviewsHistoryTab from './components/ReviewsHistoryTab';
 import EngagementSettingsTab from './components/EngagementSettingsTab';
 import DocumentsTab from './components/DocumentsTab';
 import { Spinner } from '@/components/ui/spinner';
+import { getEngagementById, listEngagements } from '@/api/engagement';
 
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
@@ -32,7 +33,8 @@ const EngagementViewPage = () => {
   const [selectedEngagement, setSelectedEngagement] =
     useState<Engagement | null>(null);
   const [currentWorkspaceTab, setCurrentWorkspaceTab] = useState('accounting');
-  const [engagements, setEngagements] = useState<Engagement[]>([]);
+  // const [engagements, setEngagements] = useState<Engagement[]>([]);
+  const [engagements, setEngagements] = useState<any[]>([]);
   const [accountingData, setAccountingData] = useState<AccountingData[]>([]);
   const [bankingData, setBankingData] = useState<BankingData[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -52,6 +54,23 @@ const EngagementViewPage = () => {
         ? JSON.parse(savedEngagements)
         : generateMockEngagements()
     );
+
+    const getEngagements = async () => {
+      try {
+        let all_engagements = await listEngagements();
+        console.log("all engagemnets:", all_engagements )
+        // setEngagements(data);
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    getEngagements();
+    
+
+
+
+
+
     setAccountingData(
       savedAccountingData
         ? JSON.parse(savedAccountingData)
