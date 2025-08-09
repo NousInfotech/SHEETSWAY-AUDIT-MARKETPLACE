@@ -1,5 +1,20 @@
 'use client';
 
+
+// Array.from({ length: 3 }, (_, i) => {
+//           const mockFile = new File(['mock content'], 'Engagement Letter.pdf', {
+//             type: 'application/pdf'
+//           });
+//           return {
+//             id: `ppe-file-${i + 1}`,
+//             name: 'Engagement Letter.pdf',
+//             size: '10.28 KB',
+//             creationDate: '29th Feb 2024 10:02 AM',
+//             directory: 'Audit Procedures/PPE',
+//             file: mockFile
+//           };
+//         })
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 
 import {
@@ -50,6 +65,8 @@ import {
 // =================================================================================
 // TYPE DEFINITIONS AND DATA
 // =================================================================================
+
+
 type FileData = {
   id: string;
   name: string;
@@ -61,7 +78,8 @@ type FileData = {
 type Subfolder = { id: string; name: string; files: FileData[] };
 type LibraryData = { id: string; name: string; subfolders: Subfolder[] };
 
-const createInitialData = (): LibraryData[] => [
+const createInitialData = (): LibraryData[] => {
+  return [
   {
     id: crypto.randomUUID(),
     name: '1. Planning',
@@ -108,19 +126,7 @@ const createInitialData = (): LibraryData[] => [
       {
         id: crypto.randomUUID(),
         name: 'PPE',
-        files: Array.from({ length: 3 }, (_, i) => {
-          const mockFile = new File(['mock content'], 'Engagement Letter.pdf', {
-            type: 'application/pdf'
-          });
-          return {
-            id: `ppe-file-${i + 1}`,
-            name: 'Engagement Letter.pdf',
-            size: '10.28 KB',
-            creationDate: '29th Feb 2024 10:02 AM',
-            directory: 'Audit Procedures/PPE',
-            file: mockFile
-          };
-        })
+        files: []
       },
       { id: crypto.randomUUID(), name: 'Revenue', files: [] },
       { id: crypto.randomUUID(), name: 'Expenses', files: [] },
@@ -153,10 +159,66 @@ const createInitialData = (): LibraryData[] => [
       { id: crypto.randomUUID(), name: 'Engagement Notes', files: [] }
     ]
   }
-];
+]
+};
 
 const ALL_DOCUMENTS_ID = '__ALL_DOCUMENTS__';
 const CLICK_DELAY = 250; // ms
+
+
+
+
+const populatePpeFiles = async (currentState: LibraryData[]): Promise<LibraryData[]> => {
+  const fileSources = [
+    { name: 'sample-invoice.pdf', path: '/demo-pdfs/sample-invoice.pdf' },
+    { name: 'sample-agreement.pdf', path: '/demo-pdfs/sample-agreement.pdf' },
+    { name: 'sample-report.pdf', path: '/demo-pdfs/sample-report.pdf' },
+    // { name: 'InvoiceTemplate.docx', path: '/demo-pdfs/InvoiceTemplate.docx' }
+  ];
+
+  const ppeFiles = await Promise.all(
+    fileSources.map(async (source, i) => {
+      const realFile = await createFileObjectFromUrl(
+        source.path,
+        source.name,
+        'application/pdf'
+      );
+      return {
+        id: `ppe-file-${i + 1}`,
+        name: realFile.name,
+        size: `${(realFile.size / 1024).toFixed(2)} KB`,
+        creationDate: '29th Feb 2024 10:02 AM',
+        directory: 'Audit Procedures/PPE',
+        file: realFile
+      };
+    })
+  );
+
+  // Create a deep copy of the state to avoid direct mutation
+  const newState = JSON.parse(JSON.stringify(currentState));
+  
+  // Find the 'Audit Procedures' library and the 'PPE' subfolder
+  const auditProcedures = newState.find((lib: LibraryData) => lib.name === '5. Audit Procedures');
+  if (auditProcedures) {
+    const ppeFolder = auditProcedures.subfolders.find((sub: Subfolder) => sub.name === 'PPE');
+    if (ppeFolder) {
+      ppeFolder.files = ppeFiles;
+    }
+  }
+
+  return newState;
+};
+
+
+
+async function createFileObjectFromUrl(url: string, filename: string, mimeType: string): Promise<File> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status} for URL: ${url}`);
+  }
+  const data = await response.blob();
+  return new File([data], filename, { type: mimeType });
+}
 
 // =================================================================================
 // HELPER FUNCTIONS
@@ -673,6 +735,24 @@ export default function FilesandDocuments() {
   const addSubfolderInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+
+  useEffect(() => {
+    const loadRealFiles = async () => {
+      // Use a functional update to ensure we have the latest state
+      setLibraries(currentLibraries => {
+        populatePpeFiles(currentLibraries).then(newLibraries => {
+          setLibraries(newLibraries);
+        });
+        // Return the original state immediately so React doesn't complain
+        return currentLibraries;
+      });
+    };
+
+    loadRealFiles();
+  }, []);
+
+
 
   useEffect(() => {
     if (renamingInfo) {
