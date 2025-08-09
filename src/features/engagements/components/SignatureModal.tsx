@@ -969,6 +969,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useEffect } from 'react';
 
 // Configure the PDF worker using the stable CDN method.
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
@@ -997,7 +998,10 @@ export const SignatureModal = ({
   onSign
 }: SignatureModalProps) => {
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [isPdfLoaded, setIsPdfLoaded] = useState(false);
+  // const [isPdfLoaded, setIsPdfLoaded] = useState(false);
+  const [loadingState, setLoadingState] = useState<
+    'preparing' | 'rendering' | 'ready'
+  >('preparing');
   const [isProcessing, setIsProcessing] = useState(false);
   const [signatureMode, setSignatureMode] = useState<
     'draw' | 'type' | 'upload'
@@ -1014,14 +1018,39 @@ export const SignatureModal = ({
   const animationFrameRef = useRef<number | null>(null);
   const lastMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const animationFrameId = useRef<number | null>(null);
+
+  // FIX: Add cleanup for the requestAnimationFrame to prevent memory leaks
+  useEffect(() => {
+    // This is the cleanup function. It runs when the component is unmounted.
+    return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
+    };
+  }, []);
 
   const onDocumentLoadSuccess = useCallback(
     ({ numPages }: { numPages: number }) => {
       setNumPages(numPages);
       pageRefs.current = new Map();
-      setIsPdfLoaded(true);
+
+      // Set the state to 'rendering'. This puts the <Page> components into the DOM.
+      setLoadingState('rendering');
+
+      // FIX: Use the double requestAnimationFrame pattern instead of setTimeout.
+      // This reliably waits for the browser to finish painting the PDF.
+      animationFrameId.current = requestAnimationFrame(() => {
+        // At this point, the browser has acknowledged the new DOM elements but hasn't
+        // necessarily painted them. We schedule another frame.
+        animationFrameId.current = requestAnimationFrame(() => {
+          // By the time this second callback runs, the previous frame's heavy
+          // painting work is complete. The UI is now truly ready and responsive.
+          setLoadingState('ready');
+        });
+      });
     },
-    []
+    [] // The dependency array is empty, which is correct for this callback.
   );
 
   const clearSignature = () => {
@@ -1175,7 +1204,7 @@ export const SignatureModal = ({
     try {
       let dataUrl: string | null = null;
       if (signatureMode === 'draw') {
-        dataUrl = sigPadRef.current!.getTrimmedCanvas().toDataURL('image/png');
+        dataUrl = sigPadRef.current!.toDataURL('image/png');
       } else {
         const canvas = document.createElement('canvas');
         canvas.width = 400;
@@ -1247,25 +1276,69 @@ export const SignatureModal = ({
     );
   };
 
+  // FIX: This function now correctly scales coordinates from screen pixels to PDF points.
   const applySignaturesToPdf = async (): Promise<Blob> => {
     const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
     const pages = pdfDoc.getPages();
 
     for (const sig of signatures) {
       const page = pages[sig.page - 1];
+      const pageRef = pageRefs.current.get(sig.page);
+
+      if (!pageRef) {
+        console.warn(`Could not find page reference for page ${sig.page}`);
+        continue;
+      }
+
+      // --- START: CRITICAL FIX FOR COORDINATE TRANSLATION ---
+
+      // 1. Find the actual <canvas> rendered by react-pdf inside our page div.
+      const canvas = pageRef.querySelector('canvas');
+      if (!canvas) {
+        console.error(`Could not find canvas for page ${sig.page}`);
+        continue;
+      }
+
+      // 2. Get the dimensions of the rendered canvas (in pixels). This is our source of truth.
+      const canvasRect = canvas.getBoundingClientRect();
+      const pageRefRect = pageRef.getBoundingClientRect();
+
+      // 3. Get the dimensions of the actual PDF page (in points).
+      const { width: pdfPageWidth, height: pdfPageHeight } = page.getSize();
+
+      // 4. Calculate the scaling factors. We use the canvas's actual rendered size.
+      const scaleX = pdfPageWidth / canvasRect.width;
+      const scaleY = pdfPageHeight / canvasRect.height;
+
+      // 5. Calculate the signature's position relative to the CANVAS, not the container div.
+      // This accounts for the horizontal centering (`justify-center`).
+      const sigX_relativeToCanvas =
+        sig.x - (canvasRect.left - pageRefRect.left);
+      const sigY_relativeToCanvas = sig.y - (canvasRect.top - pageRefRect.top);
+
+      // 6. Scale the signature's relative position and dimensions to PDF points.
+      const sigXInPoints = sigX_relativeToCanvas * scaleX;
+      const sigYInPoints = sigY_relativeToCanvas * scaleY;
+      const sigWidthInPoints = sig.width * scaleX;
+      const sigHeightInPoints = sig.height * scaleY;
+
+      // --- END: CRITICAL FIX ---
+
+      // Embed the signature image
       const pngImage = await pdfDoc.embedPng(sig.dataUrl);
 
+      // Draw the image using the correctly scaled and positioned coordinates.
+      // The Y-coordinate is flipped for pdf-lib's bottom-left origin system.
       page.drawImage(pngImage, {
-        x: sig.x,
-        y: page.getHeight() - sig.y - sig.height,
-        width: sig.width,
-        height: sig.height,
-        rotate: degrees(sig.rotation * -1) // pdf-lib rotates counter-clockwise
+        x: sigXInPoints,
+        y: pdfPageHeight - sigYInPoints - sigHeightInPoints, // Y-flip based on PDF page height
+        width: sigWidthInPoints,
+        height: sigHeightInPoints,
+        rotate: degrees(sig.rotation * -1)
       });
     }
 
     const pdfBytes = await pdfDoc.save();
-    // return new Blob([pdfBytes], { type: 'application/pdf' });
     return new Blob([pdfBytes.slice()], { type: 'application/pdf' });
   };
 
@@ -1278,13 +1351,24 @@ export const SignatureModal = ({
     toast.info('Applying signatures...');
 
     try {
+      // Create the signed PDF
       const signedPdfBlob = await applySignaturesToPdf();
+
+      // Pass the signed PDF back to the parent component
       onSign(signedPdfBlob);
+
+      // Explicitly call the function to close the modal
+      onClose();
+
       toast.success('Document signed successfully!');
     } catch (error) {
       console.error('Error signing document:', error);
       toast.error('Failed to sign the document. Please try again.');
+      // Keep the modal open on failure so the user can retry
     } finally {
+      // We no longer need to set processing to false here,
+      // because the component will be unmounted/closed on success.
+      // We only want it to stop spinning on failure.
       setIsProcessing(false);
     }
   };
@@ -1335,7 +1419,7 @@ export const SignatureModal = ({
             className='relative flex-1 overflow-y-auto bg-gray-100 p-4'
             onClick={() => setActiveSignatureId(null)}
           >
-            {!isPdfLoaded && (
+            {loadingState === 'preparing' && (
               <div className='bg-opacity-90 absolute inset-0 z-20 flex flex-col items-center justify-center bg-gray-100'>
                 <Loader2 className='h-12 w-12 animate-spin text-blue-500' />
                 <p className='mt-4 text-lg text-gray-700'>
@@ -1366,7 +1450,7 @@ export const SignatureModal = ({
                 ))}
               </Document>
 
-              {isPdfLoaded &&
+              {loadingState !== 'preparing' &&
                 signatures.map((sig) => {
                   const isActive = sig.id === activeSignatureId;
                   const pageRef = pageRefs.current.get(sig.page);
@@ -1451,123 +1535,151 @@ export const SignatureModal = ({
             </div>
           </div>
           <aside
-            className={`w-80 flex-shrink-0 border-l bg-gray-50 p-4 transition-opacity duration-300 ${
-              !isPdfLoaded ? 'pointer-events-none opacity-50' : 'opacity-100'
-            }`}
+            // Add 'relative' to act as a positioning container for the overlay
+            className={`relative w-80 flex-shrink-0 border-l bg-gray-50 p-4 transition-opacity duration-300`}
           >
-            <h3 className='text-lg font-semibold'>Create Your Signature</h3>
-            <Tabs
-              value={signatureMode}
-              onValueChange={(value) =>
-                setSignatureMode(value as 'draw' | 'type' | 'upload')
-              }
-              className='mt-2 w-full'
+            {/*
+              FIX: Add a loading overlay that covers the entire panel.
+              This displays while the PDF is loading, preventing laggy drawing
+              and providing clear user feedback.
+            */}
+            {loadingState !== 'ready' && (
+              <div className='bg-opacity-80 absolute inset-0 z-10 flex flex-col items-center justify-center bg-gray-50 backdrop-blur-sm'>
+                <Loader2 className='h-8 w-8 animate-spin text-gray-500' />
+                <p className='mt-2 font-medium text-gray-600'>
+                  {loadingState === 'rendering'
+                    ? 'Finalizing UI...'
+                    : 'Waiting for document...'}
+                </p>
+              </div>
+            )}
+
+            <div
+              // This container will hold all the content and will be disabled
+              // if the PDF is still loading.
+              className={`transition-opacity duration-300 ${
+                loadingState !== 'ready' ? 'opacity-50' : 'opacity-100'
+              }`}
             >
-              <TabsList className='grid w-full grid-cols-3'>
-                <TabsTrigger value='draw'>Draw</TabsTrigger>
-                <TabsTrigger value='type'>Type</TabsTrigger>
-                <TabsTrigger value='upload'>Upload</TabsTrigger>
-              </TabsList>
-              <TabsContent value='draw'>
-                <div className='mt-4 rounded-md border-2 border-blue-500'>
-                  <SignatureCanvas
-                    ref={sigPadRef}
-                    penColor='black'
-                    canvasProps={{
-                      width: 284,
-                      height: 150,
-                      className: 'sigCanvas'
-                    }}
-                  />
-                </div>
-              </TabsContent>
-              <TabsContent value='type'>
-                <div
-                  className='mt-4 flex flex-col items-center justify-center rounded-md border-2 border-blue-500 p-4'
-                  style={{ height: 154 }}
-                >
-                  <Input
-                    placeholder='Type your name'
-                    value={typedSignature}
-                    onChange={(e) => setTypedSignature(e.target.value)}
-                    className='border-b-2 border-gray-400 text-center text-4xl'
-                    style={{ fontFamily: '"Great Vibes", cursive' }}
-                  />
-                </div>
-              </TabsContent>
-              <TabsContent value='upload'>
-                <div
-                  className='mt-4 flex flex-col items-center justify-center rounded-md border-2 border-dashed border-gray-400 p-4'
-                  style={{ height: 154 }}
-                >
-                  <Input
-                    type='file'
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept='image/png, image/jpeg'
-                    className='hidden'
-                  />
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    variant='outline'
+              <h3 className='text-lg font-semibold'>Create Your Signature</h3>
+              <Tabs
+                value={signatureMode}
+                onValueChange={(value) =>
+                  setSignatureMode(value as 'draw' | 'type' | 'upload')
+                }
+                className='mt-2 w-full'
+              >
+                <TabsList className='grid w-full grid-cols-3'>
+                  <TabsTrigger value='draw'>Draw</TabsTrigger>
+                  <TabsTrigger value='type'>Type</TabsTrigger>
+                  <TabsTrigger value='upload'>Upload</TabsTrigger>
+                </TabsList>
+                <TabsContent value='draw'>
+                  <div className='mt-4 rounded-md border-2 border-blue-500'>
+                    <SignatureCanvas
+                      ref={sigPadRef}
+                      penColor='black'
+                      canvasProps={{
+                        width: 284,
+                        height: 150,
+                        className: 'sigCanvas'
+                      }}
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value='type'>
+                  <div
+                    className='mt-4 flex flex-col items-center justify-center rounded-md border-2 border-blue-500 p-4'
+                    style={{ height: 154 }}
                   >
-                    <Upload className='mr-2 h-4 w-4' />
-                    Import Signature
-                  </Button>
-                  <p className='mt-2 text-xs text-gray-500'>PNG or JPG file</p>
-                </div>
-              </TabsContent>
-            </Tabs>
-            <div className='mt-4 flex gap-2'>
-              <Button
-                variant='outline'
-                onClick={clearSignature}
-                disabled={isProcessing}
-              >
-                Clear
-              </Button>
-              {signatureMode !== 'upload' && (
-                <Button onClick={saveAndPlaceSignature} disabled={isProcessing}>
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                      Creating...
-                    </>
-                  ) : (
-                    'Create & Add Signature'
-                  )}
+                    <Input
+                      placeholder='Type your name'
+                      value={typedSignature}
+                      onChange={(e) => setTypedSignature(e.target.value)}
+                      className='border-b-2 border-gray-400 text-center text-4xl'
+                      style={{ fontFamily: '"Great Vibes", cursive' }}
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value='upload'>
+                  <div
+                    className='mt-4 flex flex-col items-center justify-center rounded-md border-2 border-dashed border-gray-400 p-4'
+                    style={{ height: 154 }}
+                  >
+                    <Input
+                      type='file'
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept='image/png, image/jpeg'
+                      className='hidden'
+                    />
+                    <Button
+                      onClick={() => fileInputRef.current?.click()}
+                      variant='outline'
+                    >
+                      <Upload className='mr-2 h-4 w-4' />
+                      Import Signature
+                    </Button>
+                    <p className='mt-2 text-xs text-gray-500'>
+                      PNG or JPG file
+                    </p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+              <div className='mt-4 flex gap-2'>
+                <Button
+                  variant='outline'
+                  onClick={clearSignature}
+                  disabled={isProcessing}
+                >
+                  Clear
                 </Button>
-              )}
-            </div>
-            <hr className='my-6' />
-            <div className='flex flex-col gap-2'>
-              <Button
-                size='lg'
-                onClick={handleDownload}
-                disabled={signatures.length === 0 || isProcessing}
-                className='bg-blue-600 hover:bg-blue-700'
-              >
-                {isProcessing ? (
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                ) : (
-                  <Download className='mr-2 h-4 w-4' />
+                {signatureMode !== 'upload' && (
+                  <Button
+                    onClick={saveAndPlaceSignature}
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                        Creating...
+                      </>
+                    ) : (
+                      'Create & Add Signature'
+                    )}
+                  </Button>
                 )}
-                Download Signed
-              </Button>
-              <Button
-                size='lg'
-                onClick={handleFinalSign}
-                disabled={signatures.length === 0 || isProcessing}
-                className='bg-green-600 hover:bg-green-700'
-              >
-                {isProcessing ? (
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                ) : null}
-                Apply & Finalize
-              </Button>
-              <Button size='lg' variant='destructive' onClick={onClose}>
-                Cancel
-              </Button>
+              </div>
+              <hr className='my-6' />
+              <div className='flex flex-col gap-2'>
+                <Button
+                  size='lg'
+                  onClick={handleDownload}
+                  disabled={signatures.length === 0 || isProcessing}
+                  className='bg-blue-600 hover:bg-blue-700'
+                >
+                  {isProcessing ? (
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  ) : (
+                    <Download className='mr-2 h-4 w-4' />
+                  )}
+                  Download Signed
+                </Button>
+                <Button
+                  size='lg'
+                  onClick={handleFinalSign}
+                  disabled={signatures.length === 0 || isProcessing}
+                  className='bg-green-600 hover:bg-green-700'
+                >
+                  {isProcessing ? (
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  ) : null}
+                  Apply & Finalize
+                </Button>
+                <Button size='lg' variant='destructive' onClick={onClose}>
+                  Cancel
+                </Button>
+              </div>
             </div>
           </aside>
         </div>
