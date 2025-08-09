@@ -152,8 +152,14 @@ export default function AppSidebar() {
                     src={iconPath}
                     alt={`${item.title} icon`}
                     className={cn(
-                      'h-5 w-5 transition-all duration-200 dark:brightness-0 dark:invert', // Base styles
-                      isActive && activeIconFilter
+                      // Argument 1: A conditional string (or false)
+                      isActive && activeIconFilter,
+
+                      // Argument 2: A static string of base classes
+                      'transition-all duration-200 dark:brightness-0 dark:invert',
+
+                      // Argument 3: A conditional string for sizing
+                      state === 'expanded' ? 'h-5 w-5' : 'h-4 w-4'
                     )}
                   />
                 );
