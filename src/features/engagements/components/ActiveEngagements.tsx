@@ -290,18 +290,18 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               In progress
             </div>
             <div className='text-sm text-gray-600 dark:text-gray-300'>
-              {20}% Complete
+              {2}% Complete
             </div>
           </div>
           <div className='mb-4'>
             <div className='mb-1 flex justify-between text-sm text-gray-600 dark:text-gray-300'>
               <span>Progress</span>
-              <span>{20}%</span>
+              <span>{2}%</span>
             </div>
             <div className='h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700'>
               <div
                 className='h-2 rounded-full bg-blue-600 transition-all duration-300'
-                style={{ width: `${20}%` }}
+                style={{ width: `${2}%` }}
               ></div>
             </div>
           </div>
@@ -385,7 +385,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
         <div>
           <Progress value={engagement.progress} />
           <div className='text-muted-foreground mt-1 text-right text-xs'>
-            {20}%
+            {2}%
           </div>
         </div>
 

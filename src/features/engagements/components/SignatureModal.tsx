@@ -1406,7 +1406,7 @@ export const SignatureModal = ({
         <header className='flex flex-shrink-0 items-center justify-between border-b p-4'>
           <h2 className='text-xl font-bold'>Sign Document: {file.name}</h2>
           <div className='flex items-center gap-5'>
-            <Button>Submt Signed Document</Button>
+            {/* <Button>Submt Signed Document</Button> */}
             <button
             onClick={onClose}
             className='rounded-full p-2 text-2xl leading-none hover:bg-gray-200'

@@ -30,7 +30,7 @@ export function SigningPortalModal({ selectedEngagement, open, onOpenChange, onE
 
         {/* The main content area is now padded and scrollable */}
         <div className="flex-grow overflow-y-auto overflow-x-hidden p-6">
-          <SigningFlowComponent />
+          <SigningFlowComponent selectedEngagement={selectedEngagement} />
         </div>
 
         {/* 5. Add the DialogFooter for the bottom button */}
