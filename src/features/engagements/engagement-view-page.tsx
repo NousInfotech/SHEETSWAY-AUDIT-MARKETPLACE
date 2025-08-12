@@ -26,21 +26,27 @@ import EngagementSettingsTab from './components/EngagementSettingsTab';
 import DocumentsTab from './components/DocumentsTab';
 import { Spinner } from '@/components/ui/spinner';
 import { getEngagementById, listEngagements } from '@/api/engagement';
+import { useClientEngagementStore } from './store';
 
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
   const [currentPage, setCurrentPage] = useState('engagements');
   const [selectedEngagement, setSelectedEngagement] =
-    useState<Engagement | null>(null);
+    useState<any | null>(null);
   const [currentWorkspaceTab, setCurrentWorkspaceTab] = useState('accounting');
   // const [engagements, setEngagements] = useState<Engagement[]>([]);
+  
   const [engagements, setEngagements] = useState<any[]>([]);
+
   const [accountingData, setAccountingData] = useState<AccountingData[]>([]);
   const [bankingData, setBankingData] = useState<BankingData[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+
+
+  const { clientEngagements } = useClientEngagementStore();
 
   useEffect(() => {
     const savedEngagements = localStorage.getItem('engagements');
@@ -49,22 +55,20 @@ const EngagementViewPage = () => {
     const savedPayments = localStorage.getItem('payments');
     const savedContracts = localStorage.getItem('contracts');
     const savedReviews = localStorage.getItem('reviews');
-    setEngagements(
-      savedEngagements && JSON.parse(savedEngagements).length > 0
-        ? JSON.parse(savedEngagements)
-        : generateMockEngagements()
-    );
+    // setEngagements(
+    //   savedEngagements && JSON.parse(savedEngagements).length > 0
+    //     ? JSON.parse(savedEngagements)
+    //     : generateMockEngagements()
+    // );
 
-    const getEngagements = async () => {
-      try {
-        let all_engagements = await listEngagements();
-        console.log("all engagemnets:", all_engagements )
-        // setEngagements(data);
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    getEngagements();
+
+    console.log(clientEngagements)
+    setEngagements(clientEngagements)
+
+   
+   
+     
+   
     
 
 
@@ -121,7 +125,7 @@ const EngagementViewPage = () => {
       contracts.length === 0 &&
       reviews.length === 0
     ) {
-      setEngagements(generateMockEngagements());
+      // setEngagements(generateMockEngagements());
       setAccountingData(generateMockAccountingData());
       setBankingData(generateMockBankingData());
       setPayments(generateMockPayments());
@@ -174,6 +178,8 @@ const EngagementViewPage = () => {
         return (
           <ActiveEngagements
             engagements={engagements}
+            selectedEngagement={selectedEngagement}
+            setSelectedEngagement={setSelectedEngagement}
             onEnterWorkspace={handleEnterWorkspace}
             onRefresh={handleRefresh}
           />

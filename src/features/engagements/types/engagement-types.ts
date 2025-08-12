@@ -85,3 +85,44 @@ export interface Filters {
   type: '' | 'Audit' | 'Tax';
   framework: '' | 'IFRS' | 'GAPSME';
 } 
+
+
+
+
+// #######################################################################################################
+
+// real data for client engagements
+
+interface Auditor {
+  name: string;
+}
+
+interface AuditFirm {
+  name: string;
+}
+
+interface Proposal {
+  proposalName: string;
+}
+
+interface Request {
+  title: string;
+  urgency: "NORMAL" | "HIGH" | "LOW"; // You might want to use an enum for more clarity
+  framework: string;
+  deadline: string; // Or Date if you plan to parse it
+}
+
+// Assuming the 'auditorTeam' and 'milestones' arrays could contain objects with a specific structure.
+// If they are always empty, 'any[]' or 'unknown[]' would also work.
+// For a more robust definition, you would replace 'any' with a concrete type when the structure is known.
+export interface ClientEngagement {
+  id: string;
+  startDate: string | null; // Or Date | null
+  endDate: string | null;   // Or Date | null
+  auditorTeam: any[];       // Replace 'any' with a more specific type if the structure is known
+  milestones: any[];        // Replace 'any' with a more specific type if the structure is known
+  request: Request;
+  proposal: Proposal;
+  auditFirm: AuditFirm;
+  auditor: Auditor;
+}

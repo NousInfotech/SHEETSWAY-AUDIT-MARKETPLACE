@@ -42,7 +42,7 @@ export const navItems: NavItem[] = [
   },
   {
     title: 'Active Engagements',
-    url: '/dashboard/e-signature',
+    url: '/dashboard/engagements',
     icon: '/assets/icons/briefcase.png',
     activeIcon: '/assets/icons/briefcase-filled.png',
     isActive: false,

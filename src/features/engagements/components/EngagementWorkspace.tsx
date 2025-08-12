@@ -5,7 +5,7 @@ import { ArrowLeft, Database, Banknote, FileText, History, Settings, MessageCirc
 import { useRouter } from 'next/navigation';
 
 interface EngagementWorkspaceProps {
-  engagement: Engagement;
+  engagement: any;
   currentTab: string;
   onTabChange: (tab: string) => void;
   onBack: () => void;
@@ -19,7 +19,7 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
   onBack,
   children
 }) => {
-  const StatusIcon = statusConfig[engagement.status].icon;
+  const StatusIcon = statusConfig["In Progress"].icon;
   const router = useRouter();
 
   const Header = () => (
@@ -38,7 +38,7 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
               {engagement.clientName}
             </h1>
             <div className="flex items-center gap-2 mt-1">
-              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusConfig[engagement.status].textColor} bg-opacity-10`}>
+              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusConfig['In Progress'].textColor} bg-opacity-10`}>
                 <StatusIcon className="h-4 w-4" />
                 {engagement.status}
               </div>

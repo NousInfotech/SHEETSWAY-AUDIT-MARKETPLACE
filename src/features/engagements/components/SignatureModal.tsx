@@ -1401,18 +1401,21 @@ export const SignatureModal = ({
   };
 
   return (
-    <div className='bg-opacity-60 fixed inset-0 z-50 flex items-center justify-center bg-black backdrop-blur-sm'>
+    <div className='bg-opacity-60 fixed inset-0 z-50 flex items-center justify-center bg-black rounded-lg backdrop-blur-sm'>
       <div className='relative flex h-[95vh] w-[95vw] max-w-6xl flex-col rounded-lg bg-white shadow-2xl'>
         <header className='flex flex-shrink-0 items-center justify-between border-b p-4'>
           <h2 className='text-xl font-bold'>Sign Document: {file.name}</h2>
-          <button
+          <div className='flex items-center gap-5'>
+            <Button>Submt Signed Document</Button>
+            <button
             onClick={onClose}
             className='rounded-full p-2 text-2xl leading-none hover:bg-gray-200'
           >
             &times;
           </button>
+          </div>
         </header>
-        <div className='flex flex-grow overflow-hidden'>
+        <div className='flex flex-grow overflow-hidden rounded-lg'>
           <div
             ref={scrollContainerRef}
             id='pdf-scroll-container'

@@ -23,6 +23,11 @@ instance.interceptors.response.use(
   (response) => {
     const data = response.data;
 
+
+    if (Array.isArray(data)) {
+      return data;
+    }
+
     if (data?.success === true) {
       return data; // ✅ return actual payload
     } else {

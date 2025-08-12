@@ -1,7 +1,11 @@
 // context/AuthContext.tsx
 'use client';
 
-import { onAuthStateChanged, getIdToken, User as FirebaseUser } from 'firebase/auth';
+import {
+  onAuthStateChanged,
+  getIdToken,
+  User as FirebaseUser
+} from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { setToken, clearToken } from '@/lib/utils';
 import React, { useEffect, useState, createContext } from 'react';
@@ -21,13 +25,13 @@ const AuthContext = createContext<{
   firebaseUser: null,
   appUser: null,
   loading: false,
-  setProfile: async () => { },
+  setProfile: async () => {}
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [appUser, setAppUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -59,7 +63,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-
   useEffect(() => {
     if (pathname === '/auth/sign-up' || pathname === '/auth/sign-in') {
       setLoading(false);
@@ -67,12 +70,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        await setProfile(user);
-      } else {
-        clearToken();
-        setFirebaseUser(null);
-        setAppUser(null);
+      try {
+        if (user) {
+          await setProfile(user);
+        } else {
+          clearToken();
+          setFirebaseUser(null);
+          setAppUser(null);
+        }
+      } catch (error) {
+        console.error('An error occurred during auth state change:', error);
+      } finally {
         setLoading(false);
       }
     });
@@ -81,7 +89,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [pathname]);
 
   return (
-    <AuthContext.Provider value={{ firebaseUser, appUser, loading, setProfile }}>
+    <AuthContext.Provider
+      value={{ firebaseUser, appUser, loading, setProfile }}
+    >
       {children}
     </AuthContext.Provider>
   );

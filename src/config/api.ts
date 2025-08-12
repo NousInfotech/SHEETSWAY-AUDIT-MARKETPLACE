@@ -28,6 +28,7 @@ export const PROPOSAL_BY_ID_API = (proposalId: string) => `/api/v1/proposals/${p
 
 export const ENGAGEMENT_API = '/api/v1/engagements';
 export const ENGAGEMENT_BY_ID_API = (engagementId: string) => `/api/v1/engagements/${engagementId}`;
+export const CLIENT_ENGAGEMENT_API = '/api/v1/engagements/client';
 
 
 // Centralized API object (optional, for easier import)

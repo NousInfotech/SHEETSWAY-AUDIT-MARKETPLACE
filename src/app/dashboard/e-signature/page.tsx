@@ -135,7 +135,7 @@ export default function SigningPage() {
             </div>
             <div className='w-full max-w-lg'>
               <h2 className='mb-3 text-center text-sm font-semibold text-slate-500 uppercase'>
-                Try a Demo Document
+                PLEASE SIGN YOUR DOCUMENTS GIVEN BELOW
               </h2>
               <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
                 {demoFiles.map((file) => (
