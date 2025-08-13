@@ -6,7 +6,7 @@ import { ENGAGEMENT_API } from '@/config/api';
 import instance from '@/lib/axios';
 import React, { useEffect } from 'react';
 
-function page() {
+function Page() {
   const { appUser, loading: authLoading } = useAuth();
   useEffect(() => {
     // Wait for auth to finish, then fetch if we have a user
@@ -39,4 +39,4 @@ function page() {
   return <div>PAYMENT PAGE</div>;
 }
 
-export default page;
+export default Page;
