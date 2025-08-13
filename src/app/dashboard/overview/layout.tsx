@@ -444,9 +444,9 @@ export default function OverViewLayout({
                           </span>
                         </p>
 
-                        <p className='text-xs font-semibold whitespace-nowrap'>
+                        <p className='text-xs text-red-500 font-semibold whitespace-nowrap'>
                           deadline:{' '}
-                          <span className='text-gray-800'>
+                          <span className='text-red-500'>
                             3rd July 2025 - 22 days
                           </span>
                         </p>
