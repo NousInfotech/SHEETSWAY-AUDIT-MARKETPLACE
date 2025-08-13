@@ -433,20 +433,20 @@ export default function OverViewLayout({
                   <Card className='border-t-8 border-t-yellow-500 shadow-sm not-dark:bg-white'>
                     <CardHeader>
                       <div className='flex gap-2 md:items-center md:justify-between'>
-                        <p className='flex text-sm font-bold md:items-center md:text-lg'>
+                        <p className='flex flex-nowrap text-sm font-bold md:items-center md:text-lg'>
                           <BarChart3
                             size={20}
                             className='mr-2 text-amber-500'
                           />
                           
-                          <span className='ml-1 font-normal'>
-                            Progress: <span className='text-sm text-amber-500'>Report is ready for your confirmation</span>
+                          <span className='ml-1 font-normal whitespace-nowrap'>
+                            Progress: <span className='text-sm text-amber-500 whitespace-nowrap'>Report is ready for your confirmation</span>
                           </span>
                         </p>
 
-                        <p className='text-sm'>
+                        <p className='text-xs font-semibold whitespace-nowrap'>
                           deadline:{' '}
-                          <span className='font-semibold text-gray-800'>
+                          <span className='text-gray-800'>
                             3rd July 2025 - 22 days
                           </span>
                         </p>
