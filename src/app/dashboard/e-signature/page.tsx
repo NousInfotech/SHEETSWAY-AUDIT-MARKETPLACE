@@ -30,8 +30,8 @@ const SignatureModal = dynamic(
 
 const demoFiles = [
   { title: 'Sample Agreement', path: '/demo-pdfs/sample-agreement.pdf' },
-  { title: 'Sample Invoice', path: '/demo-pdfs/sample-invoice.pdf' },
-  { title: 'Sample Report', path: '/demo-pdfs/sample-report.pdf' }
+  { title: 'Non-Disclosure-Agreement', path: '/demo-pdfs/Non-Disclosure-Agreement.pdf' },
+  { title: 'Engagement Letter', path: '/demo-pdfs/Engagement Letter.pdf' }
 ];
 
 export default function SigningPage() {
@@ -119,12 +119,6 @@ export default function SigningPage() {
             className={`flex min-h-screen w-full flex-col items-center justify-center gap-8 p-4 text-slate-800 transition-all duration-500 dark:text-slate-200 ${!isStarted ? 'scale-105 blur-md' : 'blur-0 scale-100'}`}
           >
             {' '}
-            <span
-              className='cursor-pointer rounded-full border bg-green-500 px-6 py-2 text-xs'
-              onClick={() => router.push('/dashboard/engagements')}
-            >
-              Engagements
-            </span>
             <div className='w-full max-w-2xl text-center'>
               <h1 className='text-4xl font-bold tracking-tight text-slate-900 dark:text-white'>
                 E-Signature Portal

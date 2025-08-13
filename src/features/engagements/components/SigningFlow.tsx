@@ -7,6 +7,7 @@ import { Loader2, FileUp, FileCheck, X, FileText } from 'lucide-react';
 import { StartButton } from '@/features/engagements/components/StartButton';
 
 import SignedDocumentsUpload from './SignedDocumentsUpload';
+import { Button } from '@/components/ui/button';
 
 // This is the SignatureModal from the previous step
 const SignatureModal = dynamic(
@@ -42,7 +43,7 @@ export function SigningFlowComponent({
   selectedEngagement
 }: signingFlowComponentProps) {
   // 'idle' | 'signing' | 'uploading'
-  const [flowState, setFlowState] = useState('idle');
+  const [flowState, setFlowState] = useState('signing');
 
   const [isStarted, setIsStarted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -130,13 +131,13 @@ export function SigningFlowComponent({
           {/* --- LAYER 1: E-SIGNATURE PORTAL (Always rendered) --- */}
           <div
             className={`flex min-h-[85vh] w-full flex-col items-center justify-center gap-8 p-4 text-slate-800 transition-all duration-500 dark:text-slate-200 ${!isStarted ? 'scale-105 blur-md' : 'blur-0 scale-100'}`}
-          >
+          > <Button onClick={() => setFlowState("uploading")}>UPLOAD SIGNED DOCUMENTS</Button>
             <div className='w-full max-w-2xl text-center'>
               <h1 className='text-4xl font-bold tracking-tight text-slate-900 dark:text-white'>
                 E-Signature Portal
               </h1>
               <p className='mt-2 text-lg text-slate-600 dark:text-slate-400'>
-                Select a demo document or upload your own PDF to begin.
+                Select a document or upload your own PDF to be signed.
               </p>
             </div>
 
@@ -265,26 +266,26 @@ export function SigningFlowComponent({
   }
 
   // This is the new "idle" state, the initial choice screen.
-  return (
-    <div className='flex min-h-[85vh] flex-col items-center justify-center bg-slate-50 p-4 dark:bg-slate-900'>
-      <div className='text-center'>
-        <h1 className='text-4xl font-bold tracking-tight text-slate-900 dark:text-white'>
-          Choose Your Action
-        </h1>
-        <p className='mt-2 text-lg text-slate-600 dark:text-slate-400'>
-          How would you like to proceed with your documents?
-        </p>
-        <div className='mt-8 flex flex-col gap-4 sm:flex-row'>
-          <StartButton
-            text='E-Sign Documents'
-            onClick={() => setFlowState('signing')}
-          />
-          <StartButton
-            text='Upload Signed Documents'
-            onClick={() => setFlowState('uploading')}
-          />
-        </div>
-      </div>
-    </div>
-  );
+  // return (
+  //   <div className='flex min-h-[85vh] flex-col items-center justify-center bg-slate-50 p-4 dark:bg-slate-900'>
+  //     <div className='text-center'>
+  //       <h1 className='text-4xl font-bold tracking-tight text-slate-900 dark:text-white'>
+  //         Choose Your Action
+  //       </h1>
+  //       <p className='mt-2 text-lg text-slate-600 dark:text-slate-400'>
+  //         How would you like to proceed with your documents?
+  //       </p>
+  //       <div className='mt-8 flex flex-col gap-4 sm:flex-row'>
+  //         <StartButton
+  //           text='E-Sign Documents'
+  //           onClick={() => setFlowState('signing')}
+  //         />
+  //         <StartButton
+  //           text='Upload Signed Documents'
+  //           onClick={() => setFlowState('uploading')}
+  //         />
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 }

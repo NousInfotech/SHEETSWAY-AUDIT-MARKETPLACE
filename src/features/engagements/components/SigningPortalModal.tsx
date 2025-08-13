@@ -35,7 +35,7 @@ export function SigningPortalModal({ selectedEngagement, open, onOpenChange, onE
 
         {/* 5. Add the DialogFooter for the bottom button */}
         <DialogFooter className="p-6 border-t bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-          <Button onClick={() => onEnterWorkspace(selectedEngagement)}>
+          <Button disabled onClick={() => onEnterWorkspace(selectedEngagement)}>
             Enter Workspace
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

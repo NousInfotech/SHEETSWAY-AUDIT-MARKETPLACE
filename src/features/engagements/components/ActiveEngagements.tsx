@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import { Engagement, Filters } from '../types/engagement-types';
 import { statusConfig, priorityConfig } from '../constants/config';
 import {
@@ -20,6 +21,18 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { SigningPortalModal } from './SigningPortalModal';
 
+// payment
+import { loadStripe } from '@stripe/stripe-js';
+import PaymentModal from './PaymentModal';
+
+import { useAuth } from '@/components/layout/providers';
+import instance from '@/lib/axios';
+import { ENGAGEMENT_API } from '@/config/api';
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY as string
+);
+
 interface ActiveEngagementsProps {
   engagements: any[];
   selectedEngagement: any | null;
@@ -37,6 +50,9 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
 }) => {
   const [isSignModalOpen, setIsSignModalOpen] = useState<boolean>(false);
 
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filters, setFilters] = useState<Filters>({
     search: '',
@@ -47,6 +63,37 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
   const [sortOption, setSortOption] = useState<
     'clientName' | 'status' | 'startDate' | 'deadline' | 'progress'
   >('clientName');
+
+  const { appUser, loading: authLoading } = useAuth();
+  let userId = appUser?.id;
+
+  const handlePayment = async (id: string) => {
+    setIsProcessing(true);
+
+    try {
+      const res = await instance.post(
+        `${ENGAGEMENT_API}/${id}/pre-engagement-payment/create`,
+        { userId }
+      );
+
+      console.log('Full response from backend:', res.data);
+
+      const checkoutUrl = res.data?.checkoutUrl;
+
+      if (!checkoutUrl) {
+        throw new Error("Checkout URL was not found in the server's response.");
+      }
+
+      window.location.href = checkoutUrl;
+    } catch (error) {
+      console.error('Payment Error:', error);
+      alert(
+        `Payment failed: ${error instanceof Error ? error.message : 'Unknown Error'}`
+      );
+
+      setIsProcessing(false);
+    }
+  };
 
   const sortEngagements = (list: any[]) => {
     switch (sortOption) {
@@ -264,7 +311,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               <div className='flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400'>
                 <div className='flex items-center gap-1'>
                   <Building className='h-4 w-4' />
-                  <span>Audit</span>
+                  <span>{engagement.request.type}</span>
                 </div>
                 <div className='flex items-center gap-1'>
                   <Tag className='h-4 w-4' />
@@ -332,18 +379,44 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
                 1 member
               </span>
             </div>
-            <button
-              // onClick={() => onEnterWorkspace(engagement)}
-              onClick={() => {
-                setSelectedEngagement(engagement);
-                setIsSignModalOpen(true);
-              }}
-              className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
-            >
-              <Play className='h-4 w-4' />
-              Enter Workspace
-              <ArrowRight className='h-4 w-4' />
-            </button>
+            {engagement.status === 'PENDING' && (
+              <button
+                // onClick={() => onEnterWorkspace(engagement)}
+                onClick={() => {
+                  setSelectedEngagement(engagement);
+                  setIsSignModalOpen(true);
+                }}
+                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+              >
+                <Play className='h-4 w-4' />
+                GO TO START
+                <ArrowRight className='h-4 w-4' />
+              </button>
+            )}
+            {engagement.status === 'AWAITING_PAYMENT' && (
+              <button
+                // onClick={() => onEnterWorkspace(engagement)}
+                onClick={() => {
+                  setSelectedEngagement(engagement);
+                  setIsPaymentModalOpen(true);
+                }}
+                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+              >
+                <Play className='h-4 w-4' />
+                GO TO PAYMENT
+                <ArrowRight className='h-4 w-4' />
+              </button>
+            )}
+            {engagement.status === 'ACTIVE' && (
+              <button
+                onClick={() => onEnterWorkspace(engagement)}
+                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+              >
+                <Play className='h-4 w-4' />
+                Enter Workspace
+                <ArrowRight className='h-4 w-4' />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -367,7 +440,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
         <div className='text-muted-foreground text-sm'>
           <div className='flex items-center gap-1.5'>
             <Building className='h-4 w-4 flex-shrink-0' />
-            <span>Audit</span>
+            <span>{engagement.request.type}</span>
           </div>
           <div className='mt-1 flex items-center gap-1.5'>
             <Tag className='h-4 w-4 flex-shrink-0' />
@@ -471,6 +544,18 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           onEnterWorkspace={onEnterWorkspace}
         />
       )}
+
+      {/* 
+        === RENDER THE MODAL HERE === 
+        It lives outside the card's visual flow but is controlled by its state.
+      */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onOpenChange={setIsPaymentModalOpen}
+        engagement={selectedEngagement}
+        handlePayment={handlePayment}
+        isProcessing={isProcessing}
+      />
     </div>
   );
 };

@@ -189,7 +189,6 @@
 
 // ########################################################################################################
 
-
 'use client';
 
 import PageContainer from '@/components/layout/page-container';
@@ -366,13 +365,18 @@ export default function OverViewLayout({
     // }
   ];
 
-  
-
   return (
     <PageContainer>
-      <div style={{ position: 'relative', width: '100%', height: "550px" }}>
+      <div style={{ position: 'relative', width: '100%', height: '600px' }}>
         <ScrollArea
-          style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, overflowY: "hidden" }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            overflowY: 'hidden'
+          }}
         >
           <div
             style={{ minWidth: '1100px' }}
@@ -391,10 +395,12 @@ export default function OverViewLayout({
                       </span>
                     </div>
 
-                    <div className='flex items-center gap-2 w-full'>
+                    <div className='flex w-full items-center gap-2'>
                       <div className='w-[50%] rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
                         <div>
-                          <div className='whitespace-nowrap'>Active Engagements</div>
+                          <div className='whitespace-nowrap'>
+                            Active Engagements
+                          </div>
                           <div className='text-4xl font-bold'>10</div>
                           <div
                             onClick={() =>
@@ -438,22 +444,22 @@ export default function OverViewLayout({
                             size={20}
                             className='mr-2 text-amber-500'
                           />
-                          
+
                           <span className='ml-1 font-normal whitespace-nowrap'>
-                            Progress: <span className='text-sm text-amber-500 whitespace-nowrap'>Report is ready for your confirmation</span>
+                            Progress:{' '}
+                            <span className='text-sm whitespace-nowrap text-amber-500'>
+                              Report is ready for your confirmation
+                            </span>
                           </span>
                         </p>
 
-                        <p className='text-xs text-red-500 font-semibold whitespace-nowrap'>
+                        <p className='text-sm font-semibold whitespace-nowrap text-red-500'>
                           deadline:{' '}
                           <span className='text-red-500'>
                             3rd July 2025 - 22 days
                           </span>
                         </p>
-                        <button
-                          
-                          className='rounded-full px-4 py-1 bg-blue-600 text-xs text-white hover:bg-blue-700'
-                        >
+                        <button className='rounded-full bg-blue-600 px-4 py-1 text-xs text-white hover:bg-blue-700'>
                           Extend
                         </button>
                       </div>
@@ -593,12 +599,14 @@ export default function OverViewLayout({
                       <div className='mt-2 flex items-center justify-between'>
                         <div>
                           <p>
-                            <span className='text-sm font-semibold text-gray-500'>
-                              See all the upcoming meetings <span><Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
-                              6
-                            </Badge></span>
+                            <span className='text-sm font-semibold whitespace-nowrap text-gray-500'>
+                              See all the upcoming meetings{' '}
+                              <span>
+                                <Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
+                                  6
+                                </Badge>
+                              </span>
                             </span>
-                            
                           </p>
                         </div>
                         <div className='text-right'>
@@ -626,7 +634,9 @@ export default function OverViewLayout({
                             className='flex items-center justify-between gap-2 text-sm'
                           >
                             <div>
-                              <p className='font-semibold text-xs whitespace-nowrap'>{item.auditor}</p>
+                              <p className='text-xs font-semibold whitespace-nowrap'>
+                                {item.auditor}
+                              </p>
                               <p className='text-xs text-gray-500'>
                                 New Messages
                                 <Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
@@ -635,7 +645,9 @@ export default function OverViewLayout({
                               </p>
                             </div>
                             <div className='text-right'>
-                              <p className='font-semibold text-xs'>{item.engagement}</p>
+                              <p className='text-xs font-semibold'>
+                                {item.engagement}
+                              </p>
                               <p className='text-xs text-gray-500'>
                                 latest: {item.time}
                               </p>
