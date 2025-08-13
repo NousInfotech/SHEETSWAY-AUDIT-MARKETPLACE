@@ -223,7 +223,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
@@ -366,14 +366,16 @@ export default function OverViewLayout({
     // }
   ];
 
+  
+
   return (
     <PageContainer>
-      <div style={{ position: 'relative', width: '100%', height: '578px' }}>
+      <div style={{ position: 'relative', width: '100%', height: "550px" }}>
         <ScrollArea
-          style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+          style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, overflowY: "hidden" }}
         >
           <div
-            style={{ minWidth: '1200px' }}
+            style={{ minWidth: '1100px' }}
             className='flex flex-1 shrink-0 flex-col space-y-6 rounded-lg p-4 not-dark:bg-gray-50/75'
           >
             <div className='grid h-full w-full grid-cols-3 gap-3'>
@@ -389,10 +391,10 @@ export default function OverViewLayout({
                       </span>
                     </div>
 
-                    <div className='flex items-center gap-2'>
-                      <div className='w-full rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
+                    <div className='flex items-center gap-2 w-full'>
+                      <div className='w-[50%] rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
                         <div>
-                          <div>Active Engagements</div>
+                          <div className='whitespace-nowrap'>Active Engagements</div>
                           <div className='text-4xl font-bold'>10</div>
                           <div
                             onClick={() =>
@@ -403,12 +405,12 @@ export default function OverViewLayout({
                             View Details
                             <IconTrendingUp className='ml-1 size-4' />
                           </div>
-                          <p className='text-xs whitespace-nowrap text-gray-500'>
+                          <p className='text-xs text-gray-500'>
                             see all the active engagements
                           </p>
                         </div>
                       </div>
-                      <div className='w-full rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
+                      <div className='w-[50%] rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
                         <div>
                           <div>Open Proposals</div>
                           <div className='text-4xl font-bold'>70</div>
@@ -448,12 +450,12 @@ export default function OverViewLayout({
                             3rd July 2025 - 22 days
                           </span>
                         </p>
-                        <Button
-                          size='sm'
-                          className='w-fit rounded-full bg-blue-600 text-sm text-white hover:bg-blue-700'
+                        <button
+                          
+                          className='rounded-full px-4 py-1 bg-blue-600 text-xs text-white hover:bg-blue-700'
                         >
                           Extend
-                        </Button>
+                        </button>
                       </div>
                       <div className='flex md:items-center md:justify-between'>
                         <Button
@@ -590,13 +592,13 @@ export default function OverViewLayout({
                       </CardTitle>
                       <div className='mt-2 flex items-center justify-between'>
                         <div>
-                          <p className='flex items-center gap-1'>
-                            <span className='text-sm font-semibold whitespace-nowrap text-gray-500'>
-                              See all the upcoming meetings
-                            </span>
-                            <Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
+                          <p>
+                            <span className='text-sm font-semibold text-gray-500'>
+                              See all the upcoming meetings <span><Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
                               6
-                            </Badge>
+                            </Badge></span>
+                            </span>
+                            
                           </p>
                         </div>
                         <div className='text-right'>
@@ -624,7 +626,7 @@ export default function OverViewLayout({
                             className='flex items-center justify-between gap-2 text-sm'
                           >
                             <div>
-                              <p className='font-semibold'>{item.auditor}</p>
+                              <p className='font-semibold text-xs whitespace-nowrap'>{item.auditor}</p>
                               <p className='text-xs text-gray-500'>
                                 New Messages
                                 <Badge className='h-4 min-w-4 rounded-full bg-yellow-500 p-0 font-mono text-white tabular-nums'>
@@ -633,7 +635,7 @@ export default function OverViewLayout({
                               </p>
                             </div>
                             <div className='text-right'>
-                              <p className='font-semibold'>{item.engagement}</p>
+                              <p className='font-semibold text-xs'>{item.engagement}</p>
                               <p className='text-xs text-gray-500'>
                                 latest: {item.time}
                               </p>

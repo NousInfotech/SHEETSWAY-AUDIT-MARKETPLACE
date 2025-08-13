@@ -90,6 +90,14 @@ interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
    * @example disabled
    */
   disabled?: boolean;
+
+  /**
+   * Whether to display the file preview card after selecting a file.
+   * @type boolean
+   * @default true
+   * @example showPreview={false}
+   */
+  showPreview?: boolean; // ADD THIS PROP
 }
 
 export function FileUploader(props: FileUploaderProps) {
@@ -103,6 +111,7 @@ export function FileUploader(props: FileUploaderProps) {
     maxFiles = 1,
     multiple = false,
     disabled = false,
+    showPreview = true, // ADD AND DEFAULT THIS PROP
     className,
     ...dropzoneProps
   } = props;
@@ -231,20 +240,14 @@ export function FileUploader(props: FileUploaderProps) {
                   <p className='text-muted-foreground font-medium'>
                     Drag {`&`} drop files here, or click to select files
                   </p>
-                  {/* <p className='text-muted-foreground/70 text-sm'>
-                    You can upload
-                    {maxFiles > 1
-                      ? ` ${maxFiles === Infinity ? 'multiple' : maxFiles}
-                      files (up to ${formatBytes(maxSize)} each)`
-                      : ` a file with ${formatBytes(maxSize)}`}
-                  </p> */}
                 </div>
               </div>
             )}
           </div>
         )}
       </Dropzone>
-      {files?.length ? (
+      {/* UPDATE THIS CONDITION */}
+      {showPreview && files?.length ? (
         <ScrollArea className='h-fit w-full px-3'>
           <div className='max-h-48 space-y-4'>
             {files?.map((file, index) => (
@@ -269,10 +272,15 @@ interface FileCardProps {
 }
 
 function FileCard({ file, progress, onRemove }: FileCardProps) {
+  // To avoid a flash of the preview, we can also check for progress.
+  // If progress is undefined, it means the upload hasn't started from the parent's perspective.
+  // However, the main `showPreview` flag is the primary fix.
+  const isImage = file.type.startsWith('image/');
+
   return (
     <div className='relative flex items-center space-x-4'>
       <div className='flex flex-1 space-x-4'>
-        {isFileWithPreview(file) ? (
+        {isImage && isFileWithPreview(file) ? (
           <Image
             src={file.preview}
             alt={file.name}
