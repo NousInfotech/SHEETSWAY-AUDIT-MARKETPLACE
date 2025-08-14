@@ -8,6 +8,7 @@ import { StartButton } from '@/features/engagements/components/StartButton';
 
 import SignedDocumentsUpload from './SignedDocumentsUpload';
 import { Button } from '@/components/ui/button';
+import { Info } from 'lucide-react'
 
 // This is the SignatureModal from the previous step
 const SignatureModal = dynamic(
@@ -131,7 +132,14 @@ export function SigningFlowComponent({
           {/* --- LAYER 1: E-SIGNATURE PORTAL (Always rendered) --- */}
           <div
             className={`flex min-h-[85vh] w-full flex-col items-center justify-center gap-8 p-4 text-slate-800 transition-all duration-500 dark:text-slate-200 ${!isStarted ? 'scale-105 blur-md' : 'blur-0 scale-100'}`}
-          > <Button onClick={() => setFlowState("uploading")}>UPLOAD SIGNED DOCUMENTS</Button>
+          > <div className='flex flex-col'>
+            <Button onClick={() => setFlowState("uploading")}>UPLOAD SIGNED DOCUMENTS</Button>
+            <p className='flex items-center text-red-500'>
+
+            <span className='text-xs'>uploading signed documents is mandatory to start service</span>
+            <span className='px-1'><Info size={10} /></span>
+            </p>
+          </div>
             <div className='w-full max-w-2xl text-center'>
               <h1 className='text-4xl font-bold tracking-tight text-slate-900 dark:text-white'>
                 E-Signature Portal
