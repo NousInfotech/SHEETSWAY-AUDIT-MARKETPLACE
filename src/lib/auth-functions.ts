@@ -1,25 +1,21 @@
-// In a new or existing auth helper file
-import {
-  getAuth,
-  GoogleAuthProvider,
-  linkWithPopup, // <-- IMPORTANT: Use linkWithPopup, not signInWithPopup
-} from 'firebase/auth';
+// src/lib/auth-functions.ts
+
+import { GoogleAuthProvider, linkWithPopup } from 'firebase/auth';
+
+// Import the already initialized 'auth' instance from your firebase config file.
+import { auth } from '@/lib/firebase';
 
 export const linkGoogleAccount = async () => {
   try {
-    const auth = getAuth();
+    // Now 'auth' is the initialized service. We do NOT call getAuth() anymore.
     if (!auth.currentUser) {
       throw new Error("No user is currently signed in.");
     }
 
     const provider = new GoogleAuthProvider();
-    // Ask for the necessary permission
     provider.addScope('https://www.googleapis.com/auth/drive.readonly');
 
-    // Use linkWithPopup to connect to the existing user session
     const result = await linkWithPopup(auth.currentUser, provider);
-
-    // Get the OAuth access token from the result
     const credential = GoogleAuthProvider.credentialFromResult(result);
     const googleAccessToken = credential?.accessToken;
 
@@ -27,17 +23,12 @@ export const linkGoogleAccount = async () => {
       throw new Error("Could not retrieve Google Drive access token during linking.");
     }
 
-    // Save the token to be used by the application
     localStorage.setItem('googleDriveAccessToken', googleAccessToken);
-    
     console.log("Successfully linked Google Account and stored access token!");
-    alert("Google Drive connected!");
     
-    // Return the token so the UI can update immediately
     return googleAccessToken;
 
   } catch (error: any) {
-    // Handle common errors, like if the Google account is already linked to another user
     if (error.code === 'auth/credential-already-in-use') {
       alert("This Google account is already linked to another user.");
     } else {

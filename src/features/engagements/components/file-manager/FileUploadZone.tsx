@@ -16,7 +16,6 @@ import { UploadCloud, File as FileIcon, X } from 'lucide-react';
 import { openGooglePicker } from '@/lib/google-picker'; // We'll create this helper
 import { useRouter } from 'next/navigation';
 
-
 declare const Dropbox: any;
 
 // --- MAIN COMPONENT ---
@@ -70,8 +69,6 @@ export function FileUploadZone() {
     }
   };
 
-  
-
   const handleSelectFromDropbox = () => {
     if (!isDropboxConnected) return;
 
@@ -88,12 +85,15 @@ export function FileUploadZone() {
     });
   };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const {
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    open: openFileDialog
+  } = useDropzone({
     onDrop,
     noKeyboard: true
   });
-
-  const { open: openFileDialog } = useDropzone({ onDrop });
 
   return (
     <div className='mx-auto w-full max-w-4xl'>
