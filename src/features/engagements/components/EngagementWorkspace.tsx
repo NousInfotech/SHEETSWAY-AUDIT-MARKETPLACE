@@ -68,6 +68,7 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
       { id: 'payments', label: 'Payments & Escrow', icon: FileText },
       { id: 'reviews', label: 'Milestones', icon: History },
       { id: 'documents', label: 'Documents', icon: FileText },
+      { id: 'client documents', label: 'Client Documents', icon: FileText },
       { id: 'settings', label: 'Settings', icon: Settings },
     ];
     return (

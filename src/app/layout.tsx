@@ -1,8 +1,8 @@
 import Providers from '@/components/layout/providers';
 import { Toaster } from '@/components/ui/sonner';
-import { fontVariables } from '@/lib/font'; 
+import { fontVariables } from '@/lib/font';
 import ThemeProvider from '@/components/layout/ThemeToggle/theme-provider';
-import { cn } from '@/lib/utils'; 
+import { cn } from '@/lib/utils';
 import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
 import NextTopLoader from 'nextjs-toploader';
@@ -10,7 +10,9 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import './globals.css';
 import './theme.css';
 
-import "@fontsource/great-vibes";
+import '@fontsource/great-vibes';
+
+import Script from 'next/script';
 
 const META_THEME_COLORS = {
   light: '#ffffff',
@@ -101,6 +103,11 @@ export default async function RootLayout({
             </Providers>
           </ThemeProvider>
         </NuqsAdapter>
+        {/* Add the Google API script. It will be available on all pages. */}
+        <Script
+          src='https://apis.google.com/js/api.js'
+          strategy='afterInteractive'
+        />
       </body>
     </html>
   );

@@ -27,6 +27,8 @@ import DocumentsTab from './components/DocumentsTab';
 import { Spinner } from '@/components/ui/spinner';
 import { getEngagementById, listEngagements } from '@/api/engagement';
 import { useClientEngagementStore } from './store';
+import ClientDocument from './components/ClientDocumentTab';
+import { FileUploadZone } from './components/file-manager/FileUploadZone';
 
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
@@ -208,6 +210,7 @@ const EngagementViewPage = () => {
               />
             )}
             {currentWorkspaceTab === 'documents' && <DocumentsTab />}
+            {currentWorkspaceTab === 'client documents' && <FileUploadZone />}
             {currentWorkspaceTab === 'settings' && (
               <EngagementSettingsTab
                 engagement={selectedEngagement}

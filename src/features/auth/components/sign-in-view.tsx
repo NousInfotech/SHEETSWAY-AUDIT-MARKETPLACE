@@ -32,7 +32,11 @@ export default function SignInViewPage({
     setLoading(true);
     setError('');
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
       const token = await user.getIdToken();
       localStorage.setItem('token', token);
@@ -44,18 +48,65 @@ export default function SignInViewPage({
     }
   };
 
+  // const handleGoogleSignIn = async () => {
+  //   setLoading(true);
+  //   setError('');
+  //   try {
+  //     const provider = new GoogleAuthProvider();
+  //     const result = await signInWithPopup(auth, provider);
+  //     const user = result.user;
+  //     const token = await user.getIdToken();
+  //     localStorage.setItem('token', token);
+  //     router.push('/dashboard/overview');
+  //   } catch (err: any) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  //  WITH Google Drive Access
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
     try {
+      // 1. Create a new Google Auth provider
       const provider = new GoogleAuthProvider();
+
+      // 2. [ADDED] Add the scope to request Google Drive access.
+      provider.addScope('https://www.googleapis.com/auth/drive.readonly');
+
+      // 3. Trigger the sign-in popup
       const result = await signInWithPopup(auth, provider);
+
+      // 4. [ADDED] Extract the OAuth access token from the credential
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const googleAccessToken = credential?.accessToken;
+
+      // 5. [ADDED] Check if the access token was received
+      if (!googleAccessToken) {
+        throw new Error('Could not retrieve Google Drive access token.');
+      }
+
+      // 6. [ADDED] Store the Google Drive access token for other pages to use
+      localStorage.setItem('googleDriveAccessToken', googleAccessToken);
+
+      // --- Your existing logic remains, but with a clearer key name ---
       const user = result.user;
-      const token = await user.getIdToken();
-      localStorage.setItem('token', token);
+      const firebaseIdToken = await user.getIdToken();
+      // 7. [MODIFIED] Use a more specific key for the Firebase session token
+      localStorage.setItem('firebaseIdToken', firebaseIdToken);
+
       router.push('/dashboard/overview');
     } catch (err: any) {
-      setError(err.message);
+      // 8. [MODIFIED] Added more specific error handling
+      if (err.code === 'auth/account-exists-with-different-credential') {
+        setError(
+          'An account already exists with this email. Please sign in with the original method.'
+        );
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -187,10 +238,11 @@ export default function SignInViewPage({
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isDark
-                    ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700'
-                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:bg-white'
-                    }`}
+                  className={`h-10 w-full rounded-md border px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none ${
+                    isDark
+                      ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700'
+                      : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:bg-white'
+                  }`}
                 />
               </div>
 
@@ -218,16 +270,17 @@ export default function SignInViewPage({
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isDark
-                    ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700'
-                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:bg-white'
-                    }`}
+                  className={`h-10 w-full rounded-md border px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none ${
+                    isDark
+                      ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700'
+                      : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:bg-white'
+                  }`}
                 />
               </div>
 
               {/* Error Message */}
               {error && (
-                <div className='text-center text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-md border border-red-200 dark:border-red-800'>
+                <div className='rounded-md border border-red-200 bg-red-50 p-3 text-center text-sm text-red-500 dark:border-red-800 dark:bg-red-900/20'>
                   {error}
                 </div>
               )}
@@ -235,7 +288,7 @@ export default function SignInViewPage({
               {/* Sign In Button */}
               <Button
                 type='submit'
-                className="w-full bg-white text-black hover:bg-gray-100"
+                className='w-full bg-white text-black hover:bg-gray-100'
                 disabled={loading}
               >
                 {loading ? 'Signing in...' : 'Sign in'}
@@ -263,10 +316,11 @@ export default function SignInViewPage({
                 variant='outline'
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className={`w-full h-10 font-medium rounded-md transition-colors flex items-center justify-center gap-3 ${isDark
-                  ? 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'
-                  : 'border-gray-300 bg-white text-gray-900 hover:bg-gray-50'
-                  }`}
+                className={`flex h-10 w-full items-center justify-center gap-3 rounded-md font-medium transition-colors ${
+                  isDark
+                    ? 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'
+                    : 'border-gray-300 bg-white text-gray-900 hover:bg-gray-50'
+                }`}
               >
                 <svg className='h-5 w-5' viewBox='0 0 24 24'>
                   <path
