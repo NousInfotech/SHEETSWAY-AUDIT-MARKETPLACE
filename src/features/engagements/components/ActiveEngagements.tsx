@@ -413,7 +413,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
                 className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
               >
                 <Play className='h-4 w-4' />
-                Enter Workspace
+                WORKSPACE
                 <ArrowRight className='h-4 w-4' />
               </button>
             )}
@@ -473,18 +473,44 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
         </div>
 
         <div className='text-right'>
-          <Button
-            // onClick={() => onEnterWorkspace(engagement)}
-            onClick={() => {
-              setSelectedEngagement(engagement);
-              setIsSignModalOpen(true);
-            }}
-            variant='outline'
-            size='sm'
-          >
-            <Play className='h-4 w-4 md:mr-2' />
-            <span className='inline'>Workspace</span>
-          </Button>
+          {engagement.status === 'PENDING' && (
+            <Button
+              // onClick={() => onEnterWorkspace(engagement)}
+              onClick={() => {
+                setSelectedEngagement(engagement);
+                setIsSignModalOpen(true);
+              }}
+              variant='outline'
+              size='sm'
+            >
+              <Play className='h-4 w-4 md:mr-2' />
+              <span className='inline text-xs'>GO TO START</span>
+            </Button>
+          )}
+          {engagement.status === 'AWAITING_PAYMENT' && (
+            <Button
+              // onClick={() => onEnterWorkspace(engagement)}
+              onClick={() => {
+                setSelectedEngagement(engagement);
+                setIsPaymentModalOpen(true);
+              }}
+              variant='outline'
+              size='sm'
+            >
+              <Play className='h-4 w-4 md:mr-2' />
+              <span className='inline text-xs'>GO TO PAYMENT</span>
+            </Button>
+          )}
+          {engagement.status === 'ACTIVE' && (
+            <Button
+              onClick={() => onEnterWorkspace(engagement)}
+              variant='outline'
+              size='sm'
+            >
+              <Play className='h-4 w-4 md:mr-2' />
+              <span className='inline text-xs'>WORK SPACE</span>
+            </Button>
+          )}
         </div>
       </div>
     );

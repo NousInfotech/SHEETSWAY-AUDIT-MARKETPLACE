@@ -8,8 +8,8 @@ export const listEngagements = async (params?: Record<string, any>) => {
 };
 
 
-export const createPayment = async (params?: Record<string, any>) => {
-  const response = await instance.post(`${ENGAGEMENT_API}/98ed7140-5a0a-470f-9cf5-251a61bd6fec/pre-engagement-payment/create`, { params });
+export const createPayment = async (engagementId?:string, params?: Record<string, any>) => {
+  const response = await instance.post(`${ENGAGEMENT_API}/${engagementId}/pre-engagement-payment/create`, { params });
   return response.data;
 };
 
