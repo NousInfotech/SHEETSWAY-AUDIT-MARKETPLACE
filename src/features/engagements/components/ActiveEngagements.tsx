@@ -379,7 +379,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
                 1 member
               </span>
             </div>
-            {engagement.status === 'PENDING' && (
+            {engagement.status !== 'AWAITING_PAYMENT' && engagement.status !== 'ACTIVE' && (
               <button
                 // onClick={() => onEnterWorkspace(engagement)}
                 onClick={() => {
@@ -473,7 +473,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
         </div>
 
         <div className='text-right'>
-          {engagement.status === 'PENDING' && (
+          {engagement.status !== 'AWAITING_PAYMENT' && engagement.status !== 'ACTIVE' && (
             <Button
               // onClick={() => onEnterWorkspace(engagement)}
               onClick={() => {

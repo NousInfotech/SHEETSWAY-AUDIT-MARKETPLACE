@@ -2,6 +2,7 @@ import React from 'react';
 import { Engagement } from '../types/engagement-types';
 import { statusConfig } from '../constants/config';
 import { ArrowLeft, Database, Banknote, FileText, History, Settings, MessageCircle, Star } from 'lucide-react';
+
 import { useRouter } from 'next/navigation';
 
 interface EngagementWorkspaceProps {
@@ -35,7 +36,7 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
           </button>
           <div>
             <h1 className="text-3xl font-bold text-foreground">
-              {engagement.clientName}
+              {engagement.request.title}
             </h1>
             <div className="flex items-center gap-2 mt-1">
               <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusConfig['In Progress'].textColor} bg-opacity-10`}>
@@ -43,20 +44,16 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
                 {engagement.status}
               </div>
               <span className="text-muted-foreground text-sm">
-                {engagement.type} • {engagement.framework}
+                {engagement.request.type} • {engagement.framework}
               </span>
             </div>
           </div>
         </div>
         {/* Messages Icon Button */}
-        <a
-          href={`/dashboard/engagements/${engagement.id}/chat`}
-          className="inline-flex items-center gap-2 p-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors ml-4"
-          aria-label="Open Engagement Chat"
-        >
-          <MessageCircle className="h-6 w-6" />
-          Connect
-        </a>
+        <button onClick={() => onTabChange('chat')} className='flex flex-nowrap gap-1 items-center text-white bg-green-500 px-6 py-2 rounded-full'>
+            <MessageCircle />
+            <span>Chat&nbsp;With&nbsp;Auditor</span>
+          </button>
       </div>
     </header>
   );
@@ -70,18 +67,21 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
       { id: 'documents', label: 'Documents', icon: FileText },
       { id: 'client documents', label: 'Client Documents', icon: FileText },
       { id: 'settings', label: 'Settings', icon: Settings },
+      { id: 'chat', label: 'Chat', icon: MessageCircle },
     ];
     return (
+      <>
+      <div className='flex flex-col'>
       <nav className="bg-card dark:bg-card border-b border-border px-6 transition-colors">
         <div className="flex space-x-8">
-          {tabs.map((tab) => {
+          {tabs.slice(0,tabs.length - 1).map((tab) => {
             const Icon = tab.icon;
             return (
               <button
               // disabled={tab.label === "Documents" }
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
-                className={`flex items-center gap-2 px-3 py-4 text-sm font-medium border-b-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`flex whitespace-nowrap items-center gap-2 px-3 py-4 text-sm font-medium border-b-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   currentTab === tab.id
                     ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
@@ -94,6 +94,14 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
           })}
         </div>
       </nav>
+      {/* <div className='flex justify-end py-2 px-4'>
+          <button onClick={() => onTabChange('chat')} className='flex flex-nowrap gap-1 items-center text-white bg-green-500 px-4 py-1 rounded-full'>
+            <MessageCircle />
+            <span>Chat</span>
+          </button>
+      </div> */}
+      </div>
+      </>
     );
   };
 

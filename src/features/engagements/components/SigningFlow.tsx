@@ -8,7 +8,8 @@ import { StartButton } from '@/features/engagements/components/StartButton';
 
 import SignedDocumentsUpload from './SignedDocumentsUpload';
 import { Button } from '@/components/ui/button';
-import { Info } from 'lucide-react'
+import { Info } from 'lucide-react';
+import { makeEngaementToStart } from '@/api/engagement';
 
 // This is the SignatureModal from the previous step
 const SignatureModal = dynamic(
@@ -31,7 +32,10 @@ const SignatureModal = dynamic(
 
 const demoFiles = [
   { title: 'Sample Agreement', path: '/demo-pdfs/sample-agreement.pdf' },
-  { title: 'Non-Disclosure-Agreement', path: '/demo-pdfs/Non-Disclosure-Agreement.pdf' },
+  {
+    title: 'Non-Disclosure-Agreement',
+    path: '/demo-pdfs/Non-Disclosure-Agreement.pdf'
+  },
   { title: 'Engagement Letter', path: '/demo-pdfs/Engagement Letter.pdf' }
 ];
 
@@ -58,6 +62,8 @@ export function SigningFlowComponent({
       setIsModalOpen(true);
     }
   }, [documentToSign]);
+
+  // inside the useEffect call the function makeEngagementToStart
 
   const processFile = (file: File | null | undefined) => {
     if (file && file.type === 'application/pdf') {
@@ -132,14 +138,21 @@ export function SigningFlowComponent({
           {/* --- LAYER 1: E-SIGNATURE PORTAL (Always rendered) --- */}
           <div
             className={`flex min-h-[85vh] w-full flex-col items-center justify-center gap-8 p-4 text-slate-800 transition-all duration-500 dark:text-slate-200 ${!isStarted ? 'scale-105 blur-md' : 'blur-0 scale-100'}`}
-          > <div className='flex flex-col'>
-            <Button onClick={() => setFlowState("uploading")}>UPLOAD SIGNED DOCUMENTS</Button>
-            <p className='flex items-center text-red-500'>
-
-            <span className='text-xs'>uploading signed documents is mandatory to start service</span>
-            <span className='px-1'><Info size={10} /></span>
-            </p>
-          </div>
+          >
+            {' '}
+            <div className='flex flex-col'>
+              <Button onClick={() => setFlowState('uploading')}>
+                UPLOAD SIGNED DOCUMENTS
+              </Button>
+              <p className='flex items-center text-red-500'>
+                <span className='text-xs'>
+                  uploading signed documents is mandatory to start service
+                </span>
+                <span className='px-1'>
+                  <Info size={10} />
+                </span>
+              </p>
+            </div>
             <div className='w-full max-w-2xl text-center'>
               <h1 className='text-4xl font-bold tracking-tight text-slate-900 dark:text-white'>
                 E-Signature Portal
@@ -148,7 +161,6 @@ export function SigningFlowComponent({
                 Select a document or upload your own PDF to be signed.
               </p>
             </div>
-
             {/* ... (rest of your JSX for file selection, etc.) ... */}
             <div className='w-full max-w-lg'>
               <h2 className='mb-3 text-center text-sm font-semibold text-slate-500 uppercase'>

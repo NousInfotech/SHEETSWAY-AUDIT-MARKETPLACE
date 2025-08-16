@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDropzone, FileWithPath } from 'react-dropzone';
 import { useAuth } from '@/components/layout/providers'; // Your custom auth hook
-import { linkGoogleAccount } from '@/lib/auth-functions';
+
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+
+import {
+  linkGoogleAccountRedirect, // Import the new redirect functions
+  completeGoogleLinkRedirect
+} from '@/lib/auth-functions';
 
 // Icons & Components
 import { Button } from '@/components/ui/button';
@@ -25,6 +30,41 @@ export function FileUploadZone() {
   const [localFiles, setLocalFiles] = useState<FileWithPath[]>([]);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isDropboxConnected, setDropboxConnected] = useState(false);
+
+  const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
+
+  const hasCheckedRedirect = useRef(false);
+
+  console.log('TIMELINE STEP 1: Component is rendering. User object is:', user);
+
+  // This useEffect will run when the component mounts to check for a redirect result
+  useEffect(() => {
+    console.log('TIMELINE STEP 2: useEffect triggered. User:', user, 'Has checked:', hasCheckedRedirect.current);
+    const checkRedirect = async () => {
+      // 3. Only run the check if we have a user AND the check has NOT run before
+      if (user && !hasCheckedRedirect.current) {
+        // 4. Immediately set the flag to true to prevent re-runs
+        hasCheckedRedirect.current = true;
+
+        const token = await completeGoogleLinkRedirect();
+        if (token) {
+          setAccessToken(token);
+        }
+      }
+
+      // If there's no user, we can stop the loading state
+      if (!user) {
+        setIsCheckingRedirect(false);
+      }
+      // Note: We only stop the loading state for a logged-in user *after* the check is done.
+      // So we move the setIsCheckingRedirect(false) call from the `if(user)` block to a more general place.
+    };
+
+    checkRedirect().finally(() => {
+      // 5. No matter what, stop the loading state after the check is attempted.
+      setIsCheckingRedirect(false);
+    });
+  }, [user]);
 
   useEffect(() => {
     const token = localStorage.getItem('googleDriveAccessToken');
@@ -47,8 +87,8 @@ export function FileUploadZone() {
   };
 
   const handleConnectGoogle = async () => {
-    const token = await linkGoogleAccount();
-    if (token) setAccessToken(token);
+    // This now just starts the redirect process
+    await linkGoogleAccountRedirect();
   };
 
   const handleSelectFromGoogle = () => {
@@ -94,6 +134,10 @@ export function FileUploadZone() {
     onDrop,
     noKeyboard: true
   });
+
+  if (isCheckingRedirect) {
+    return <div>Loading...</div>; // Or a spinner component
+  }
 
   return (
     <div className='mx-auto w-full max-w-4xl'>

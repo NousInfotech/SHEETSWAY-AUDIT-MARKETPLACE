@@ -1,4 +1,5 @@
-"use client"
+'use client';
+import { makeEngaementToStart } from '@/api/engagement';
 import { FileUploader } from '@/components/file-uploader';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -189,6 +190,9 @@ function SignedDocumentsUpload({ engagement }: any) {
     };
 
     try {
+      if (engagement.status === 'PENDING') {
+        await makeEngaementToStart(engagement.id);
+      }
       await instance.patch(
         `${ENGAGEMENT_API}/${engagement.id}/pre-engagement-documents/submit`,
         body
@@ -196,6 +200,7 @@ function SignedDocumentsUpload({ engagement }: any) {
       toast.success('Documents submitted successfully!');
       setNdaDocument(null);
       setEngagementLetterDocument(null);
+      router.refresh();
       router.push('/dashboard/engagements');
     } catch (error) {
       console.error('Failed to submit documents:', error);

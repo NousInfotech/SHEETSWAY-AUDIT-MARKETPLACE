@@ -1,6 +1,8 @@
-import React from 'react';
+"use client"
+import React, { useEffect, useState } from 'react';
 import { Video, PhoneCall, Settings, User } from 'lucide-react';
 import { ChatMessage } from '@/types/connect';
+import { getAuditorById } from '@/api/auditor.api';
 
 interface ChatOnlyViewProps {
   chatMessages: Record<string, ChatMessage[]>;
@@ -9,7 +11,7 @@ interface ChatOnlyViewProps {
   setActiveChat: (chat: string) => void;
   setMessage: (message: string) => void;
   handleSendMessage: () => void;
-  engagements: any[];
+  engagement:any;
 }
 
 export const ChatOnlyView: React.FC<ChatOnlyViewProps> = ({
@@ -19,7 +21,7 @@ export const ChatOnlyView: React.FC<ChatOnlyViewProps> = ({
   setActiveChat,
   setMessage,
   handleSendMessage,
-  engagements
+  engagement
 }) => {
   // Helper functions from ChatView
   const getSenderIcon = (sender: string) => {
@@ -48,8 +50,29 @@ export const ChatOnlyView: React.FC<ChatOnlyViewProps> = ({
   };
 
   // Find engagement for dynamic name
-  const engagement = engagements.find(e => e.id === activeChat);
-  const engagementName = engagement ? engagement.clientName : 'Chat';
+  // const engagement = engagements.find(e => e.id === activeChat);
+  // const engagementName = engagement ? engagement.clientName : 'Chat';
+
+
+  const [auditor, setAuditor] = useState<any>({})
+
+
+  useEffect(() => {
+    const findAuditor = async () => {
+      try {
+        let current_auditor = await getAuditorById(engagement.proposal.auditorId)
+        setAuditor(current_auditor)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    findAuditor();
+  })
+
+
+
+
 
   return (
     <div className='flex flex-col h-full min-h-[calc(100vh-100px)] w-full'>
@@ -61,7 +84,7 @@ export const ChatOnlyView: React.FC<ChatOnlyViewProps> = ({
               <User className='h-5 w-5 text-primary' />
             </div>
             <div>
-              <h3 className='text-foreground font-semibold'>{engagementName}</h3>
+              <h3 className='text-foreground font-semibold'>{auditor.name}</h3>
               <p className='text-muted-foreground text-sm'>Active now</p>
             </div>
           </div>

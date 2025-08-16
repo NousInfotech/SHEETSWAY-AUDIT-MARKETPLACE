@@ -12,7 +12,19 @@ const baseConfig: NextConfig = {
       }
     ]
   },
-  transpilePackages: ['geist']
+
+  transpilePackages: ['geist'],
+
+  async rewrites() {
+    return [
+      {
+        source: '/__/auth/:path*',
+        // This is the destination you just found.
+        destination:
+          'https://sheetsway-marketplace.firebaseapp.com/__/auth/:path*'
+      }
+    ];
+  }
 };
 
 let configWithPlugins = baseConfig;

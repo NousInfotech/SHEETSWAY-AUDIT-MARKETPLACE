@@ -29,6 +29,7 @@ import { getEngagementById, listEngagements } from '@/api/engagement';
 import { useClientEngagementStore } from './store';
 import ClientDocument from './components/ClientDocumentTab';
 import { FileUploadZone } from './components/file-manager/FileUploadZone';
+import EngagementChatPage from '@/app/dashboard/engagements/[id]/chat/page';
 
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
@@ -217,6 +218,8 @@ const EngagementViewPage = () => {
                 onUpdate={updateEngagement}
               />
             )}
+            {currentWorkspaceTab === 'chat' && <EngagementChatPage engagement={selectedEngagement}/>}
+            
           </EngagementWorkspace>
         ) : null;
       default:

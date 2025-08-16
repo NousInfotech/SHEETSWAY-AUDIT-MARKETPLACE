@@ -53,9 +53,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (err) {
       console.error('Failed to fetch profile:', err);
-      clearToken();
-      setFirebaseUser(null);
-      setAppUser(null);
 
       if (!isAuthRoute) {
         router.push('/auth/sign-in');

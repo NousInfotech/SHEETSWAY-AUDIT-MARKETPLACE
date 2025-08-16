@@ -7,7 +7,7 @@ import { ChatOnlyView } from '@/features/connect/components/ChatOnlyView';
 import { generateMockEngagements } from '@/features/engagements/data/mock-data';
 import type { Engagement } from '@/features/engagements/types/engagement-types';
 
-export default function EngagementChatPage() {
+export default function EngagementChatPage({engagement}:any) {
   const params = useParams();
   const engagementId = params?.id as string;
   const [engagements, setEngagements] = React.useState<Engagement[]>([]);
@@ -43,7 +43,7 @@ export default function EngagementChatPage() {
             setActiveChat={setActiveChat}
             setMessage={setMessage}
             handleSendMessage={handleSendMessage}
-            engagements={engagements}
+            engagement={engagement}
           />
         </div>
       </div>
