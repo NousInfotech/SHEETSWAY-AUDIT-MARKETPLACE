@@ -1,26 +1,25 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone, FileWithPath } from 'react-dropzone';
-import { useAuth } from '@/components/layout/providers'; // Your custom auth hook
-
+import { useAuth } from '@/components/layout/providers';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 import {
-  linkGoogleAccountRedirect, // Import the new redirect functions
+  linkGoogleAccountRedirect,
   completeGoogleLinkRedirect
 } from '@/lib/auth-functions';
+
+// EXPLANATION: Ensure this path correctly points to your useGooglePicker hook file.
+import { useGooglePicker } from '@/features/engagements/hooks/use-google-picker';
 
 // Icons & Components
 import { Button } from '@/components/ui/button';
 import { UploadCloud, File as FileIcon, X } from 'lucide-react';
 
-// --- (Optional but recommended) Your GoogleDrivePicker logic should be in a hook or separate file ---
-// For this example, we'll assume the logic is available to be called directly.
-import { openGooglePicker } from '@/lib/google-picker'; // We'll create this helper
-import { useRouter } from 'next/navigation';
-
+// Declare Dropbox for the Dropbox Chooser script, if you are using it.
 declare const Dropbox: any;
 
 // --- MAIN COMPONENT ---
@@ -28,81 +27,72 @@ export function FileUploadZone() {
   const router = useRouter();
   const { firebaseUser: user } = useAuth();
   const [localFiles, setLocalFiles] = useState<FileWithPath[]>([]);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [isDropboxConnected, setDropboxConnected] = useState(false);
-
+  const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(
+    null
+  );
+  const [isDropboxConnected, setDropboxConnected] = useState(false); // Placeholder for Dropbox logic
   const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
 
-  const hasCheckedRedirect = useRef(false);
+  // --- Google Picker Hook Integration ---
+  const { openPicker } = useGooglePicker({
+    apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY!,
+    clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+    accessToken: googleAccessToken,
+    onFilesSelected: (files) => {
+      console.log('Files selected from Google Drive:', files);
+      alert(`You selected ${files.length} file(s) from Google Drive!`);
+      // You can further process the selected files here
+    }
+  });
 
-  console.log('TIMELINE STEP 1: Component is rendering. User object is:', user);
-
-  // This useEffect will run when the component mounts to check for a redirect result
+  // Effect 1: Checks for a redirect result ONCE on component mount.
   useEffect(() => {
-    console.log('TIMELINE STEP 2: useEffect triggered. User:', user, 'Has checked:', hasCheckedRedirect.current);
     const checkRedirect = async () => {
-      // 3. Only run the check if we have a user AND the check has NOT run before
-      if (user && !hasCheckedRedirect.current) {
-        // 4. Immediately set the flag to true to prevent re-runs
-        hasCheckedRedirect.current = true;
-
-        const token = await completeGoogleLinkRedirect();
-        if (token) {
-          setAccessToken(token);
-        }
+      const token = await completeGoogleLinkRedirect();
+      if (token) {
+        setGoogleAccessToken(token);
       }
-
-      // If there's no user, we can stop the loading state
-      if (!user) {
-        setIsCheckingRedirect(false);
-      }
-      // Note: We only stop the loading state for a logged-in user *after* the check is done.
-      // So we move the setIsCheckingRedirect(false) call from the `if(user)` block to a more general place.
-    };
-
-    checkRedirect().finally(() => {
-      // 5. No matter what, stop the loading state after the check is attempted.
       setIsCheckingRedirect(false);
-    });
-  }, [user]);
+    };
+    checkRedirect();
+  }, []); // Empty dependency array is crucial for running this only once.
 
+  // Effect 2: Syncs the access token state with localStorage and the user's auth status.
   useEffect(() => {
-    const token = localStorage.getItem('googleDriveAccessToken');
-    if (user && token) {
-      setAccessToken(token);
+    if (user) {
+      const storedToken = localStorage.getItem('googleDriveAccessToken');
+      if (storedToken) {
+        setGoogleAccessToken(storedToken);
+      }
     } else {
-      setAccessToken(null);
+      // If user logs out, clear the token from state and storage.
+      setGoogleAccessToken(null);
       localStorage.removeItem('googleDriveAccessToken');
     }
   }, [user]);
 
+  // Callback for handling local file drops
   const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
     setLocalFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
   }, []);
 
+  // Removes a file from the staged local files list
   const handleRemoveFile = (path: string) => {
     setLocalFiles((prevFiles) =>
       prevFiles.filter((file) => file.path !== path)
     );
   };
 
+  // Starts the Google account linking process
   const handleConnectGoogle = async () => {
-    // This now just starts the redirect process
-    await linkGoogleAccountRedirect();
+    if (user) {
+      await linkGoogleAccountRedirect(user);
+    } else {
+      alert('Please sign in to connect your Google Account.');
+    }
   };
 
-  const handleSelectFromGoogle = () => {
-    if (!accessToken) return;
-    openGooglePicker(accessToken, (files) => {
-      console.log('Files selected from Google Drive:', files);
-      alert(`You selected ${files.length} file(s) from Google Drive!`);
-    });
-  };
-
-  const handleDropboxClick = () => {
-    alert('Dropbox integration logic would be triggered here!');
-  };
-
+  // --- Dropbox Handlers (as per your original code) ---
   const handleConnectDropbox = () => {
     if (user) {
       router.push(`/api/auth/dropbox/redirect?uid=${user.uid}`);
@@ -111,8 +101,6 @@ export function FileUploadZone() {
 
   const handleSelectFromDropbox = () => {
     if (!isDropboxConnected) return;
-
-    // Use the global Dropbox object to open the Chooser
     Dropbox.choose({
       success: (files: any[]) => {
         alert(
@@ -120,7 +108,7 @@ export function FileUploadZone() {
         );
         console.log('Selected files from Dropbox:', files);
       },
-      linkType: 'direct', // Provides a direct link to the file content
+      linkType: 'direct',
       multiselect: true
     });
   };
@@ -135,8 +123,9 @@ export function FileUploadZone() {
     noKeyboard: true
   });
 
+  // Render a loading state while checking for the redirect result
   if (isCheckingRedirect) {
-    return <div>Loading...</div>; // Or a spinner component
+    return <div>Loading...</div>; // Or a more sophisticated spinner component
   }
 
   return (
@@ -144,16 +133,18 @@ export function FileUploadZone() {
       {/* --- The Dropzone Area --- */}
       <motion.div
         whileHover={{ scale: 1.01 }}
-        className={`relative overflow-hidden rounded-2xl transition-all duration-300 ${isDragActive ? 'shadow-primary/20 scale-105 shadow-2xl' : ''}`}
+        className={`relative overflow-hidden rounded-2xl transition-all duration-300 ${
+          isDragActive ? 'shadow-primary/20 scale-105 shadow-2xl' : ''
+        }`}
       >
-        {/* The inner div gets the dropzone props */}
         <div
           {...getRootProps()}
-          className={`bg-card/50 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-colors duration-300 ${isDragActive ? 'border-primary' : 'border-border'}`}
+          className={`bg-card/50 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-colors duration-300 ${
+            isDragActive ? 'border-primary' : 'border-border'
+          }`}
         >
           <div className='from-primary/5 absolute inset-0 -z-10 bg-gradient-to-br to-transparent'></div>
           <input {...getInputProps()} />
-
           <motion.div
             animate={{
               y: isDragActive ? -10 : 0,
@@ -163,7 +154,6 @@ export function FileUploadZone() {
           >
             <UploadCloud className='text-primary h-12 w-12' />
           </motion.div>
-
           <h1 className='text-foreground text-3xl font-bold tracking-tight'>
             Organize Your Files
           </h1>
@@ -203,12 +193,14 @@ export function FileUploadZone() {
             />
           }
           title='Google Drive'
+          // EXPLANATION: Corrected `accessToken` to `googleAccessToken`
           description={
-            user && accessToken ? 'Select from Drive' : 'Connect your account'
+            user && googleAccessToken
+              ? 'Select from Drive'
+              : 'Connect your account'
           }
-          onClick={
-            user && accessToken ? handleSelectFromGoogle : handleConnectGoogle
-          }
+          // EXPLANATION: Corrected logic to use `openPicker` from the hook or `handleConnectGoogle`
+          onClick={user && googleAccessToken ? openPicker : handleConnectGoogle}
           disabled={!user}
         />
 
@@ -223,11 +215,11 @@ export function FileUploadZone() {
             />
           }
           title='Dropbox'
-          description='Connect your account'
+          description='Connect your account' // This can be updated when Dropbox logic is complete
           onClick={
             isDropboxConnected ? handleSelectFromDropbox : handleConnectDropbox
           }
-          // disabled={!user} // Enable when logic is ready
+          disabled={!user}
         />
       </div>
 
@@ -275,7 +267,7 @@ export function FileUploadZone() {
   );
 }
 
-// --- A Reusable, Beautiful Button Component for Sources ---
+// --- Reusable Button Component for Sources ---
 interface SourceButtonProps {
   icon: React.ReactNode;
   title: string;
@@ -293,7 +285,7 @@ function SourceButton({
 }: SourceButtonProps) {
   return (
     <motion.button
-      type='button' // Explicitly set the type to "button" to avoid any form submission behavior
+      type='button'
       whileHover={{
         y: -5,
         boxShadow:

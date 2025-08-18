@@ -65,7 +65,7 @@ export default function SignInViewPage({
   //   }
   // };
 
-  //  WITH Google Drive Access
+  //  Above Code Changed orUpdated for Google Drive Access / Integration
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
@@ -93,9 +93,9 @@ export default function SignInViewPage({
 
       // --- Your existing logic remains, but with a clearer key name ---
       const user = result.user;
-      const firebaseIdToken = await user.getIdToken();
+      const token = await user.getIdToken();
       // 7. [MODIFIED] Use a more specific key for the Firebase session token
-      localStorage.setItem('firebaseIdToken', firebaseIdToken);
+      localStorage.setItem('token', token);
 
       router.push('/dashboard/overview');
     } catch (err: any) {
