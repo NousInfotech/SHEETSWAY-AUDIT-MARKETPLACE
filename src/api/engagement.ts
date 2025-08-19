@@ -12,6 +12,17 @@ export const listEngagements = async (params?: Record<string, any>) => {
   return response.data;
 };
 
+// Get Engagement by ID
+export const getEngagementById = async (engagementId: string) => {
+  const response = await instance.get(ENGAGEMENT_BY_ID_API(engagementId));
+  return response.data;
+};
+
+export const listClientEngagements = async (params?: Record<string, any>) => {
+  const response = await instance.get(CLIENT_ENGAGEMENT_API, { params });
+  return response.data;
+};
+
 export const makeEngaementToStart = async (engagementId: string) => {
   try {
     const response = await instance.patch(
@@ -36,13 +47,27 @@ export const createPayment = async (
   return response.data;
 };
 
-export const listClientEngagements = async (params?: Record<string, any>) => {
-  const response = await instance.get(CLIENT_ENGAGEMENT_API, { params });
+
+// documements, files, folders
+
+export const getRoots = async (engagementId: string) => {
+  const response = await instance.get(`${ENGAGEMENT_API}/document-roots?engagementId=${engagementId}`);
   return response.data;
 };
 
-// Get Engagement by ID
-export const getEngagementById = async (engagementId: string) => {
-  const response = await instance.get(ENGAGEMENT_BY_ID_API(engagementId));
+export const getRootFolders = async (rootId: string) => {
+  const response = await instance.get(`${ENGAGEMENT_API}/document-folders?rootId=${rootId}`);
+  return response.data;
+
+};
+export const getSubFolders = async (parentId: string) => {
+  const response = await instance.get(`${ENGAGEMENT_API}/document-folders?parentId=${parentId}`);
   return response.data;
 };
+export const getFiles = async (parentId: string) => {
+  const response = await instance.get(`${ENGAGEMENT_API}/document-files?parentId=${parentId}`);
+  return response.data;
+};
+
+
+

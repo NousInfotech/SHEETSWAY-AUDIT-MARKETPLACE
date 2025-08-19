@@ -1,20 +1,5 @@
 'use client';
 
-
-// Array.from({ length: 3 }, (_, i) => {
-//           const mockFile = new File(['mock content'], 'Engagement Letter.pdf', {
-//             type: 'application/pdf'
-//           });
-//           return {
-//             id: `ppe-file-${i + 1}`,
-//             name: 'Engagement Letter.pdf',
-//             size: '10.28 KB',
-//             creationDate: '29th Feb 2024 10:02 AM',
-//             directory: 'Audit Procedures/PPE',
-//             file: mockFile
-//           };
-//         })
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 
 import {
@@ -61,11 +46,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { getRoots, getRootFolders, getSubFolders } from '@/api/engagement';
 
 // =================================================================================
-// TYPE DEFINITIONS AND DATA
+// TYPE DEFINITIONS
 // =================================================================================
-
 
 type FileData = {
   id: string;
@@ -73,152 +58,13 @@ type FileData = {
   size: string;
   creationDate: string;
   directory: string;
-  file: File;
+  file: File; // Note: For files from an API, this might be a URL or ID initially.
 };
 type Subfolder = { id: string; name: string; files: FileData[] };
 type LibraryData = { id: string; name: string; subfolders: Subfolder[] };
 
-const createInitialData = (): LibraryData[] => {
-  return [
-  {
-    id: crypto.randomUUID(),
-    name: '1. Planning',
-    subfolders: [
-      { id: crypto.randomUUID(), name: 'Engagement Letter', files: [] },
-      { id: crypto.randomUUID(), name: 'Materiality Assessment', files: [] },
-      { id: crypto.randomUUID(), name: 'Risk Assessment', files: [] },
-      { id: crypto.randomUUID(), name: 'Team Planning Docs', files: [] }
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: '2. Trial Balance',
-    subfolders: [
-      { id: crypto.randomUUID(), name: 'TB Excel', files: [] },
-      { id: crypto.randomUUID(), name: 'Mapping File', files: [] },
-      { id: crypto.randomUUID(), name: 'Adjustments', files: [] }
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: '3. General Ledger',
-    subfolders: [
-      { id: crypto.randomUUID(), name: 'Full GL', files: [] },
-      { id: crypto.randomUUID(), name: 'Monthly Breakdown', files: [] }
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: '4. Prior Year Files',
-    subfolders: [
-      { id: crypto.randomUUID(), name: 'Prior FS', files: [] },
-      { id: crypto.randomUUID(), name: 'Prior Working Papers', files: [] }
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: '5. Audit Procedures',
-    subfolders: [
-      { id: crypto.randomUUID(), name: 'Cash and Bank', files: [] },
-      { id: crypto.randomUUID(), name: 'Receivables', files: [] },
-      { id: crypto.randomUUID(), name: 'Payables', files: [] },
-      { id: crypto.randomUUID(), name: 'Inventory', files: [] },
-      {
-        id: crypto.randomUUID(),
-        name: 'PPE',
-        files: []
-      },
-      { id: crypto.randomUUID(), name: 'Revenue', files: [] },
-      { id: crypto.randomUUID(), name: 'Expenses', files: [] },
-      { id: crypto.randomUUID(), name: 'Others', files: [] }
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: '6. Audit Letters & Confirmations',
-    subfolders: [
-      { id: crypto.randomUUID(), name: 'Bank Confirmations', files: [] },
-      { id: crypto.randomUUID(), name: 'Legal Letters', files: [] },
-      { id: crypto.randomUUID(), name: 'Management Rep Letter', files: [] }
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: '7. Final Deliverables',
-    subfolders: [
-      { id: crypto.randomUUID(), name: 'Signed Financials', files: [] },
-      { id: crypto.randomUUID(), name: 'Signed Audit Report', files: [] },
-      { id: crypto.randomUUID(), name: 'Final Management Letter', files: [] }
-    ]
-  },
-  {
-    id: crypto.randomUUID(),
-    name: '8. Admin / Billing',
-    subfolders: [
-      { id: crypto.randomUUID(), name: 'Invoices', files: [] },
-      { id: crypto.randomUUID(), name: 'Engagement Notes', files: [] }
-    ]
-  }
-]
-};
-
 const ALL_DOCUMENTS_ID = '__ALL_DOCUMENTS__';
 const CLICK_DELAY = 250; // ms
-
-
-
-
-const populatePpeFiles = async (currentState: LibraryData[]): Promise<LibraryData[]> => {
-  const fileSources = [
-    { name: 'sample-invoice.pdf', path: '/demo-pdfs/sample-invoice.pdf' },
-    { name: 'sample-agreement.pdf', path: '/demo-pdfs/sample-agreement.pdf' },
-    { name: 'sample-report.pdf', path: '/demo-pdfs/sample-report.pdf' },
-    // { name: 'InvoiceTemplate.docx', path: '/demo-pdfs/InvoiceTemplate.docx' }
-  ];
-
-  const ppeFiles = await Promise.all(
-    fileSources.map(async (source, i) => {
-      const realFile = await createFileObjectFromUrl(
-        source.path,
-        source.name,
-        'application/pdf'
-      );
-      return {
-        id: `ppe-file-${i + 1}`,
-        name: realFile.name,
-        size: `${(realFile.size / 1024).toFixed(2)} KB`,
-        creationDate: '29th Feb 2024 10:02 AM',
-        directory: 'Audit Procedures/PPE',
-        file: realFile
-      };
-    })
-  );
-
-  // Create a deep copy of the state to avoid direct mutation
-  const newState = JSON.parse(JSON.stringify(currentState));
-  
-  // Find the 'Audit Procedures' library and the 'PPE' subfolder
-  const auditProcedures = newState.find((lib: LibraryData) => lib.name === '5. Audit Procedures');
-  if (auditProcedures) {
-    const ppeFolder = auditProcedures.subfolders.find((sub: Subfolder) => sub.name === 'PPE');
-    if (ppeFolder) {
-      ppeFolder.files = ppeFiles;
-    }
-  }
-
-  return newState;
-};
-
-
-
-async function createFileObjectFromUrl(url: string, filename: string, mimeType: string): Promise<File> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status} for URL: ${url}`);
-  }
-  const data = await response.blob();
-  return new File([data], filename, { type: mimeType });
-}
 
 // =================================================================================
 // HELPER FUNCTIONS
@@ -233,7 +79,7 @@ function formatBytes(bytes: number, decimals = 2): string {
 }
 
 // =================================================================================
-// STABLE CHILD COMPONENTS
+// STABLE CHILD COMPONENTS (No changes needed here)
 // =================================================================================
 
 // #region Sidebar Component
@@ -707,13 +553,13 @@ const FileListView: React.FC<FileListViewProps> = ({
 // =================================================================================
 // MAIN COMPONENT
 // =================================================================================
-export default function FilesandDocuments() {
-  const [libraries, setLibraries] = useState<LibraryData[]>(createInitialData);
-  const [selectedLibraryId, setSelectedLibraryId] = useState<string>(
-    libraries[4].id
-  );
+export default function FilesandDocuments({ engagement }: any) {
+  // Initialize state with empty or default values
+  const [libraries, setLibraries] = useState<LibraryData[]>([]);
+  const [selectedLibraryId, setSelectedLibraryId] =
+    useState<string>(ALL_DOCUMENTS_ID);
   const [selectedSubfolderId, setSelectedSubfolderId] = useState<string | null>(
-    libraries[4].subfolders[4].id
+    null
   );
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [folderSearchTerm, setFolderSearchTerm] = useState('');
@@ -736,23 +582,83 @@ export default function FilesandDocuments() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const clickTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-
+  // ***************************************************************************************************************
+  // DATA FETCHING AND STRUCTURING
+  // ***************************************************************************************************************
   useEffect(() => {
-    const loadRealFiles = async () => {
-      // Use a functional update to ensure we have the latest state
-      setLibraries(currentLibraries => {
-        populatePpeFiles(currentLibraries).then(newLibraries => {
-          setLibraries(newLibraries);
+    const fetchAndStructureData = async () => {
+      if (!engagement?.id) return;
+
+      try {
+        // 1. Fetch all top-level roots for the engagement
+        const roots = await getRoots(engagement.id);
+        if (!roots || roots.length === 0) {
+          setLibraries([]);
+          return;
+        }
+
+        // 2. Fetch all folders associated with all roots
+        let allFolders: any[] = [];
+        for (const root of roots) {
+          const foldersForRoot = await getRootFolders(root.id);
+          allFolders.push(...foldersForRoot);
+        }
+
+        // 3. Structure the data into Libraries and Subfolders
+        const rootFoldersFromApi = allFolders.filter(
+          (folder) => folder.parentId === null
+        );
+
+        const libraryPromises = rootFoldersFromApi.map(async (libData) => {
+          // Fetch subfolders for each root folder (library)
+          const subfoldersFromApi = await getSubFolders(libData.id);
+
+          const subfolders: Subfolder[] = subfoldersFromApi.map(
+            (subData: any) => ({
+              id: subData.id,
+              name: subData.name,
+              files: [] // Files will be fetched separately or on demand
+            })
+          );
+
+          return {
+            id: libData.id,
+            name: libData.name,
+            subfolders: subfolders
+          };
         });
-        // Return the original state immediately so React doesn't complain
-        return currentLibraries;
-      });
+
+        const structuredLibraries = await Promise.all(libraryPromises);
+        setLibraries(structuredLibraries);
+
+        // 4. Set an intelligent initial selection
+        if (structuredLibraries.length > 0) {
+          const auditProcedures = structuredLibraries.find(
+            (lib) => lib.name === 'Audit Procedures'
+          );
+
+          if (auditProcedures) {
+            setSelectedLibraryId(auditProcedures.id);
+            // Optionally select the first subfolder
+            if (auditProcedures.subfolders.length > 0) {
+              setSelectedSubfolderId(auditProcedures.subfolders[0].id);
+            }
+          } else {
+            // Fallback to the first library if 'Audit Procedures' not found
+            setSelectedLibraryId(structuredLibraries[0].id);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch and structure library data:', error);
+        toast.error('Failed to load document libraries.');
+        setLibraries([]); // Set to empty on error
+      }
     };
 
-    loadRealFiles();
-  }, []);
+    fetchAndStructureData();
+  }, [engagement?.id]); // Re-run if the engagement ID changes
 
-
+  // ***************************************************************************************************************
 
   useEffect(() => {
     if (renamingInfo) {

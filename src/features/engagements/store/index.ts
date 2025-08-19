@@ -3,13 +3,13 @@ import { ClientEngagement } from '../types/engagement-types';
 import { listClientEngagements } from '@/api/engagement';
 
 interface ClientEngagementStore {
-  // State
+  // State -- type/interface definition
   clientEngagements: ClientEngagement[];
   selectedClientEngagement: ClientEngagement | null;
   loading: boolean;
   error: string | null;
 
-  // Actions
+  // Actions -- type/interface definition
   setSelectedClientEngagement: (
     clientEngagement: ClientEngagement | null
   ) => void;
@@ -48,18 +48,5 @@ export const useClientEngagementStore = create<ClientEngagementStore>(
         });
       }
     }
-    // loadClientEngagements: async () => {
-    //   set({ loading: true, error: null });
-    //   try {
-    //     const data = await listClientEngagements();
-
-    //     set({ clientEngagements: data, loading: false });
-    //   } catch (error: any) {
-    //     set({
-    //       error: error.message || 'Failed to load client engagements',
-    //       loading: false
-    //     });
-    //   }
-    // }
   })
 );

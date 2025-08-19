@@ -210,7 +210,7 @@ const EngagementViewPage = () => {
                 engagementId={selectedEngagement.id}
               />
             )}
-            {currentWorkspaceTab === 'documents' && <DocumentsTab />}
+            {currentWorkspaceTab === 'documents' && <DocumentsTab engagement={selectedEngagement}/>}
             {currentWorkspaceTab === 'client documents' && <FileUploadZone />}
             {currentWorkspaceTab === 'settings' && (
               <EngagementSettingsTab

@@ -31,6 +31,10 @@ export const ENGAGEMENT_BY_ID_API = (engagementId: string) => `/api/v1/engagemen
 export const CLIENT_ENGAGEMENT_API = '/api/v1/engagements/client';
 
 
+//payment
+export const PAYMENT_API = '/api/v1/payments';
+
+
 // Centralized API object (optional, for easier import)
 export const API = {
   BUSINESS_PROFILES: BUSINESS_PROFILES_API,

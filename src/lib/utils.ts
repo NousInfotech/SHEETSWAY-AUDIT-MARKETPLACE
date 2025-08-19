@@ -1,5 +1,21 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app } from "@/lib/firebase";
+
+const auth = getAuth(app);
+
+// This function needs to be async now because getting the ID token is an async operation
+export const getFirebaseIdToken = async (): Promise<string | null> => {
+  const user = auth.currentUser;
+  if (user) {
+    // This is the official Firebase function to get the ID token
+    // The `true` argument forces a refresh if the token is expired.
+    return await user.getIdToken(true);
+  }
+  return null;
+};
+
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
