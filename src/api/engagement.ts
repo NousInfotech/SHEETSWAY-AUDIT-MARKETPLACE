@@ -64,6 +64,20 @@ export const getPaymentEscrow = async (params?: Record<string, any>) => {
 };
 
 
+// milestones
+
+export const listMilestones = async (params?: Record<string, any>) => {
+  const response = await instance.get(`${ENGAGEMENT_API}/milestones`, { params });
+  return response.data;
+};
+export const createMilestone = async (payload:any) => {
+  const response = await instance.post(`${ENGAGEMENT_API}/milestone`, payload);
+  return response.data;
+};
+
+
+
+
 
 
 

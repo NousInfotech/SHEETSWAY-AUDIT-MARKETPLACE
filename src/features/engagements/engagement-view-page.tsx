@@ -21,7 +21,7 @@ import EngagementWorkspace from './components/EngagementWorkspace';
 import AccountingDataTab from './components/AccountingDataTab';
 import BankingDataTab from './components/BankingDataTab';
 
-import ReviewsHistoryTab from './components/ReviewsHistoryTab';
+
 import EngagementSettingsTab from './components/EngagementSettingsTab';
 import DocumentsTab from './components/DocumentsTab';
 import { Spinner } from '@/components/ui/spinner';
@@ -31,15 +31,17 @@ import ClientDocument from './components/ClientDocumentTab';
 import { FileUploadZone } from './components/file-manager/FileUploadZone';
 import EngagementChatPage from '@/app/dashboard/engagements/[id]/chat/page';
 import PaymentEscrowTab from './components/PaymentEscrowTab';
+import MilestoneTab from './components/MilestoneTab';
 
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
   const [currentPage, setCurrentPage] = useState('engagements');
-  const [selectedEngagement, setSelectedEngagement] =
-    useState<any | null>(null);
+  const [selectedEngagement, setSelectedEngagement] = useState<any | null>(
+    null
+  );
   const [currentWorkspaceTab, setCurrentWorkspaceTab] = useState('accounting');
   // const [engagements, setEngagements] = useState<Engagement[]>([]);
-  
+
   const [engagements, setEngagements] = useState<any[]>([]);
 
   const [accountingData, setAccountingData] = useState<AccountingData[]>([]);
@@ -48,7 +50,6 @@ const EngagementViewPage = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-
 
   const { clientEngagements } = useClientEngagementStore();
 
@@ -65,19 +66,8 @@ const EngagementViewPage = () => {
     //     : generateMockEngagements()
     // );
 
-
-    console.log(clientEngagements)
-    setEngagements(clientEngagements)
-
-   
-   
-     
-   
-    
-
-
-
-
+    console.log(clientEngagements);
+    setEngagements(clientEngagements);
 
     setAccountingData(
       savedAccountingData
@@ -203,15 +193,14 @@ const EngagementViewPage = () => {
               <BankingDataTab data={bankingData} />
             )}
             {currentWorkspaceTab === 'payments' && (
-              <PaymentEscrowTab  engagement={selectedEngagement}/>
+              <PaymentEscrowTab engagement={selectedEngagement} />
             )}
             {currentWorkspaceTab === 'reviews' && (
-              <ReviewsHistoryTab
-                reviews={reviews}
-                engagementId={selectedEngagement.id}
-              />
+              <MilestoneTab engagement={selectedEngagement} />
             )}
-            {currentWorkspaceTab === 'documents' && <DocumentsTab engagement={selectedEngagement}/>}
+            {currentWorkspaceTab === 'documents' && (
+              <DocumentsTab engagement={selectedEngagement} />
+            )}
             {currentWorkspaceTab === 'client documents' && <FileUploadZone />}
             {currentWorkspaceTab === 'settings' && (
               <EngagementSettingsTab
@@ -219,8 +208,9 @@ const EngagementViewPage = () => {
                 onUpdate={updateEngagement}
               />
             )}
-            {currentWorkspaceTab === 'chat' && <EngagementChatPage engagement={selectedEngagement}/>}
-            
+            {currentWorkspaceTab === 'chat' && (
+              <EngagementChatPage engagement={selectedEngagement} />
+            )}
           </EngagementWorkspace>
         ) : null;
       default:
