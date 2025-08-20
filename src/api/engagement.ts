@@ -48,6 +48,30 @@ export const createPayment = async (
 };
 
 
+
+
+
+// Payments&Escrow
+
+export const getEscrowbyEngagementId = async (params?: Record<string, any>) => {
+  const response = await instance.get(`${ENGAGEMENT_API}/escrows`, { params });
+  return response.data;
+};
+
+export const getPaymentEscrow = async (params?: Record<string, any>) => {
+  const response = await instance.get(`${ENGAGEMENT_API}/escrow/payments`, {params});
+  return response.data;
+};
+
+
+
+
+
+
+
+
+
+
 // documements, files, folders
 
 export const getRoots = async (engagementId: string) => {
@@ -64,10 +88,67 @@ export const getSubFolders = async (parentId: string) => {
   const response = await instance.get(`${ENGAGEMENT_API}/document-folders?parentId=${parentId}`);
   return response.data;
 };
-export const getFiles = async (parentId: string) => {
-  const response = await instance.get(`${ENGAGEMENT_API}/document-files?parentId=${parentId}`);
+export const getFiles = async (folderId: string) => {
+  const response = await instance.get(`${ENGAGEMENT_API}/document-files?folderId=${folderId}`);
+  if(response.data){
+    console.log("successfully got all files:", response.data)
+  }
   return response.data;
 };
 
+
+
+export const createRootFolder = async (rootId: string, {name}:Record<string, any>) => {
+  const response = await instance.post(`${ENGAGEMENT_API}/document-folder?rootId=${rootId}`);
+  return response.data;
+};
+
+export const createSubFolder = async (parentId: string, {name}:Record<string, any>) => {
+  const response = await instance.post(`${ENGAGEMENT_API}/document-folder?parentId=${parentId}`);
+  return response.data;
+};
+
+export const createFile = async (folderId: string, fileData:any ) => {
+  let body = {folderId, fileName:fileData.get('name'), fileUrl:fileData.get('url')}
+  console.log(body)
+  const response = await instance.post(`${ENGAGEMENT_API}/document-file`, body );
+  if(response.data){
+    console.log("success:", response.data)
+  }
+  return response.data;
+};
+
+
+export const renameRootFolder = async (id: string, {name}:Record<string, any>) => {
+  const response = await instance.put(`${ENGAGEMENT_API}/document-folder/${id}`);
+  return response.data;
+};
+
+export const renameSubFolder = async (id: string, {name}:Record<string, any>) => {
+  const response = await instance.post(`${ENGAGEMENT_API}/document-folder/${id}`);
+  return response.data;
+};
+
+export const renameFile = async (id: string, {name}:Record<string, any>) => {
+  const response = await instance.post(`${ENGAGEMENT_API}/document-file/${id}`);
+  return response.data;
+};
+
+
+
+export const deleteRootFolder = async (id: string) => {
+  const response = await instance.put(`${ENGAGEMENT_API}/document-folder/${id}`);
+  return response.data;
+};
+
+export const deleteSubFolder = async (id: string) => {
+  const response = await instance.post(`${ENGAGEMENT_API}/document-folder/${id}`);
+  return response.data;
+};
+
+export const deleteFile = async (id: string) => {
+  const response = await instance.post(`${ENGAGEMENT_API}/document-file/${id}`);
+  return response.data;
+};
 
 

@@ -20,7 +20,7 @@ import ActiveEngagements from './components/ActiveEngagements';
 import EngagementWorkspace from './components/EngagementWorkspace';
 import AccountingDataTab from './components/AccountingDataTab';
 import BankingDataTab from './components/BankingDataTab';
-import PaymentsContractsTab from './components/PaymentsContractsTab';
+
 import ReviewsHistoryTab from './components/ReviewsHistoryTab';
 import EngagementSettingsTab from './components/EngagementSettingsTab';
 import DocumentsTab from './components/DocumentsTab';
@@ -30,6 +30,7 @@ import { useClientEngagementStore } from './store';
 import ClientDocument from './components/ClientDocumentTab';
 import { FileUploadZone } from './components/file-manager/FileUploadZone';
 import EngagementChatPage from '@/app/dashboard/engagements/[id]/chat/page';
+import PaymentEscrowTab from './components/PaymentEscrowTab';
 
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
@@ -202,7 +203,7 @@ const EngagementViewPage = () => {
               <BankingDataTab data={bankingData} />
             )}
             {currentWorkspaceTab === 'payments' && (
-              <PaymentsContractsTab payments={payments} contracts={contracts} />
+              <PaymentEscrowTab  engagement={selectedEngagement}/>
             )}
             {currentWorkspaceTab === 'reviews' && (
               <ReviewsHistoryTab
