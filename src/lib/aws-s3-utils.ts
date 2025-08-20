@@ -72,10 +72,10 @@ export async function uploadMultipleFiles(
 
 
 export async function getAccessUrlForFile(fileKey: string): Promise<string> {
-  const { data } = await axiosInstance.post('/api/v1/upload/access/single', {
+  const response = await axiosInstance.post('/api/v1/upload/single/access', {
     fileKey,
   });
-  return data.accessUrl;
+  return response.data;
 }
 
 
@@ -83,8 +83,8 @@ export async function getAccessUrlForFile(fileKey: string): Promise<string> {
 // getAccessUrlsForFiles with Axios
 
 export async function getAccessUrlsForFiles(fileKeys: string[]): Promise<string[]> {
-  const { data } = await axiosInstance.post('/api/v1/upload/access/multiple', {
+  const response = await axiosInstance.post('/api/v1/upload/multiple/access', {
     fileKeys,
   });
-  return data.accessUrls;
+  return response.data;
 }

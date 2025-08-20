@@ -108,10 +108,10 @@ export const createSubFolder = async (parentId: string, {name}:Record<string, an
   return response.data;
 };
 
-export const createFile = async (folderId: string, fileData:any ) => {
-  let body = {folderId, fileName:fileData.get('name'), fileUrl:fileData.get('url')}
-  console.log(body)
-  const response = await instance.post(`${ENGAGEMENT_API}/document-file`, body );
+export const createFile = async (payload:any ) => {
+  
+  console.log(payload)
+  const response = await instance.post(`${ENGAGEMENT_API}/document-file`, payload );
   if(response.data){
     console.log("success:", response.data)
   }
