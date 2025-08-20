@@ -804,7 +804,7 @@ export default function FilesandDocuments({ engagement }: any) {
     const trimmedName = newLibraryName.trim();
     if (!trimmedName || !primaryRootId) return;
     try {
-      await createRootFolder(primaryRootId, { name: trimmedName });
+      await createRootFolder({ rootId: primaryRootId, name: trimmedName });
       toast.success(`Library "${trimmedName}" created.`);
       await fetchLibraries();
     } catch (error) {
@@ -839,7 +839,7 @@ export default function FilesandDocuments({ engagement }: any) {
     const trimmedName = newSubfolderName.trim();
     if (!trimmedName || !selectedLibraryId) return;
     try {
-      await createSubFolder(selectedLibraryId, { name: trimmedName });
+      await createSubFolder({ parentId: selectedLibraryId, name: trimmedName });
       toast.success(`Folder "${trimmedName}" created.`);
       await fetchSubfolders(selectedLibraryId); // Only refetch subfolders
     } catch (error) {
@@ -1143,6 +1143,15 @@ export default function FilesandDocuments({ engagement }: any) {
   };
 
   // --- RENDER LOGIC ---
+
+  // if (isLibrariesLoading) {
+  //   return (
+  //     <div className='flex h-[50vh] items-center justify-center p-10'>
+  //       <div className='h-8 w-8 animate-spin rounded-full border-4 border-dashed border-amber-500'></div>
+  //     </div>
+  //   );
+  // }
+
   return (
     <div className='flex h-auto font-sans not-dark:bg-white'>
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>

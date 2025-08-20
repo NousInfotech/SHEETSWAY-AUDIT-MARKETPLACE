@@ -112,13 +112,13 @@ export const getFiles = async (folderId: string) => {
 
 
 
-export const createRootFolder = async (rootId: string, {name}:Record<string, any>) => {
-  const response = await instance.post(`${ENGAGEMENT_API}/document-folder?rootId=${rootId}`);
+export const createRootFolder = async (payload:any) => {
+  const response = await instance.post(`${ENGAGEMENT_API}/document-folder`, payload);
   return response.data;
 };
 
-export const createSubFolder = async (parentId: string, {name}:Record<string, any>) => {
-  const response = await instance.post(`${ENGAGEMENT_API}/document-folder?parentId=${parentId}`);
+export const createSubFolder = async (payload:any) => {
+  const response = await instance.post(`${ENGAGEMENT_API}/document-folder`, payload);
   return response.data;
 };
 
@@ -139,29 +139,29 @@ export const renameRootFolder = async (id: string, {name}:Record<string, any>) =
 };
 
 export const renameSubFolder = async (id: string, {name}:Record<string, any>) => {
-  const response = await instance.post(`${ENGAGEMENT_API}/document-folder/${id}`);
+  const response = await instance.put(`${ENGAGEMENT_API}/document-folder/${id}`);
   return response.data;
 };
 
 export const renameFile = async (id: string, {name}:Record<string, any>) => {
-  const response = await instance.post(`${ENGAGEMENT_API}/document-file/${id}`);
+  const response = await instance.put(`${ENGAGEMENT_API}/document-file/${id}`);
   return response.data;
 };
 
 
 
 export const deleteRootFolder = async (id: string) => {
-  const response = await instance.put(`${ENGAGEMENT_API}/document-folder/${id}`);
+  const response = await instance.delete(`${ENGAGEMENT_API}/document-folder/${id}`);
   return response.data;
 };
 
 export const deleteSubFolder = async (id: string) => {
-  const response = await instance.post(`${ENGAGEMENT_API}/document-folder/${id}`);
+  const response = await instance.delete(`${ENGAGEMENT_API}/document-folder/${id}`);
   return response.data;
 };
 
 export const deleteFile = async (id: string) => {
-  const response = await instance.post(`${ENGAGEMENT_API}/document-file/${id}`);
+  const response = await instance.delete(`${ENGAGEMENT_API}/document-file/${id}`);
   return response.data;
 };
 
