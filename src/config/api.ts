@@ -35,6 +35,11 @@ export const CLIENT_ENGAGEMENT_API = '/api/v1/engagements/client';
 export const PAYMENT_API = '/api/v1/payments';
 
 
+// salt-edge
+export const SALTEDGE_API = '/api/v1/salt-edge';
+
+
+
 // Centralized API object (optional, for easier import)
 export const API = {
   BUSINESS_PROFILES: BUSINESS_PROFILES_API,

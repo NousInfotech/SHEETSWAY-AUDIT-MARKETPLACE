@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import {
   Engagement,
   AccountingData,
-  BankingData,
+  
   Payment,
   Contract,
-  Review
+  Review,
+  BankingData
 } from './types/engagement-types';
 import {
   generateMockEngagements,
@@ -32,6 +33,8 @@ import { FileUploadZone } from './components/file-manager/FileUploadZone';
 import EngagementChatPage from '@/app/dashboard/engagements/[id]/chat/page';
 import PaymentEscrowTab from './components/PaymentEscrowTab';
 import MilestoneTab from './components/MilestoneTab';
+import BankingDataView from './components/BankingDataView';
+
 
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
@@ -190,7 +193,7 @@ const EngagementViewPage = () => {
               <AccountingDataTab data={accountingData} />
             )}
             {currentWorkspaceTab === 'banking' && (
-              <BankingDataTab data={bankingData} />
+              <BankingDataView />
             )}
             {currentWorkspaceTab === 'payments' && (
               <PaymentEscrowTab engagement={selectedEngagement} />
