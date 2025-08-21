@@ -112,7 +112,7 @@ function BankingDataView() {
   }
 
   return (
-    <div className='bg-muted/20 flex w-full items-center justify-center p-4'>
+    <div className='bg-muted/20 rounded-xl flex w-full items-center justify-center p-4'>
       <ConnectBankCard isLoading={isLoading} onConnect={handleConnectClick} />
     </div>
   );
