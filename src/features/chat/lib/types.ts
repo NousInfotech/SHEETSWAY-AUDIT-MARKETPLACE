@@ -10,7 +10,7 @@ export interface Message {
   type: 'text' | 'image' | 'file';
   threadId: string;
   senderId: string;
-  createdAt: string;
+  sentAt: string;
   sender?: User;
 
   // --- ADD THESE NEW OPTIONAL FIELDS ---

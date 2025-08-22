@@ -11,7 +11,8 @@ interface UseChatProps {
   currentUser: User;
 }
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000';
+const SOCKET_URL =
+  process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000';
 
 /**
  * A comprehensive React hook for managing a real-time chat thread.
@@ -22,6 +23,7 @@ export const useChat = ({ threadId, currentUser }: UseChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isReceiverOnline, setIsReceiverOnline] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -35,13 +37,13 @@ export const useChat = ({ threadId, currentUser }: UseChatProps) => {
         setError('Authentication failed: User is not signed in.');
         return;
       }
-      
+
       socket = io(SOCKET_URL, {
         transports: ['websocket'],
         auth: { token: token, role: 'USER' }
       });
       socketRef.current = socket;
-      
+
       socket.on('connect', () => {
         setIsConnected(true);
         setError(null);
@@ -53,23 +55,37 @@ export const useChat = ({ threadId, currentUser }: UseChatProps) => {
           }
         });
       });
-      
-      socket.on('disconnect', () => setIsConnected(false));
+
+      socket.on('other_user_online', () => {
+        console.log('[PRESENCE] Other user came online.');
+        setIsReceiverOnline(true);
+      });
+
+      socket.on('other_user_offline', () => {
+        console.log('[PRESENCE] Other user went offline.');
+        setIsReceiverOnline(false);
+      });
+
+      socket.on('disconnect', () => {
+        setIsConnected(false);
+        setIsReceiverOnline(false); // Can't know their status if we're not connected
+      });
       socket.on('connect_error', (err) => setError(err.message));
-      
+
       // This listener handles incoming messages from OTHER users in the room
       socket.on('new_message', (newMessage: Message) => {
         // We check the senderId to avoid duplicating our own optimistic messages
         if (newMessage.senderId !== currentUser.id) {
           setMessages((prevMessages) => {
             // Prevent adding a message if it somehow already exists
-            if (prevMessages.some(msg => msg.id === newMessage.id)) return prevMessages;
+            if (prevMessages.some((msg) => msg.id === newMessage.id))
+              return prevMessages;
             return [...prevMessages, newMessage];
           });
         }
       });
     };
-    
+
     connectSocket();
 
     // Cleanup function to disconnect on component unmount
@@ -93,7 +109,9 @@ export const useChat = ({ threadId, currentUser }: UseChatProps) => {
     failedMessageId: string | null = null
   ) => {
     if (!socketRef.current?.connected || !content.trim()) {
-      console.warn('Cannot send message. Socket not connected or content is empty.');
+      console.warn(
+        'Cannot send message. Socket not connected or content is empty.'
+      );
       return;
     }
 
@@ -105,14 +123,16 @@ export const useChat = ({ threadId, currentUser }: UseChatProps) => {
       type,
       senderId: currentUser.id, // Use the current user's ID
       threadId,
-      createdAt: new Date().toISOString(),
-      status: 'sending', // Set the initial status
+      sentAt: new Date().toISOString(),
+      status: 'sending' // Set the initial status
     };
 
     // 2. Add the temporary "sending" message to the UI immediately.
     // If we are retrying, we also filter out the old "failed" message.
     setMessages((prev) => {
-      const filtered = failedMessageId ? prev.filter(msg => msg.id !== failedMessageId) : prev;
+      const filtered = failedMessageId
+        ? prev.filter((msg) => msg.id !== failedMessageId)
+        : prev;
       return [...filtered, optimisticMessage];
     });
 
@@ -124,11 +144,19 @@ export const useChat = ({ threadId, currentUser }: UseChatProps) => {
       'send_message',
       payload,
       // The server will process the message and "echo" the tempId back in its response.
-      (response: { success: boolean; message?: Message; error?: string; tempId?: string }) => {
+      (response: {
+        success: boolean;
+        message?: Message;
+        error?: string;
+        tempId?: string;
+      }) => {
         // 5. Use the echoed tempId from the response to find and update the message.
         // This is guaranteed to be correct and is not affected by stale closures.
         if (response.success && response.message && response.tempId) {
-          console.log('[CLIENT] ✅ Server acknowledged message successfully:', response.message);
+          console.log(
+            '[CLIENT] ✅ Server acknowledged message successfully:',
+            response.message
+          );
           setMessages((prevMessages) =>
             prevMessages.map((msg) =>
               msg.id === response.tempId // <-- Use the echoed tempId from the server
@@ -137,11 +165,16 @@ export const useChat = ({ threadId, currentUser }: UseChatProps) => {
             )
           );
         } else {
-          console.error('[CLIENT] ❌ Server returned an error:', response.error);
+          console.error(
+            '[CLIENT] ❌ Server returned an error:',
+            response.error
+          );
           if (response.tempId) {
             setMessages((prevMessages) =>
-              prevMessages.map(msg =>
-                msg.id === response.tempId ? { ...msg, status: 'failed', error: response.error } : msg
+              prevMessages.map((msg) =>
+                msg.id === response.tempId
+                  ? { ...msg, status: 'failed', error: response.error }
+                  : msg
               )
             );
           }
@@ -150,5 +183,5 @@ export const useChat = ({ threadId, currentUser }: UseChatProps) => {
     );
   };
 
-  return { messages, isConnected, sendMessage, error };
+  return { messages, isConnected, sendMessage, error, isReceiverOnline };
 };
