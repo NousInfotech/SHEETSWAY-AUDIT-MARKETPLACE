@@ -368,7 +368,7 @@ const RequestPage = () => {
   const renderAuditForm = () => {
     console.log('Rendering dropdowns', businessProfiles, plaidAccounts);
     return (
-      <div className='mx-auto w-full max-w-4xl'>
+      <div className='mx-auto w-full max-w-4xl pb-8'>
         {submitting && (
           <div className='bg-opacity-40 fixed inset-0 z-50 flex items-center justify-center bg-black'>
             <Spinner size={48} className='text-primary' />
@@ -444,7 +444,7 @@ const RequestPage = () => {
               {(plaidAccounts.length > 0 ||
                 accountingIntegrations.length > 0) && (
                 <div className='flex w-full gap-4'>
-                  {plaidAccounts.length > 0 && (
+                  {/* {plaidAccounts.length > 0 && (
                     <div className='min-w-0 flex-1'>
                       <FormField
                         control={form.control}
@@ -485,7 +485,7 @@ const RequestPage = () => {
                         )}
                       />
                     </div>
-                  )}
+                  )} */}
                   {accountingIntegrations.length > 0 && (
                     <div className='min-w-0 flex-1'>
                       <FormField

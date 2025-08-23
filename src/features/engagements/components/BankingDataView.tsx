@@ -76,6 +76,8 @@ import { createSessionForSaltedge } from '@/api/salt-edge';
 import { useAuth } from '@/components/layout/providers';
 import React, { useState, useCallback } from 'react'; // Removed useEffect
 import { ConnectBankCard } from './ConnectBankCard';
+import { ConnectionProvider } from '@/contexts/SaltEdgeConnectionContext';
+import BankingDashboard from '@/app/dashboard/banking&accounts/page';
 
 function BankingDataView() {
   const { appUser, loading: authLoading } = useAuth();
@@ -86,7 +88,8 @@ function BankingDataView() {
 
     setIsLoading(true);
     try {
-      const result = await createSessionForSaltedge({ user: appUser });
+      const returnTo = `${window.location.origin}/dashboard/banking-callback`;
+      const result = await createSessionForSaltedge(returnTo);
 
       if (result && result.connect_url) {
         window.open(result.connect_url, '_blank');
@@ -112,9 +115,15 @@ function BankingDataView() {
   }
 
   return (
-    <div className='bg-muted/20 rounded-xl flex w-full items-center justify-center p-4'>
-      <ConnectBankCard isLoading={isLoading} onConnect={handleConnectClick} />
-    </div>
+    <>
+      <div>
+        <ConnectionProvider>
+          <div className='mt-4 border-t p-4'>
+            <BankingDashboard />
+          </div>
+        </ConnectionProvider>
+      </div>
+    </>
   );
 }
 

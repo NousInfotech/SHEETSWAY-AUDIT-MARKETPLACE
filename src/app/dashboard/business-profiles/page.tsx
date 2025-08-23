@@ -14,7 +14,7 @@ export default function BusinessProfilesPage() {
       <Tabs defaultValue="business-profile" className="w-full">
         <TabsList>
           <TabsTrigger value="business-profile">Business Profile</TabsTrigger>
-          <TabsTrigger value="plaid">Plaid</TabsTrigger>
+          {/* <TabsTrigger value="plaid">Plaid</TabsTrigger> */}
           <TabsTrigger value="apideck">Accounting Integrations</TabsTrigger>
         </TabsList>
         <TabsContent value="business-profile" className="max-h-[calc(100vh-200px)] overflow-y-auto">
