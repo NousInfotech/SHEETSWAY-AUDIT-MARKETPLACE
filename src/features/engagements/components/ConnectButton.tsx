@@ -20,8 +20,7 @@ export default function ConnectButton() {
   const handleConnect = async () => {
     setIsLoading(true);
     try {
-      // const returnTo = `${window.location.origin}/dashboard/banking-callback`;
-      const returnTo = "";
+      const returnTo = `${window.location.origin}/dashboard/banking-callback`;
 
       const session = await createConnectSession(returnTo);
 
