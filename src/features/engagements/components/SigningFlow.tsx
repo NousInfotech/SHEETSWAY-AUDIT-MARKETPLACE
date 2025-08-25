@@ -41,11 +41,13 @@ const demoFiles = [
 
 interface signingFlowComponentProps {
   selectedEngagement: any | null;
+  handleUploadSuccess: () => void;
 }
 
 // Renamed from SigningPage to SigningFlowComponent to reflect its new role
 export function SigningFlowComponent({
-  selectedEngagement
+  selectedEngagement,
+  handleUploadSuccess
 }: signingFlowComponentProps) {
   // 'idle' | 'signing' | 'uploading'
   const [flowState, setFlowState] = useState('signing');
@@ -126,7 +128,7 @@ export function SigningFlowComponent({
   };
 
   if (flowState === 'uploading') {
-    return <SignedDocumentsUpload engagement={selectedEngagement} />;
+    return <SignedDocumentsUpload engagement={selectedEngagement} handleUploadSuccess={handleUploadSuccess} />;
   }
 
   if (flowState === 'signing') {

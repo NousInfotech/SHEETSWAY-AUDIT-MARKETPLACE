@@ -56,7 +56,12 @@ const UploadedFileInfo = ({ doc, onPreview, loadingPreviewKey }: any) => {
   );
 };
 
-function SignedDocumentsUpload({ engagement }: any) {
+interface SignedDocumentsUploadProps {
+  engagement: any;
+  handleUploadSuccess: () => void
+}
+
+function SignedDocumentsUpload({ engagement, handleUploadSuccess }: SignedDocumentsUploadProps) {
   const router = useRouter();
   // State for files selected in the uploader inputs
   const [ndaInputFile, setNdaInputFile] = useState<File[]>([]);
@@ -198,10 +203,7 @@ function SignedDocumentsUpload({ engagement }: any) {
         body
       );
       toast.success('Documents submitted successfully!');
-      setNdaDocument(null);
-      setEngagementLetterDocument(null);
-      router.refresh();
-      router.push('/dashboard/engagements');
+      handleUploadSuccess()
     } catch (error) {
       console.error('Failed to submit documents:', error);
       toast.error('An error occurred during submission. Please try again.');

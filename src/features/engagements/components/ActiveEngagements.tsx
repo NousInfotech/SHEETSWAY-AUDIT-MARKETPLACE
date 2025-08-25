@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Engagement, Filters } from '../types/engagement-types';
 import { statusConfig, priorityConfig } from '../constants/config';
 import {
@@ -28,6 +28,7 @@ import PaymentModal from './PaymentModal';
 import { useAuth } from '@/components/layout/providers';
 import instance from '@/lib/axios';
 import { ENGAGEMENT_API } from '@/config/api';
+import { useClientEngagementStore } from '../store';
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY as string
@@ -66,6 +67,23 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
 
   const { appUser, loading: authLoading } = useAuth();
   let userId = appUser?.id;
+
+  // Get the specific action from your store
+  const { loadClientEngagements } = useClientEngagementStore();
+  
+
+  const handleUploadSuccess = () => {
+    // Step 1: Immediately close the modal. This provides instant feedback to the user.
+    setIsSignModalOpen(false);
+
+    // Step 2: Trigger the store to refresh the data.
+    // The store will handle setting its own loading and error states.
+    if (appUser?.id) {
+      loadClientEngagements(appUser.id);
+    } else {
+      console.error('User ID not available to refresh engagements.');
+    }
+  };
 
   const handlePayment = async (id: string) => {
     setIsProcessing(true);
@@ -379,20 +397,21 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
                 1 member
               </span>
             </div>
-            {engagement.status !== 'AWAITING_PAYMENT' && engagement.status !== 'ACTIVE' && (
-              <button
-                // onClick={() => onEnterWorkspace(engagement)}
-                onClick={() => {
-                  setSelectedEngagement(engagement);
-                  setIsSignModalOpen(true);
-                }}
-                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
-              >
-                <Play className='h-4 w-4' />
-                GO TO START
-                <ArrowRight className='h-4 w-4' />
-              </button>
-            )}
+            {engagement.status !== 'AWAITING_PAYMENT' &&
+              engagement.status !== 'ACTIVE' && (
+                <button
+                  // onClick={() => onEnterWorkspace(engagement)}
+                  onClick={() => {
+                    setSelectedEngagement(engagement);
+                    setIsSignModalOpen(true);
+                  }}
+                  className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+                >
+                  <Play className='h-4 w-4' />
+                  GO TO START
+                  <ArrowRight className='h-4 w-4' />
+                </button>
+              )}
             {engagement.status === 'AWAITING_PAYMENT' && (
               <button
                 // onClick={() => onEnterWorkspace(engagement)}
@@ -473,20 +492,21 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
         </div>
 
         <div className='text-right'>
-          {engagement.status !== 'AWAITING_PAYMENT' && engagement.status !== 'ACTIVE' && (
-            <Button
-              // onClick={() => onEnterWorkspace(engagement)}
-              onClick={() => {
-                setSelectedEngagement(engagement);
-                setIsSignModalOpen(true);
-              }}
-              variant='outline'
-              size='sm'
-            >
-              <Play className='h-4 w-4 md:mr-2' />
-              <span className='inline text-xs'>GO TO START</span>
-            </Button>
-          )}
+          {engagement.status !== 'AWAITING_PAYMENT' &&
+            engagement.status !== 'ACTIVE' && (
+              <Button
+                // onClick={() => onEnterWorkspace(engagement)}
+                onClick={() => {
+                  setSelectedEngagement(engagement);
+                  setIsSignModalOpen(true);
+                }}
+                variant='outline'
+                size='sm'
+              >
+                <Play className='h-4 w-4 md:mr-2' />
+                <span className='inline text-xs'>GO TO START</span>
+              </Button>
+            )}
           {engagement.status === 'AWAITING_PAYMENT' && (
             <Button
               // onClick={() => onEnterWorkspace(engagement)}
@@ -568,6 +588,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           open={isSignModalOpen}
           onOpenChange={setIsSignModalOpen}
           onEnterWorkspace={onEnterWorkspace}
+          handleUploadSuccess={handleUploadSuccess}
         />
       )}
 

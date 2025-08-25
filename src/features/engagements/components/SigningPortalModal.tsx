@@ -17,9 +17,10 @@ interface SigningPortalModalProps {
   open: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onEnterWorkspace: (engagement: any) => void;
+  handleUploadSuccess: () => void;
 }
 
-export function SigningPortalModal({ selectedEngagement, open, onOpenChange, onEnterWorkspace }: SigningPortalModalProps) {
+export function SigningPortalModal({ selectedEngagement, open, onOpenChange, onEnterWorkspace, handleUploadSuccess }: SigningPortalModalProps) {
   return (
     // The Dialog's visibility is now controlled by the `open` and `onOpenChange` props
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -30,7 +31,7 @@ export function SigningPortalModal({ selectedEngagement, open, onOpenChange, onE
 
         {/* The main content area is now padded and scrollable */}
         <div className="flex-grow overflow-y-auto overflow-x-hidden p-6">
-          <SigningFlowComponent selectedEngagement={selectedEngagement} />
+          <SigningFlowComponent selectedEngagement={selectedEngagement} handleUploadSuccess={handleUploadSuccess} />
         </div>
 
         {/* 5. Add the DialogFooter for the bottom button */}
