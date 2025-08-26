@@ -8,6 +8,12 @@ export const listClientRequests = async (params?: Record<string, any>) => {
   return response.data;
 };
 
+// delete request by id
+export const deleteClientRequestById = async (requestId: string) => {
+  const response = await instance.delete(`${CLIENT_REQUESTS_API}${requestId}`);
+  return response.data;
+};
+
 // Get Client Request by ID
 export const getClientRequestById = async (requestId: string) => {
   const response = await instance.get(`${CLIENT_REQUESTS_API}${requestId}`);

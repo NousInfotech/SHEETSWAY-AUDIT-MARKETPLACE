@@ -35,12 +35,12 @@ export const useClientEngagementStore = create<ClientEngagementStore>(
         const params = userId ? { userId } : {};
         const data = await listClientEngagements(params);
 
-        if (Array.isArray(data)) {
-          set({ clientEngagements: data, loading: false });
-        } else {
-          // This part might be hit if the backend is fixed
-          set({ clientEngagements: data.data, loading: false });
-        }
+        const sortedData = [...data].sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+
+        set({ clientEngagements: sortedData, loading: false });
       } catch (error: any) {
         set({
           error: error.message || 'Failed to load engagements',

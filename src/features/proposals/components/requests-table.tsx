@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import { ArrowUpDown, MoreHorizontal, Eye, FileText } from 'lucide-react';
+import { ArrowUpDown, DeleteIcon } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,8 @@ import {
   getDaysRemaining,
   getUrgencyColor
 } from '../utils';
+import { deleteClientRequestById } from '@/api/client-request.api';
+import { toast } from 'sonner';
 
 interface RequestsTableProps {
   requests: Request[];
@@ -59,6 +61,17 @@ export function RequestsTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+
+
+  const handleDelete = async (id:string) => {
+    console.log("delete thing")
+    try {
+      await deleteClientRequestById(id)
+    } catch (error) {
+      console.log(error)
+      toast.error("something went wrong while deleting")
+    }
+  }
 
   const columns: ColumnDef<Request>[] = [
     {
@@ -208,15 +221,18 @@ export function RequestsTable({
       cell: ({ row }) => {
         const request = row.original;
         return (
-          <Button
-          className='cursor-pointer'
-            size='sm'
-            variant='ghost'
-            onClick={() => onViewProposals(request)}
-          >
-            {/* <Eye className='h-5 w-5' /> */}
-            View
-          </Button>
+          <>
+            <Button
+              className='cursor-pointer'
+              size='sm'
+              variant='ghost'
+              onClick={() => onViewProposals(request)}
+            >
+              {/* <Eye className='h-5 w-5' /> */}
+              View
+            </Button>
+            {/* <DeleteIcon onClick={() => handleDelete(request.id)}/> */}
+          </>
         );
       }
     }
