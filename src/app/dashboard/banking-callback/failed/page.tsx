@@ -8,9 +8,14 @@ import CenteredActionPage from '@/features/engagements/components/CenteredAction
 
 function CallbackComponent() {
   useEffect(() => {
-    // Close the tab automatically after the half second
-    const timer  = setTimeout(() => {}, 500)
-    window.close();
+    // Start the timer and store its ID
+    const timerId = setTimeout(() => {
+      // This will only run if the component is still mounted after 1000ms
+      window.close();
+    }, 1000);
+    return () => {
+      clearTimeout(timerId);
+    };
   }, []);
 
   return (
