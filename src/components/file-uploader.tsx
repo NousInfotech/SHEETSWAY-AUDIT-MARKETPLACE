@@ -151,16 +151,16 @@ export function FileUploader(props: FileUploaderProps) {
 
       if (
         onUpload &&
-        updatedFiles.length > 0 &&
-        updatedFiles.length <= maxFiles
+        newFiles.length > 0 // 1. Check only for NEW files
       ) {
         const target =
-          updatedFiles.length > 0 ? `${updatedFiles.length} files` : `file`;
+          newFiles.length > 1 ? `${newFiles.length} files` : `file`; // 2. Base the message on NEW files
 
-        toast.promise(onUpload(updatedFiles), {
+        toast.promise(onUpload(newFiles), {
+          // 3. Upload ONLY the NEW files
           loading: `Uploading ${target}...`,
           success: () => {
-            setFiles([]);
+            setFiles([]); // This correctly clears the preview after upload
             return `${target} uploaded`;
           },
           error: `Failed to upload ${target}`
