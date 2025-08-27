@@ -16,7 +16,7 @@ interface Transaction {
 
 interface TransactionsListProps {
   connectionId: string;
-  selectedAccount: { id: string; name: string }; // We need the account ID and name
+  selectedAccount: any
 }
 
 export default function TransactionsList({ connectionId, selectedAccount }: TransactionsListProps) {
@@ -31,8 +31,8 @@ export default function TransactionsList({ connectionId, selectedAccount }: Tran
       setIsLoading(true);
       try {
         // Fetch ALL transactions for the entire connection
-        const response = await fetchTransactions(connectionId);
-        setAllTransactions(response.data);
+        const response = await fetchTransactions(selectedAccount.id, connectionId);
+        setAllTransactions(response);
       } catch (err) {
         setError('Failed to load transactions');
         console.error(err);

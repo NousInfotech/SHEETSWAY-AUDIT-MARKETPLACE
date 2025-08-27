@@ -14,10 +14,11 @@ export default function ConnectionStatus({ connectionId }: ConnectionStatusProps
 
   useEffect(() => {
     if (!connectionId) return;
-
+    console.log("inside status card")
     checkConnectionStatus(connectionId)
       .then((res: any) => {
         // Assuming the status is in res.data.status based on your API
+        console.log("inside status",res.data)
         setStatus(res.data.status);
       })
       .catch(() => {

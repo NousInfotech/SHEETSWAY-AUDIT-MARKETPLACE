@@ -1,69 +1,90 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Import all necessary components
 import ConnectButton from '@/features/engagements/components/ConnectButton';
-import AccountsList from '@/features/engagements/components/AccountsList';
-import TransactionsList from '@/features/engagements/components/TransactionsList';
-import ConnectionStatus from '@/features/engagements/components/ConnectionStatus'; // Import the new component
 
 // Import the custom hook to access the shared connection state
 import { useConnection } from '@/contexts/SaltEdgeConnectionContext';
-
-// Define the shape of your Account data for type safety
-interface Account {
-  id: string;
-  name: string;
-  // Add other properties as needed
-}
+import { useAuth } from '@/components/layout/providers';
+import { fetchConnections } from '@/api/salt-edge';
+import AccountCardsDisplay from './AccountCardsDisplay';
+import { AccountDataModal } from './AccountDataModal';
+import ConnectionCard from './ConnectionCard';
 
 export default function BankData() {
-  // 1. SHARED STATE: Get the connectionId and loading status from the global context.
-  const { connectionId, isLoading } = useConnection();
+  const { appUser, loading: authLoading } = useAuth();
 
-  // 2. LOCAL UI STATE: Manage the currently selected account within this component.
-  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  // 1. SHARED STATE: Get the connectionId and loading status from the global context.
+  // const { connectionId, isLoading } = useConnection();
 
   // While the context is doing its initial check, show a loading message.
-  if (isLoading) {
-    return (
-      <div className="container mx-auto p-4 text-center">
-        <p>Loading Connection Status...</p>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="container mx-auto p-4 text-center">
+  //       <p>Loading Connection Status...</p>
+  //     </div>
+  //   );
+  // }
+
+  const [connections, setConnections] = useState<any>([]);
+  const [selectedConnection, setSelectedConnection] = useState<any | null>(
+    null
+  );
+
+  const handleConnectionSelect = (currentAccount: any) => {
+    setSelectedConnection(currentAccount);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedConnection(null);
+  };
+
+  const listConnections = async (customerId: string) => {
+    try {
+      const connections = await fetchConnections(customerId);
+      console.log('connections', connections);
+      setConnections(connections);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!authLoading && appUser?.bankCustomerId) {
+      listConnections(appUser?.bankCustomerId);
+    }
+  }, [authLoading, appUser?.bankCustomerId]);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Financial Dashboard</h1>
-      
-      {!connectionId ? (
-        // RENDERED IF NOT CONNECTED
-        <div className="mb-6 p-6 border rounded-lg text-center">
-          
-          <ConnectButton />
-        </div>
-      ) : (
-        // RENDERED IF CONNECTED
-        <div>
-          {/* Render the dedicated component to show the connection status */}
-          <ConnectionStatus connectionId={connectionId} />
+    <div className='container mx-auto p-4'>
+      <h1 className='mb-6 text-2xl font-bold'>Financial Dashboard</h1>
 
-          <AccountsList 
-            connectionId={connectionId} 
-            onAccountSelect={setSelectedAccount}
-          />
-          
-          {selectedAccount && (
-            <div className="mt-6">
-              <TransactionsList 
-                connectionId={connectionId} 
-                selectedAccount={selectedAccount} 
+      <div className='mb-6 rounded-lg border p-6 text-center'>
+        <ConnectButton />
+      </div>
+
+      {connections.length > 0 && (
+        <>
+          <div className='container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
+            {connections.map((connection: any) => (
+              <ConnectionCard
+                key={connection?.id}
+                connection={connection}
+                onSelect={handleConnectionSelect}
               />
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {selectedConnection && (
+        <AccountDataModal
+          connectionId={selectedConnection?.id}
+          isOpen={!!selectedConnection}
+          onClose={handleCloseModal}
+        />
       )}
     </div>
   );

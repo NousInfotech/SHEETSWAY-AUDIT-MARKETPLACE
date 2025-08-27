@@ -5,7 +5,6 @@ export const createSessionForSaltedge = async (returnTo: string) => {
   const response = await instance.post(`${SALTEDGE_API}/create-session`, {
     returnTo
   });
-  console.log(response.data);
   return response.data;
 };
 
@@ -14,27 +13,33 @@ export const createConnectSession = async (returnTo: string) => {
   const response = await instance.post(`${SALTEDGE_API}/create-session`, {
     returnTo
   });
-  console.log(response.data);
   return response.data;
 };
+
+export const fetchConnections = async (customerId: string) => {
+  const response = await instance.get(
+    `${SALTEDGE_API}/connection/customer/${customerId}`
+  );
+  return response.data;
+};
+
 export const fetchAccounts = async (connectionId: string) => {
   const response = await instance.get(
-    `${SALTEDGE_API}//accounts/${connectionId}`
+    `${SALTEDGE_API}/accounts/${connectionId}`
   );
-  console.log(response.data);
   return response.data;
 };
-export const fetchTransactions = async (connectionId: string) => {
+
+export const fetchTransactions = async (accountId:string, connectionId: string) => {
   const response = await instance.get(
-    `${SALTEDGE_API}/transactions/${connectionId}`
+    `${SALTEDGE_API}/transactions/${accountId}?connectionId=${connectionId}`
   );
-  console.log(response.data);
   return response.data;
 };
+
 export const checkConnectionStatus = async (connectionId: string) => {
   const response = await instance.get(
     `${SALTEDGE_API}/connection/${connectionId}/status`
   );
-  console.log(response.data);
   return response.data;
 };

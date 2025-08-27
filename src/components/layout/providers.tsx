@@ -14,7 +14,15 @@ import { ActiveThemeProvider } from '../active-theme';
 import { getProfile } from '@/api/user.api';
 import { usePathname, useRouter } from 'next/navigation';
 
-type AppUser = { id: string; name: string };
+interface AppUser {
+  id: string;
+  authId: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  // Add bankCustomerId here:
+  bankCustomerId?: string;
+}
 
 const AuthContext = createContext<{
   firebaseUser: FirebaseUser | null;
