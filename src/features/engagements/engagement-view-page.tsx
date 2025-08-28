@@ -72,6 +72,8 @@ const EngagementViewPage = () => {
     console.log(clientEngagements);
     setEngagements(clientEngagements);
 
+    
+
     setAccountingData(
       savedAccountingData
         ? JSON.parse(savedAccountingData)

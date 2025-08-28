@@ -62,15 +62,20 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
     framework: ''
   });
   const [sortOption, setSortOption] = useState<
-    'clientName' | 'status' | 'startDate' | 'deadline' | 'progress'
-  >('clientName');
+    | 'clientName'
+    | 'status'
+    | 'startDate'
+    | 'deadline'
+    | 'progress'
+    | 'createdAt'
+    | 'updatedAt'
+  >('createdAt');
 
   const { appUser, loading: authLoading } = useAuth();
   let userId = appUser?.id;
 
   // Get the specific action from your store
   const { loadClientEngagements } = useClientEngagementStore();
-  
 
   const handleUploadSuccess = () => {
     // Step 1: Immediately close the modal. This provides instant feedback to the user.
@@ -149,7 +154,8 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           .toLowerCase()
           .includes(filters.search.toLowerCase());
       const matchesStatus = !filters.status || 'In Progress' === filters.status;
-      const matchesType = !filters.type || engagement.type === filters.type;
+      const matchesType =
+        !filters.type || engagement.request.type === filters.type;
       const matchesFramework =
         !filters.framework ||
         engagement.request.framework === filters.framework;
@@ -215,6 +221,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               }
               className='border-border bg-background text-foreground rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500'
             >
+              <option value='createdAt'>Sort: Created At</option>
               <option value='clientName'>Sort: Client Name</option>
               <option value='status'>Sort: Status</option>
               <option value='startDate'>Sort: Start Date</option>
