@@ -13,6 +13,7 @@ import { getPlaidBankAccounts } from '@/api/user.api';
 import { useAuth } from '@/components/layout/providers';
 import { Spinner } from '@/components/ui/spinner';
 import { formatCurrency } from '@/utils/formatCurrency';
+import { ApideckConnectionList } from './ApideckConnectionList';
 
 interface AccountingDataTabProps {
   data: AccountingData[];
@@ -21,7 +22,7 @@ interface AccountingDataTabProps {
 const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
   const { appUser } = useAuth();
   const [apideckIntegrations, setApideckIntegrations] = useState<
-    ApideckIntegration[]
+    any[]
   >([]);
   const [plaidIntegrations, setPlaidIntegrations] = useState<
     PlaidIntegration[]
@@ -135,13 +136,13 @@ const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
       </div>
     </div>
   );
-
+  console.log('Apideck integrations', apideckIntegrations);
   return (
     <div className='space-y-6'>
       {/* Connected Integrations Section */}
       <div>
         <h2 className='text-foreground mb-4 text-xl font-semibold'>
-          Connected Integrations
+          All the Connections
         </h2>
         {loading ? (
           <div className='flex flex-col items-center justify-center py-6'>
@@ -151,14 +152,22 @@ const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
           <div className='text-red-500'>{error}</div>
         ) : (
           <>
-            <ApideckIntegrationList
+            {/* OLD COMPONENTS */}
+
+            {/* <ApideckIntegrationList
               integrations={apideckIntegrations}
               onDelete={handleDeleteApideck}
             />
             <PlaidIntegrationList
               integrations={plaidIntegrations}
               onDelete={handleDeletePlaid}
-            />
+            /> */}
+
+            {/* OLD COMPONENTS ENDS */}
+
+            {/* NEW COMPONENTS */}
+
+              <ApideckConnectionList connections={apideckIntegrations} />
           </>
         )}
       </div>

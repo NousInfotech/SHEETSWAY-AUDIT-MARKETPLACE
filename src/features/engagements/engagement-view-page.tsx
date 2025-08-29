@@ -72,7 +72,7 @@ const EngagementViewPage = () => {
     console.log(clientEngagements);
     setEngagements(clientEngagements);
 
-    
+
 
     setAccountingData(
       savedAccountingData
@@ -192,7 +192,8 @@ const EngagementViewPage = () => {
             onBack={handleBackToEngagements}
           >
             {currentWorkspaceTab === 'accounting' && (
-              <AccountingDataTab data={accountingData} />
+              <></>
+              // <AccountingDataTab data={accountingData} />
             )}
             {currentWorkspaceTab === 'banking' && (
               <BankingDataView />

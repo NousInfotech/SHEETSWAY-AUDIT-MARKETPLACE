@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,7 +11,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog';
 import {
   Form,
@@ -20,10 +19,14 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -34,8 +37,10 @@ import { createMilestone } from '@/api/engagement';
 
 // Define the form validation schema using Zod
 const milestoneFormSchema = z.object({
-  label: z.string().min(3, { message: 'Label must be at least 3 characters long.' }),
-  dueDate: z.date().optional(),
+  label: z
+    .string()
+    .min(3, { message: 'Label must be at least 3 characters long.' }),
+  dueDate: z.date().optional()
   // Add other fields you want to set from the form
 });
 
@@ -54,15 +59,15 @@ export function CreateMilestoneDialog({
   auditorId,
   isOpen,
   onOpenChange,
-  onMilestoneCreated,
+  onMilestoneCreated
 }: CreateMilestoneDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<MilestoneFormValues>({
     resolver: zodResolver(milestoneFormSchema),
     defaultValues: {
-      label: '',
-    },
+      label: ''
+    }
   });
 
   async function onSubmit(data: MilestoneFormValues) {
@@ -74,9 +79,7 @@ export function CreateMilestoneDialog({
         engagementId,
         auditorId,
         status: 'not_started', // Default status
-        // Convert date to ISO string if it exists
-        dueDate: data.dueDate ? data.dueDate.toISOString() : null,
-        setBy:"CLIENT"
+        dueDate: data.dueDate ? data.dueDate.toISOString() : null
       };
 
       await createMilestone(payload);
@@ -94,23 +97,30 @@ export function CreateMilestoneDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
           <DialogTitle>Add New Milestone</DialogTitle>
           <DialogDescription>
-            Fill in the details for the new milestone. Click save when you're done.
+            Fill in the details for the new milestone. Click save when you're
+            done.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='space-y-4 py-4'
+          >
             <FormField
               control={form.control}
-              name="label"
+              name='label'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Label</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Finalize Audit Report" {...field} />
+                    <Input
+                      placeholder='e.g., Finalize Audit Report'
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,9 +128,9 @@ export function CreateMilestoneDialog({
             />
             <FormField
               control={form.control}
-              name="dueDate"
+              name='dueDate'
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem className='flex flex-col'>
                   <FormLabel>Due Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -137,13 +147,13 @@ export function CreateMilestoneDialog({
                           ) : (
                             <span>Pick a date</span>
                           )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className='w-auto p-0' align='start'>
                       <Calendar
-                        mode="single"
+                        mode='single'
                         selected={field.value}
                         onSelect={field.onChange}
                         initialFocus
@@ -155,8 +165,10 @@ export function CreateMilestoneDialog({
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button type='submit' disabled={isSubmitting}>
+                {isSubmitting && (
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                )}
                 Save Milestone
               </Button>
             </DialogFooter>

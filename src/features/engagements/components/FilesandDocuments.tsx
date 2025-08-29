@@ -2103,7 +2103,7 @@ export default function FilesandDocuments({ engagement }: any) {
     const trimmedName = newSubfolderName.trim();
     if (!trimmedName || !selectedLibraryId) return;
     try {
-      await createSubFolder({ parentId: selectedLibraryId, name: trimmedName });
+      await createSubFolder({rootId:primaryRootId, parent: selectedLibraryId, name: trimmedName });
       toast.success(`Folder "${trimmedName}" created.`);
       await fetchSubfolders(selectedLibraryId); // Only refetch subfolders
     } catch (error) {

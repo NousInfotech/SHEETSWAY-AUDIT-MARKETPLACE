@@ -6,18 +6,20 @@ import { Button } from '@/components/ui/button';
 
 export type ApideckIntegration = z.infer<typeof apideckIntegrationSchema>;
 
-export default function ApideckIntegrationList({ integrations, onDelete }: { integrations: ApideckIntegration[], onDelete?: (id: string) => void }) {
+export default function ApideckIntegrationList({ integrations, onDelete }: { integrations: any[], onDelete?: (id: string) => void }) {
   // Only show integrations that are fully created (id, service, and status must exist)
   const validIntegrations = integrations.filter(
-    integration => integration.id && integration.service && integration.status
+    integration => integration.id && integration.serviceId
   );
   if (validIntegrations.length === 0) return null;
+  console.log("validIntegrations", validIntegrations)
   return (
     <div className="space-y-4">
-      {validIntegrations.map(integration => (
+      {validIntegrations.length > 0 && validIntegrations.map(integration => (
         <Card key={integration.id} className="w-full">
+          
           <CardHeader className="flex flex-row items-center justify-between gap-2 px-6 py-4">
-            <CardTitle>{integration.service}</CardTitle>
+            <CardTitle>{integration.serviceId}</CardTitle>
             {onDelete && (
               <Button size="sm" variant="destructive" onClick={() => onDelete(integration.id)}>
                 Delete

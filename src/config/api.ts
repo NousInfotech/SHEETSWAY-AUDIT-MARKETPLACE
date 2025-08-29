@@ -12,6 +12,8 @@ export const PLAID_CREATE_ACCOUNT_API = '/api/v1/plaid-integration/create-accoun
 export const PLAID_ACCOUNTS_API = '/api/v1/users/plaid-accounts';
 
 // Apideck Integrations
+export const APIDECK_API = '/api/v1/apideck-integrations'
+
 export const APIDECK_LINK_TOKEN_API = '/api/v1/apideck-integrations/link-token';
 export const APIDECK_ACCOUNTING_INTEGRATIONS_API = '/api/v1/users/accounting-integrations';
 
