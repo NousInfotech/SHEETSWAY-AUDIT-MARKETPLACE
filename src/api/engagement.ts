@@ -118,7 +118,7 @@ export const createRootFolder = async (payload:any) => {
 };
 
 export const createSubFolder = async (payload:any) => {
-  const response = await instance.post(`${ENGAGEMENT_API}/document-folder`, payload);
+  const response = await instance.post(`${ENGAGEMENT_API}/document-folder/sub-folder`, payload);
   return response.data;
 };
 
