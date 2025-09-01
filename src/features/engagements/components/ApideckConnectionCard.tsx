@@ -5,7 +5,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils'; // Assuming you have a utility for class merging
@@ -31,7 +31,7 @@ export function ApideckConnectionCard({
   connection,
   className,
   onClick,
-  isActive,
+  isActive
 }: ConnectionCardProps) {
   const formattedDate = new Date(connection.createdAt).toLocaleDateString(
     'en-US',
@@ -40,19 +40,16 @@ export function ApideckConnectionCard({
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit',
+      minute: '2-digit'
     }
   );
-
-  // Status is not present in the new interface, so we'll omit it or derive it if possible.
-  // For now, removing status-related logic.
-  // const statusVariant = connection.status === 'active' ? 'default' : 'secondary';
 
   return (
     <Card
       className={cn(
         'w-full cursor-pointer shadow-lg transition-shadow duration-300 ease-in-out hover:shadow-xl', // Added cursor-pointer
-        isActive && 'border-primary ring-primary-foreground border-2 ring-2', // Highlight active card
+        isActive &&
+          'border-primary ring-primary-foreground border-2 !bg-pink-100 ring-2', // Highlight active card
         className
       )}
       onClick={() => onClick && onClick(connection.serviceId)} // Call onClick with serviceId
@@ -77,7 +74,7 @@ export function ApideckConnectionCard({
         </div>
         <div className='flex items-center space-x-2'>
           <span className='font-medium'>Auth Type:</span>
-          <span className='text-sm truncate'>{connection.authType}</span>
+          <span className='truncate text-sm'>{connection.authType}</span>
         </div>
         <div className='flex items-center space-x-2'>
           <span className='font-medium'>Created At:</span>

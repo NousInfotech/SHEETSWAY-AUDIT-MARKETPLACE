@@ -108,7 +108,7 @@ export default function ApideckHomePage() {
   const connectionsWithHandlers = connections.map((conn: any) => ({
     connection: conn, // Wrap the connection object
     onClick: handleConnectionClick,
-    isActive: conn.connectionId === selectedConnectionId
+    isActive: conn.serviceId === selectedConnectionId
   }));
 
   if (loading) {
