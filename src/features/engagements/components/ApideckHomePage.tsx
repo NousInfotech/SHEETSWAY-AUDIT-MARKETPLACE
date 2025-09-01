@@ -6,6 +6,7 @@ import { ApideckDataDisplay } from '@/features/engagements/components/ApideckDat
 import { useAuth } from '@/components/layout/providers';
 import { toast } from 'sonner';
 import { getAccountingIntegrations } from '@/api/user.api';
+import { getServicesbyUserId } from '@/api/apideck.api';
 
 // Mock data for demonstration
 const mockConnections = [
@@ -46,6 +47,7 @@ const mockConnections = [
 
 export default function ApideckHomePage() {
   const [connections, setConnections] = useState<any>([]);
+  const [services, setServices] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const [selectedConnectionId, setSelectedConnectionId] = useState<
     string | null
@@ -53,27 +55,51 @@ export default function ApideckHomePage() {
   const { appUser, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    async function loadIntegrations() {
+    async function fetchServices() {
       setLoading(true);
-
       try {
         if (!appUser) return;
 
-        const connections = await getAccountingIntegrations({
-          userId: appUser.id
-        });
-
-        setConnections(connections);
-      } catch (err) {
-        toast.error('some thing went while connecting to apideck');
+        const response = await getServicesbyUserId();
+        console.log(response)
+        console.log("services", response.getConsumerResponse.data.services);
+        console.log("connections", response.getConsumerResponse.data.connections);
+        setServices(response.getConsumerResponse.data.services)
+        setConnections(response.getConsumerResponse.data.connections)
+      } catch (error) {
+        console.log(error);
+        toast.error('Something went wrong, while fetching services');
       } finally {
         setLoading(false);
       }
     }
     if (!authLoading && appUser) {
-      loadIntegrations();
+      fetchServices();
     }
   }, [appUser]);
+
+  // useEffect(() => {
+  //   async function loadIntegrations() {
+  //     setLoading(true);
+
+  //     try {
+  //       if (!appUser) return;
+
+  //       const connections = await getAccountingIntegrations({
+  //         userId: appUser.id
+  //       });
+
+  //       setConnections(connections);
+  //     } catch (err) {
+  //       toast.error('some thing went while connecting to apideck');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+  //   if (!authLoading && appUser) {
+  //     loadIntegrations();
+  //   }
+  // }, [appUser]);
 
   const handleConnectionClick = (connectionId: string) => {
     setSelectedConnectionId(connectionId);
@@ -88,20 +114,20 @@ export default function ApideckHomePage() {
   if (loading) {
     return <div>Loading.......</div>;
   }
-  console.log(connections)
+  console.log(connections);
   return (
-    <div className='w-full min-h-screen bg-gradient-to-br from-gray-50 to-indigo-100 py-10'>
+    <div className='min-h-screen w-full bg-gradient-to-br from-gray-50 to-indigo-100 py-10'>
       <h1 className='mb-12 text-center text-4xl font-extrabold text-gray-900'>
         Apideck Integrations Dashboard
       </h1>
 
       {/* Connection List Section */}
-      <div className='w-full rounded-lg bg-white p-6 shadow-xl'>
+      <div className='w-full rounded-lg bg-white p-6 shadow-xl my-5'>
         <ApideckConnectionList connections={connectionsWithHandlers} />
       </div>
 
       {/* Data Display Section */}
-      <div className='w-full rounded-lg bg-white p-6 shadow-xl'>
+      <div className='w-full rounded-lg bg-white p-6 shadow-xl my-5'>
         <ApideckDataDisplay connectionId={selectedConnectionId} />
       </div>
     </div>

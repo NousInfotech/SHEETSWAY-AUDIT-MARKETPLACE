@@ -62,10 +62,10 @@ export function ApideckDataDisplay({ connectionId }: ApideckDataDisplayProps) {
       await Promise.all([
         fetchApiData(getJournalEntries, setJournalEntries, 'data'), // Adjust 'data' if response structure differs
         fetchApiData(getLedgerAccountsData, setLedgerAccounts, 'data'),
-        fetchApiData(getProfitAndLoss, setProfitAndLoss, 'data'),
-        fetchApiData(getBalanceSheet, setBalanceSheet, 'data'),
-        fetchApiData(getAgedReceivables, setAgedReceivables, 'data'),
-        fetchApiData(getAgedPayables, setAgedPayables, 'data'),
+        // fetchApiData(getProfitAndLoss, setProfitAndLoss, 'data'),
+        // fetchApiData(getBalanceSheet, setBalanceSheet, 'data'),
+        // fetchApiData(getAgedReceivables, setAgedReceivables, 'data'),
+        // fetchApiData(getAgedPayables, setAgedPayables, 'data'),
       ]);
     };
 
@@ -81,13 +81,13 @@ export function ApideckDataDisplay({ connectionId }: ApideckDataDisplayProps) {
   }
 
   return (
-    <div className="w-full grid grid-cols-1">
+    <div className="w-full grid grid-cols-1 gap-5">
       <ConnectionDetailTable title="Journal Entries" {...journalEntries} />
       <ConnectionDetailTable title="Ledger Accounts" {...ledgerAccounts} />
-      <ConnectionDetailTable title="Profit and Loss" {...profitAndLoss} />
+      {/* <ConnectionDetailTable title="Profit and Loss" {...profitAndLoss} />
       <ConnectionDetailTable title="Balance Sheet" {...balanceSheet} />
       <ConnectionDetailTable title="Aged Receivables" {...agedReceivables} />
-      <ConnectionDetailTable title="Aged Payables" {...agedPayables} />
+      <ConnectionDetailTable title="Aged Payables" {...agedPayables} /> */}
     </div>
   );
 }

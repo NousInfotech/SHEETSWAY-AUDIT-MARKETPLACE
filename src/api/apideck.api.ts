@@ -59,15 +59,23 @@ export const getAccountingIntegrations = async (): Promise<any> => {
 };
 
 
-export const getJournalEntries = async (connectionId:string) => {
-  const response = await instance.get(`${APIDECK_API}/accounts/freshbooks/journal-entries`);
+export const getServicesbyUserId = async () => {
+  const response = await instance.get(`${APIDECK_API}/services/list`);
   return response.data;
+};
+
+
+
+
+export const getJournalEntries = async (connectionId:string) => {
+  const response = await instance.get(`${APIDECK_API}/accounts/${connectionId}/journal-entries`);
+  return response.data.getJournalEntriesResponse.data;
 };
 
 
 export const getLedgerAccountsData = async (connectionId:string) => {
   const response = await instance.get(`${APIDECK_API}/accounts/${connectionId}/ledger-accounts`);
-  return response.data;
+  return response.data.getLedgerAccountsResponse.data;
 };
 
 

@@ -90,18 +90,19 @@ export default function ApideckIntegrationForm({
           console.log(connection);
           try {
             // Use real userId from auth context
-            const integrationData = {
-              userId: appUser.id, // Now guaranteed to be string
-              connectionId: connection.id, // <-- correct field name
-              serviceId: connection.service_id,
+            // const integrationData = {
+            //   userId: appUser.id, // Now guaranteed to be string
+            //   connectionId: connection.id, // <-- correct field name
+            //   serviceId: connection.service_id,
 
-              unifiedApi: connection.unified_api || connection.service_id,
-              status: connection.status || '',
-              label: 'accounting'
-            };
-            const savedIntegration =
-              await saveAccountingIntegration(integrationData);
-            onSubmit({ ...savedIntegration, connection });
+            //   unifiedApi: connection.unified_api || 'accounting',
+            //   status: connection.status || '',
+            //   label: 'accounting'
+            // };
+            // const savedIntegration =
+            //   await saveAccountingIntegration(integrationData);
+            // onSubmit({ ...savedIntegration, connection });
+            onSubmit({ connection });
             onOpenChange(false);
             toast.success('Accounting integration connected successfully!');
           } catch (error) {
@@ -110,7 +111,11 @@ export default function ApideckIntegrationForm({
           }
         },
         onClose: () => {
-          // Optional: handle close
+          console.log('Vault closed');
+          onOpenChange(false); // Close the modal/dialog
+        },
+        onReady: () => {
+          console.log('Vault ready');
         }
       });
     } catch (error) {
