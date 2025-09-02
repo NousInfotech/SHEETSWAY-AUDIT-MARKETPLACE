@@ -243,6 +243,7 @@ const TableCellContent: React.FC<TableCellContentProps> = ({
   value, 
   maxLength = 50 
 }) => {
+  const [showFull, setShowFull] = useState(false);
   // Handle null/undefined
   if (value === null || value === undefined) {
     return <span className="text-gray-400 italic">—</span>;
@@ -256,7 +257,7 @@ const TableCellContent: React.FC<TableCellContentProps> = ({
   // Handle primitive values
   const stringValue = String(value);
   const isLong = stringValue.length > maxLength;
-  const [showFull, setShowFull] = useState(false);
+  
 
   if (!isLong) {
     return <span>{stringValue}</span>;

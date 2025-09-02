@@ -2,7 +2,7 @@ import PageContainer from '@/components/layout/page-container';
 import ApideckHomePage from '@/features/engagements/components/ApideckHomePage';
 import React from 'react';
 
-function ApideckMainPage() {
+function page() {
   return (
     <PageContainer>
       <div className='w-full'>
@@ -12,4 +12,4 @@ function ApideckMainPage() {
   );
 }
 
-export default ApideckMainPage;
+export default page;

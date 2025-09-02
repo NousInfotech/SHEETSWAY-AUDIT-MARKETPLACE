@@ -76,7 +76,7 @@ export default function ApideckHomePage() {
     if (!authLoading && appUser) {
       fetchServices();
     }
-  }, [appUser]);
+  }, [authLoading, appUser]);
 
   // useEffect(() => {
   //   async function loadIntegrations() {
