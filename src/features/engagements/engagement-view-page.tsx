@@ -34,6 +34,7 @@ import EngagementChatPage from '@/app/dashboard/engagements/[id]/chat/page';
 import PaymentEscrowTab from './components/PaymentEscrowTab';
 import MilestoneTab from './components/MilestoneTab';
 import BankingDataView from './components/BankingDataView';
+import ApideckHomePage from './components/ApideckHomePage';
 
 
 const EngagementViewPage = () => {
@@ -192,7 +193,7 @@ const EngagementViewPage = () => {
             onBack={handleBackToEngagements}
           >
             {currentWorkspaceTab === 'accounting' && (
-              <></>
+              <ApideckHomePage />
               // <AccountingDataTab data={accountingData} />
             )}
             {currentWorkspaceTab === 'banking' && (
