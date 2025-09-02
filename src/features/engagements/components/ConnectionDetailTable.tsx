@@ -130,7 +130,8 @@ const ComplexDataRenderer: React.FC<ComplexDataRendererProps> = ({
   // Handle arrays
   if (Array.isArray(data)) {
     if (data.length === 0) {
-      return <Badge variant="outline" className="text-xs">Empty Array</Badge>;
+      // return <Badge variant="outline" className="text-xs">Empty Array</Badge>;
+      return <Badge variant="outline" className="text-xs">Empty</Badge>;
     }
 
     const previewItems = data.slice(0, maxPreviewItems);
@@ -140,7 +141,8 @@ const ComplexDataRenderer: React.FC<ComplexDataRendererProps> = ({
       <div className="space-y-1">
         <div className="flex items-center gap-1">
           <Badge variant="secondary" className="text-xs">
-            Array ({data.length})
+            {/* Array ({data.length}) */}
+            list view ({data.length})
           </Badge>
           {data.length > 0 && (
             <Button
@@ -191,7 +193,8 @@ const ComplexDataRenderer: React.FC<ComplexDataRendererProps> = ({
       <div className="space-y-1">
         <div className="flex items-center gap-1">
           <Badge variant="secondary" className="text-xs">
-            Object ({keys.length} keys)
+            {/* Object ({keys.length} keys) */}
+            Details ({keys.length} fields)
           </Badge>
           <Button
             variant="ghost"
@@ -243,7 +246,10 @@ const TableCellContent: React.FC<TableCellContentProps> = ({
   value, 
   maxLength = 50 
 }) => {
+
   const [showFull, setShowFull] = useState(false);
+
+
   // Handle null/undefined
   if (value === null || value === undefined) {
     return <span className="text-gray-400 italic">—</span>;

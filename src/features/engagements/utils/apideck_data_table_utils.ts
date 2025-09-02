@@ -39,7 +39,8 @@ export const formatDisplayValue = (value: any): string => {
   }
   
   if (typeof value === 'object') {
-    return `Object (${Object.keys(value).length} keys)`;
+    // return `Object (${Object.keys(value).length} keys)`;
+    return `Details (${Object.keys(value).length} fields)`;
   }
   
   return String(value);
