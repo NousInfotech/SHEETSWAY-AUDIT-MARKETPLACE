@@ -41,6 +41,30 @@ export function formatBytes(
   }`;
 }
 
+
+
+// get latest firebase refresh token
+
+export const getLatestToken = async (): Promise<string | null> => {
+  const auth = getAuth();
+  if (auth.currentUser) {
+    try {
+      // Force refresh the token
+      const token = await auth.currentUser.getIdToken(true);
+      return token;
+    } catch (error) {
+      console.error('Error refreshing Firebase ID token:', error);
+      return null;
+    }
+  }
+  return null;
+};
+
+
+
+
+
+
 // utils/token.ts
 
 const TOKEN_KEY = 'sheetsway-007';

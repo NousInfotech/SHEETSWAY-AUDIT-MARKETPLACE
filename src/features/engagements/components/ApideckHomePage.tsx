@@ -8,43 +8,6 @@ import { toast } from 'sonner';
 import { getAccountingIntegrations } from '@/api/user.api';
 import { getServicesbyUserId } from '@/api/apideck.api';
 
-// Mock data for demonstration
-const mockConnections = [
-  {
-    id: '06f04b3d-7078-406a-b929-53f39f0cbd53',
-    userId: 'b5404dc2-4bc3-4cb7-8c82-b3f9df5c26b8',
-    unifiedApi: 'accounting',
-    createdAt: '2025-08-23T20:02:33.022Z',
-    connectionId: 'accounting+sage-business-cloud-accounting', // This is the ID passed to APIs
-    consumerId: 'sage-business-cloud-accounting',
-    label: 'Accounting (Sage)',
-    serviceId: 'sage-business-cloud-accounting',
-    status: 'active'
-  },
-  {
-    id: '29292b29-864c-4e70-a897-41539c40e43e',
-    userId: 'b5404dc2-4bc3-4cb7-8c82-b3f9df5c26b8',
-    unifiedApi: 'crm',
-    createdAt: '2025-08-20T10:00:00.000Z',
-    connectionId: 'crm+salesforce-test', // Another connectionId
-    consumerId: 'salesforce',
-    label: 'CRM (Salesforce)',
-    serviceId: 'salesforce',
-    status: 'active'
-  },
-  {
-    id: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
-    userId: 'b5404dc2-4bc3-4cb7-8c82-b3f9df5c26b8',
-    unifiedApi: 'hr',
-    createdAt: '2024-07-15T10:30:00.000Z',
-    connectionId: 'hr+bamboo-hr-inactive',
-    consumerId: 'bamboo-hr',
-    label: 'HR (BambooHR)',
-    serviceId: 'bamboo-hr',
-    status: 'inactive'
-  }
-];
-
 export default function ApideckHomePage() {
   const [connections, setConnections] = useState<any>([]);
   const [services, setServices] = useState<any>([]);
@@ -61,11 +24,14 @@ export default function ApideckHomePage() {
         if (!appUser) return;
 
         const response = await getServicesbyUserId();
-        console.log(response)
-        console.log("services", response.getConsumerResponse.data.services);
-        console.log("connections", response.getConsumerResponse.data.connections);
-        setServices(response.getConsumerResponse.data.services)
-        setConnections(response.getConsumerResponse.data.connections)
+        console.log(response);
+        console.log('services', response.getConsumerResponse.data.services);
+        console.log(
+          'connections',
+          response.getConsumerResponse.data.connections
+        );
+        setServices(response.getConsumerResponse.data.services);
+        setConnections(response.getConsumerResponse.data.connections);
       } catch (error) {
         console.log(error);
         toast.error('Something went wrong, while fetching services');
@@ -122,12 +88,12 @@ export default function ApideckHomePage() {
       </h1>
 
       {/* Connection List Section */}
-      <div className='w-full rounded-lg bg-white p-6 shadow-xl my-5'>
+      <div className='my-5 w-full rounded-lg bg-white p-6 shadow-xl'>
         <ApideckConnectionList connections={connectionsWithHandlers} />
       </div>
 
       {/* Data Display Section */}
-      <div className='w-full rounded-lg bg-white p-6 shadow-xl my-5'>
+      <div className='my-5 w-full rounded-lg bg-white p-6 shadow-xl'>
         <ApideckDataDisplay connectionId={selectedConnectionId} />
       </div>
     </div>

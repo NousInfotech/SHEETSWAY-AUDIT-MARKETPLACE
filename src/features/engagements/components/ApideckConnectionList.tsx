@@ -33,7 +33,7 @@ export function ApideckConnectionList({
       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         {' '}
         {/* Adjusted grid for list on left */}
-        {connections.map((item, index) => (
+        {connections.length > 0 && connections.map((item, index) => (
           <ApideckConnectionCard
             key={index}
             connection={item.connection}

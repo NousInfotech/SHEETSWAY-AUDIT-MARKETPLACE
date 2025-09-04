@@ -1,16 +1,33 @@
 // lib/axios.ts
 import axios from 'axios';
-import { getToken } from './utils';
+import { getLatestToken } from './utils';
 
 const instance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
 });
 
 // Request interceptor: Add auth and role headers
-instance.interceptors.request.use((config) => {
-  const token = getToken();
+// instance.interceptors.request.use((config) => {
+//   const token = getToken();
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+
+//   config.headers['active-role'] = 'USER';
+
+//   return config;
+// });
+
+
+// New Request interceptor: Add auth and role headers
+
+instance.interceptors.request.use(async (config) => { 
+  const token = await getLatestToken(); 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    
+    delete config.headers.Authorization;
   }
 
   config.headers['active-role'] = 'USER';

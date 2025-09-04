@@ -167,16 +167,15 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
     <header className='bg-card dark:bg-card border-border rounded-t-xl border-b px-6 py-4 transition-colors'>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
-          {typeof onRefresh === 'function' && (
-            <button
-              onClick={onRefresh}
-              className='hover:bg-muted text-muted-foreground rounded p-1 transition-colors'
-              title='Refresh engagements'
-              aria-label='Refresh engagements'
-            >
-              <Icons.refresh className='h-5 w-5' />
-            </button>
-          )}
+          <button
+            onClick={() => location.reload()}
+            className='hover:bg-muted text-muted-foreground rounded p-1 transition-colors'
+            title='Refresh engagements'
+            aria-label='Refresh engagements'
+          >
+            <Icons.refresh className='h-5 w-5' />
+          </button>
+
           <div>
             <h1 className='text-foreground text-3xl font-bold'>
               Active Engagements
