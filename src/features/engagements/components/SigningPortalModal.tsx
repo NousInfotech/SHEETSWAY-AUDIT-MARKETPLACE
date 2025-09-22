@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { SigningFlowComponent } from '@/features/engagements/components/SigningFlow';
-import { ArrowRight } from 'lucide-react';
+
 
 // Define the props for the controlled modal
 interface SigningPortalModalProps {

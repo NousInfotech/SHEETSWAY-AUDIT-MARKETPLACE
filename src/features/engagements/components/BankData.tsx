@@ -6,27 +6,15 @@ import { useEffect, useState } from 'react';
 import ConnectButton from '@/features/engagements/components/ConnectButton';
 
 // Import the custom hook to access the shared connection state
-import { useConnection } from '@/contexts/SaltEdgeConnectionContext';
+
 import { useAuth } from '@/components/layout/providers';
 import { fetchConnections } from '@/api/salt-edge';
-import AccountCardsDisplay from './AccountCardsDisplay';
+
 import { AccountDataModal } from './AccountDataModal';
 import ConnectionCard from './ConnectionCard';
 
 export default function BankData() {
   const { appUser, loading: authLoading } = useAuth();
-
-  // 1. SHARED STATE: Get the connectionId and loading status from the global context.
-  // const { connectionId, isLoading } = useConnection();
-
-  // While the context is doing its initial check, show a loading message.
-  // if (isLoading) {
-  //   return (
-  //     <div className="container mx-auto p-4 text-center">
-  //       <p>Loading Connection Status...</p>
-  //     </div>
-  //   );
-  // }
 
   const [connections, setConnections] = useState<any>([]);
   const [selectedConnection, setSelectedConnection] = useState<any | null>(
@@ -67,7 +55,7 @@ export default function BankData() {
 
       {connections.length > 0 && (
         <>
-          <div className='container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
+          <div className='container mx-auto grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3'>
             {connections.map((connection: any) => (
               <ConnectionCard
                 key={connection?.id}

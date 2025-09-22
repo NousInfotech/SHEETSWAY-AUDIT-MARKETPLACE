@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
+import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import {
   createUserWithEmailAndPassword,
@@ -25,8 +26,6 @@ export default function SignUpViewPage({
   isDark = false,
   onToggleTheme
 }: SignUpViewPageProps) {
-
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,7 +33,20 @@ export default function SignUpViewPage({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const router = useRouter()
+  const router = useRouter();
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' });
+
+  // Optional: Auto-play effect (like a carousel)
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    let autoPlayInterval = setInterval(() => {
+      emblaApi.scrollNext();
+    }, 3000);
+
+    return () => clearInterval(autoPlayInterval);
+  }, [emblaApi]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,13 +63,17 @@ export default function SignUpViewPage({
     setLoading(true);
     setError('');
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
       const firebaseId = user.uid;
       const token = await user.getIdToken();
       localStorage.setItem('token', token);
       await axios.post('/api/v1/users', { name, email, firebaseId });
-      router.push("/dashboard/overview");
+      router.push('/dashboard/overview');
 
       // Redirect or show success as needed
     } catch (err: any) {
@@ -80,7 +96,7 @@ export default function SignUpViewPage({
       const token = await user.getIdToken();
       localStorage.setItem('token', token);
       await axios.post('/api/v1/users', { name, email, firebaseId });
-      router.push("/dashboard/overview");
+      router.push('/dashboard/overview');
       // Redirect or show success as needed
     } catch (err: any) {
       setError(err.message);
@@ -93,9 +109,13 @@ export default function SignUpViewPage({
     <div className={`flex min-h-screen ${isDark ? 'bg-gray-950' : 'bg-white'}`}>
       {/* Left side - Testimonial */}
       <div
-        className={`hidden lg:flex lg:w-1/2 ${isDark ? 'bg-black' : 'bg-black'} flex-col justify-between p-12`}
+        className={`relative hidden flex-col justify-between bg-[url('/assets/AuthPage_Bg.png')] p-12 lg:flex lg:w-1/2`}
+        style={{
+          backgroundSize: 'calc(100% + 80px) auto', // Adjust 40px to match your offset, or even more
+          backgroundPosition: '-80px center', // Your desired offset
+          backgroundRepeat: 'no-repeat' // Ensure it doesn't repeat
+        }}
       >
-        {/* Logo/Brand */}
         <div className='flex items-center space-x-3'>
           <Image
             src={'/assets/sheetswaylogo.png'}
@@ -103,34 +123,57 @@ export default function SignUpViewPage({
             width={180}
             height={40}
             priority
-            className='object-contain'
+            className='object-contain [filter:brightness(0)_invert(1)]'
           />
         </div>
 
-        {/* Testimonial */}
-        <div className='space-y-6'>
-          <blockquote className='text-lg leading-relaxed text-white'>
-            &ldquo;The onboarding process was seamless and the interface is
-            incredibly user-friendly. Within minutes, I was able to set up my
-            account and start exploring all the amazing features.&rdquo;
-          </blockquote>
+        {/* Embla Carousel */}
 
-          <div className='flex items-center space-x-4'>
-            <div className='flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-blue-500'>
-              <span className='text-sm font-semibold text-white'>MJ</span>
-            </div>
-            <div>
-              <div className='font-semibold text-white'>Michael Johnson</div>
-              <div className='text-sm text-gray-400'>
-                Product Manager at TechFlow Inc
+        <div className='absolute inset-0 overflow-hidden'>
+          <div className='embla flex h-full items-center' ref={emblaRef}>
+            <div className='embla__container flex h-full'>
+              {' '}
+              {/* Added h-full here too */}
+              {/* Slides */}
+              <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
+                <img
+                  src='/assets/authPageImages/ticket copy.png'
+                  alt='Slide 1'
+                  className='max-h-[100%] max-w-[100%] object-contain'
+                />
+              </div>
+              <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
+                <img
+                  src='/assets/authPageImages/Calendar.png'
+                  alt='Slide 2'
+                  className='max-h-[100%] max-w-[100%] object-contain'
+                />
+              </div>
+              <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
+                <img
+                  src='/assets/authPageImages/Lamp.png'
+                  alt='Slide 3'
+                  className='max-h-[100%] max-w-[100%] object-contain' // Adjusted for scaling down
+                />
+              </div>
+              <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
+                <img
+                  src='/assets/authPageImages/Lightning.png'
+                  alt='Slide 4'
+                  className='max-h-[100%] max-w-[100%] object-contain' // Adjusted for scaling down
+                />
               </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className='text-sm text-gray-500'>
-          © 2024 ShadcnUI. All rights reserved.
+        <div>
+          <img
+            src='/assets/authPageImages/text.png'
+            alt='footer'
+            className='mx-auto h-48 saturate-150'
+          />
         </div>
       </div>
 

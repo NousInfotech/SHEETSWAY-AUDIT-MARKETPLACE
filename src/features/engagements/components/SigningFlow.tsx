@@ -217,7 +217,7 @@ export function SigningFlowComponent({
                       className={`mb-4 h-12 w-12 transition-colors ${isDragging ? 'text-blue-500' : 'text-slate-400'}`}
                     />
                     <h3 className='font-semibold text-slate-700 lg:text-lg dark:text-slate-300'>
-                      Drag & drop your own PDF
+                      Drag & drop your own PDF to Sign
                     </h3>
                     <p className='text-sm text-slate-500 dark:text-slate-400'>
                       or click to browse
