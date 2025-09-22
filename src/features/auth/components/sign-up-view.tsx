@@ -43,7 +43,7 @@ export default function SignUpViewPage({
 
     let autoPlayInterval = setInterval(() => {
       emblaApi.scrollNext();
-    }, 3000);
+    }, 4000);
 
     return () => clearInterval(autoPlayInterval);
   }, [emblaApi]);
