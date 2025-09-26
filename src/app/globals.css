@@ -189,7 +189,7 @@
 
 
 
-/* Add these at the end of your global CSS file */
+/* animation for fadeIn and fadeInUp */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -212,4 +212,40 @@
 
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-in-out forwards;
+}
+
+
+
+
+
+/* custom-scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Light gray track */
+  border-radius: 10px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: #333; /* Dark track for dark mode */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #a8a8a8; /* Medium gray thumb */
+  border-radius: 10px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #666; /* Lighter gray thumb for dark mode */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #888; /* Darker thumb on hover */
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #888; /* Darker thumb on hover for dark mode */
 }

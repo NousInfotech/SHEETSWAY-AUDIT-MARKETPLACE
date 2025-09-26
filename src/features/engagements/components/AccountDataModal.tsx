@@ -1,3 +1,4 @@
+// src\features\engagements\components\AccountDataModal.tsx
 import {
   Dialog,
   DialogContent,
@@ -9,8 +10,8 @@ import {
 import { Button } from '@/components/ui/button';
 import AccountsList from '@/features/engagements/components/AccountsList';
 import TransactionsList from '@/features/engagements/components/TransactionsList';
-import ConnectionStatus from '@/features/engagements/components/ConnectionStatus';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react'; // Import useRef and useEffect
+import { AccountData } from '../types/account'; // Import AccountData type
 
 interface AccountDataModalProps {
   connectionId: string;
@@ -23,26 +24,36 @@ export function AccountDataModal({
   isOpen,
   onClose
 }: AccountDataModalProps) {
-  const [selectedAccount, setSelectedAccount] = useState<any | null>(null);
+  const [selectedAccount, setSelectedAccount] = useState<AccountData | null>(null); // Use AccountData type
+  const transactionsListRef = useRef<HTMLDivElement>(null); // Create a ref for the transactions list
 
-  const handleAccountSelect = (currentAccount: any) => {
-    setSelectedAccount(currentAccount);
+  const handleAccountSelect = (account: AccountData) => {
+    setSelectedAccount(account);
+    // Scroll to the transactions list when an account is selected
+    // Use a setTimeout to ensure the TransactionsList is rendered before scrolling
+    setTimeout(() => {
+      transactionsListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 100); // Small delay to allow rendering
   };
 
-  console.log('inside accound data modal ', selectedAccount);
+  // Reset selected account when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedAccount(null);
+    }
+  }, [isOpen]);
+
   return (
-    // Use the 'open' and 'onOpenChange' props to control the dialog
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='w-full md:min-w-5xl lg:min-w-7xl'>
-        <DialogHeader>
-          <DialogTitle>Connection Details</DialogTitle>
-          <DialogDescription>
-            View Accounts and Transactions.
+      <DialogContent className='min-w-[95vw] h-[95vh] flex flex-col p-6 dark:bg-gray-900'>
+        <DialogHeader className='pb-4 border-b border-gray-200 dark:border-gray-700'>
+          <DialogTitle className='text-3xl font-bold text-gray-900 dark:text-gray-50'>Connection Details</DialogTitle>
+          <DialogDescription className='text-md text-gray-600 dark:text-gray-400'>
+            Explore your accounts and their associated transactions.
           </DialogDescription>
         </DialogHeader>
-        <div className='h-[70dvh] overflow-auto px-5'>
-          {/* <ConnectionStatus connectionId={selectedAccount?.connection_id} /> */}
 
+        <div className='flex-grow overflow-y-auto px-2 pr-4 custom-scrollbar'> {/* Added custom-scrollbar for better aesthetics */}
           <AccountsList
             connectionId={connectionId}
             onAccountSelect={handleAccountSelect}
@@ -50,7 +61,7 @@ export function AccountDataModal({
           />
 
           {selectedAccount && (
-            <div className='mt-6'>
+            <div ref={transactionsListRef} className='mt-10 pt-6 border-t border-gray-200 dark:border-gray-700'>
               <TransactionsList
                 connectionId={connectionId}
                 selectedAccount={selectedAccount}
@@ -58,8 +69,9 @@ export function AccountDataModal({
             </div>
           )}
         </div>
-        <DialogFooter>
-          <Button onClick={onClose}>Close</Button>
+
+        <DialogFooter className='pt-4 border-t border-gray-200 dark:border-gray-700'>
+          <Button onClick={onClose} variant='secondary' className='px-6 py-2 text-md'>Close</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -3,6 +3,7 @@ import BusinessProfileTab from '@/features/business-profiles/components/business
 import PlaidIntegrationTab from '@/features/business-profiles/components/plaid-integration-tab';
 import ApideckIntegrationTab from '@/features/business-profiles/components/apideck-integration-tab';
 import ConnectButton from '@/features/engagements/components/ConnectButton';
+import BankingDashboardPage from '../banking&accounts/page';
 
 // export const metadata = {
 //   title: 'Business Profiles & Integrations',
@@ -29,8 +30,8 @@ export default function BusinessProfilesPage() {
           <ApideckIntegrationTab />
         </TabsContent>
         <TabsContent value="saltedge" className="max-h-[calc(100vh-200px)] overflow-y-auto">
-          <div className='w-full mt-5 bg-gray-100 border rounded-md py-5'>
-            <ConnectButton />
+          <div className='w-full mt-5 not-dark:bg-gray-100 border rounded-md py-5'>
+            <BankingDashboardPage />
           </div>
         </TabsContent>
       </Tabs>

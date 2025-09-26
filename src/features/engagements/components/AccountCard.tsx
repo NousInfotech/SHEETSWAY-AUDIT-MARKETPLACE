@@ -1,4 +1,4 @@
-
+// src\features\engagements\components\AccountCard.tsx
 import React from 'react';
 import {
   Card,
@@ -7,25 +7,23 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/card'; // Adjust import path as per your shadcn setup
-import { Badge } from '@/components/ui/badge'; // Adjust import path
-import { Separator } from '@/components/ui/separator'; // Adjust import path
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
-  Banknote,
   CreditCard,
   Wallet,
   Landmark,
-  PiggyBank,
-  ArrowUpRightFromSquare,
   BadgeDollarSign,
+  ArrowUpRightFromSquare,
   CalendarCheck,
 } from 'lucide-react';
 
-import { AccountData, AccountExtra, CardAccountExtra, CreditAccountExtra } from '../types/account'; // Adjust path to your types file
+import { AccountData, AccountExtra, CardAccountExtra, CreditAccountExtra } from '../types/account';
 
 interface AccountCardProps {
   account: AccountData;
-  onSelect?: (account:any) => void; // Optional callback for selecting an account
+  onSelect?: (account: any) => void;
   selectedAccount: any;
 }
 
@@ -33,13 +31,13 @@ const getNatureIcon = (nature: AccountData['nature']) => {
   switch (nature) {
     case 'card':
     case 'credit_card':
-      return <CreditCard className='h-5 w-5 text-muted-foreground' />;
+      return <CreditCard className='h-5 w-5 text-indigo-500' />;
     case 'account':
-      return <Landmark className='h-5 w-5 text-muted-foreground' />;
+      return <Landmark className='h-5 w-5 text-teal-500' />;
     case 'credit':
-      return <BadgeDollarSign className='h-5 w-5 text-muted-foreground' />;
+      return <BadgeDollarSign className='h-5 w-5 text-orange-500' />;
     default:
-      return <Wallet className='h-5 w-5 text-muted-foreground' />;
+      return <Wallet className='h-5 w-5 text-purple-500' />;
   }
 };
 
@@ -53,8 +51,8 @@ const formatCurrency = (amount: number, currencyCode: string) => {
 const AccountCard: React.FC<AccountCardProps> = ({ account, onSelect, selectedAccount }) => {
   const { id, name, nature, balance, currency_code, extra } = account;
   const isNegativeBalance = balance < 0;
+  const isSelected = selectedAccount?.id === account.id;
 
-  // Type guard for specific extra fields
   const isCardAccountExtra = (extra: AccountExtra): extra is CardAccountExtra => {
     return (extra as CardAccountExtra).card_type !== undefined || nature === 'card' || nature === 'credit_card';
   };
@@ -65,74 +63,90 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onSelect, selectedAc
 
   return (
     <Card
-      className={`${selectedAccount?.id === account.id && "bg-pink-100"} relative w-full max-w-md h-full max-h-96 cursor-pointer transform-gpu transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`}
+      data-account-id={account.id} // Added for potential future targeting
+      className={`
+        relative w-full max-w-md h-full min-h-[220px]
+        cursor-pointer rounded-xl border-2
+        shadow-md transition-all duration-300
+        hover:scale-[1.02] hover:shadow-lg
+        ${isSelected
+          ? 'border-indigo-500 bg-indigo-50 shadow-indigo-200 dark:bg-indigo-950 dark:border-indigo-400'
+          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+        }
+      `}
       onClick={() => onSelect && onSelect(account)}
     >
-      <CardHeader className='flex-row items-center justify-between space-y-0 pb-2'>
-        <div className='flex items-center gap-2'>
-          {getNatureIcon(nature)}
-          <CardTitle className='text-xl font-semibold'>{name}</CardTitle>
+      <CardHeader className='flex-row items-center justify-between space-y-0 pb-3'>
+        <div className='flex items-center gap-3'>
+          <div className={`p-2 rounded-full ${isSelected ? 'bg-indigo-100 dark:bg-indigo-800' : 'bg-gray-100 dark:bg-gray-700'}`}>
+            {getNatureIcon(nature)}
+          </div>
+          <CardTitle className='text-xl font-bold text-gray-900 dark:text-gray-100'>{name}</CardTitle>
         </div>
         <Badge
-          className={`text-xs capitalize ${
-            extra.status === 'active' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
-          }`}
+          className={`
+            text-xs font-semibold capitalize px-3 py-1 rounded-full
+            ${extra.status === 'active'
+              ? 'bg-green-500 hover:bg-green-600 text-white'
+              : 'bg-red-500 hover:bg-red-600 text-white'
+            }
+          `}
         >
           {nature.replace('_', ' ')}
         </Badge>
       </CardHeader>
       <CardContent>
-        <CardDescription className='text-sm text-gray-500 dark:text-gray-400'>
+        <CardDescription className='text-sm text-gray-600 dark:text-gray-400'>
           {isCardAccountExtra(extra) && extra.card_type && (
             <span className='capitalize'>{extra.card_type.replace('_', ' ')} Card</span>
           )}
           {extra.account_number && (
-            <span> &bull; Account: {extra.account_number}</span>
+            <span className='ml-1 sm:ml-2'> &bull; Acc: {extra.account_number}</span>
           )}
           {extra.iban && (
-            <span> &bull; IBAN: {extra.iban}</span>
+            <span className='ml-1 sm:ml-2'> &bull; IBAN: {extra.iban}</span>
           )}
         </CardDescription>
 
-        <Separator className='my-4' />
+        <Separator className='my-4 bg-gray-200 dark:bg-gray-700' />
 
-        <div className='flex items-baseline justify-between'>
-          <div className='text-3xl font-bold'>
-            <span className={isNegativeBalance ? 'text-red-600' : 'text-green-600'}>
+        <div className='flex flex-col sm:flex-row sm:items-baseline justify-between'>
+          <div className='text-3xl font-extrabold'>
+            <span className={isNegativeBalance ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}>
               {formatCurrency(balance, currency_code)}
             </span>
           </div>
-          <p className='text-sm text-muted-foreground'>Current Balance</p>
+          <p className='text-sm text-muted-foreground mt-1 sm:mt-0'>Current Balance</p>
         </div>
 
         {isCreditAccountExtra(extra) && extra.credit_limit !== undefined && (
-          <div className='mt-2 flex items-baseline justify-between'>
-            <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>
-              Credit Limit: {formatCurrency(extra.credit_limit, currency_code)}
+          <div className='mt-3 flex flex-col sm:flex-row sm:items-baseline justify-between'>
+            <p className='text-md font-medium text-gray-700 dark:text-gray-300'>
+              Credit Limit: <span className='font-semibold'>{formatCurrency(extra.credit_limit, currency_code)}</span>
             </p>
-            <p className='text-sm text-muted-foreground'>
+            <p className='text-sm text-muted-foreground mt-1 sm:mt-0'>
               Available: {formatCurrency(extra.available_amount || 0, currency_code)}
             </p>
           </div>
         )}
 
         {isCardAccountExtra(extra) && extra.expiry_date && (
-            <div className='mt-2 flex items-center gap-2 text-sm text-muted-foreground'>
-                <CalendarCheck className='h-4 w-4' />
-                Expires: {new Date(extra.expiry_date).toLocaleDateString()}
+            <div className='mt-3 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400'>
+                <CalendarCheck className='h-4 w-4 text-gray-400' />
+                Expires: {new Date(extra.expiry_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
             </div>
         )}
 
         {extra.transactions_count && (
-          <div className='mt-2 flex items-center gap-2 text-sm text-muted-foreground'>
-            <ArrowUpRightFromSquare className='h-4 w-4' />
-            Transactions: {extra.transactions_count.posted} posted, {extra.transactions_count.pending} pending
+          <div className='mt-2 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400'>
+            <ArrowUpRightFromSquare className='h-4 w-4 text-gray-400' />
+            Transactions: <span className='font-medium'>{extra.transactions_count.posted} posted</span>, {extra.transactions_count.pending} pending
           </div>
         )}
       </CardContent>
-      <CardFooter className='flex justify-between text-sm text-muted-foreground'>
+      <CardFooter className='flex justify-between text-xs text-muted-foreground border-t pt-3 dark:border-gray-700'>
         <span>Last updated: {new Date(account.updated_at).toLocaleDateString()}</span>
-        {extra.client_name && <span>Client: {extra.client_name}</span>}
+        {extra.client_name && <span className='font-medium'>Client: {extra.client_name}</span>}
       </CardFooter>
     </Card>
   );
