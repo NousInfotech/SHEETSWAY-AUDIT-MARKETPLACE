@@ -175,8 +175,11 @@ export default function OverViewLayout({
   ];
 
   return (
-    <PageContainer>
-      <div style={{ position: 'relative', width: '100%', height: '600px' }}>
+    <div className='w-full'>
+      <div
+        style={{ position: 'relative', width: '100%' }}
+        className='h-[calc(100dvh-72px)]'
+      >
         <ScrollArea
           style={{
             position: 'absolute',
@@ -205,7 +208,7 @@ export default function OverViewLayout({
                     </div>
 
                     <div className='flex w-full items-center gap-2'>
-                      <div className='w-[50%] rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
+                      <div className='w-[50%] rounded-lg border px-6 py-2 shadow-sm transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.01] hover:shadow-lg'>
                         <div>
                           <div className='whitespace-nowrap'>
                             Active Engagements
@@ -225,7 +228,7 @@ export default function OverViewLayout({
                           </p>
                         </div>
                       </div>
-                      <div className='w-[50%] rounded-lg border px-6 py-2 shadow-sm not-dark:bg-white'>
+                      <div className='w-[50%] rounded-lg border px-6 py-2 shadow-sm transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.01] hover:shadow-lg'>
                         <div>
                           <div>Open Proposals</div>
                           <div className='text-4xl font-bold'>70</div>
@@ -245,7 +248,7 @@ export default function OverViewLayout({
                   </div>
 
                   {/* Progress Card */}
-                  <Card className='border-t-8 border-t-yellow-500 shadow-sm not-dark:bg-white'>
+                  <Card className='border-t-8 border-t-yellow-500 shadow-sm transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.005] hover:shadow-lg'>
                     <CardHeader>
                       <div className='flex gap-2 md:items-center md:justify-between'>
                         <p className='flex flex-nowrap text-sm font-bold md:items-center md:text-lg'>
@@ -275,7 +278,7 @@ export default function OverViewLayout({
                       <div className='flex md:items-center md:justify-between'>
                         <Button
                           variant='outline'
-                          className='h-8 w-fit rounded-lg text-gray-700'
+                          className='h-8 w-fit rounded-lg text-gray-700 hover:bg-gray-100'
                         >
                           Engagement Name{' '}
                           <ChevronDown size={16} className='ml-2' />
@@ -292,7 +295,7 @@ export default function OverViewLayout({
                   </Card>
 
                   {/* Quick Actions */}
-                  <div className='rounded-lg border border-t-8 border-t-blue-300 p-4 shadow-sm not-dark:bg-white'>
+                  <div className='rounded-lg border border-t-8 border-t-blue-300 p-4 shadow-sm transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.01] hover:shadow-lg'>
                     <h3 className='flex items-center text-xl font-bold text-gray-700'>
                       {' '}
                       <span className='mr-2 text-2xl font-black text-blue-500'>
@@ -303,7 +306,7 @@ export default function OverViewLayout({
                     <div className='mt-4 grid grid-cols-4 gap-4'>
                       {quickActions.map((action) => (
                         <Link href={action.link} key={action.name}>
-                          <div className='flex h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-200 p-4 text-center transition-all not-dark:bg-white hover:border-gray-300 hover:shadow-md'>
+                          <div className='flex h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-200 p-4 text-center transition-all not-dark:bg-white hover:scale-[1.03] hover:border-gray-300 hover:shadow-md'>
                             {action.icon}
                             <p className='mt-2 text-xs font-semibold text-gray-700'>
                               {action.name}
@@ -315,52 +318,53 @@ export default function OverViewLayout({
                   </div>
 
                   {/* === Your Requests Card - CORRECTED LAYOUT === */}
+                  <div className='flex flex-col'>
+                    <div className='flex h-full w-full items-center justify-between gap-2'>
+                      <div className='h-full w-full rounded-lg border border-t-8 border-t-green-300 p-2 shadow-md transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.005] hover:shadow-lg md:h-full md:w-3/4'>
+                        <div className='py-5'>
+                          <div className='flex items-center text-lg'>
+                            <PlusSquare
+                              size={20}
+                              className='mr-2 text-green-600'
+                            />{' '}
+                            Your Requests
+                          </div>
+                        </div>
 
-                  <div className='flex w-full items-center justify-between gap-2'>
-                    <div className='h-auto w-full rounded-lg border border-t-8 border-t-green-300 p-2 shadow-md not-dark:bg-white md:h-full md:w-3/4'>
-                      <div className='py-5'>
-                        <div className='flex items-center text-lg'>
-                          <PlusSquare
-                            size={20}
-                            className='mr-2 text-green-600'
-                          />{' '}
-                          Your Requests
+                        <div className='flex w-full items-center gap-2'>
+                          <div className='w-full rounded-xl border p-4 shadow transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.02] hover:shadow-lg'>
+                            <div className='my-2 flex items-center justify-between'>
+                              <h3>Total Requests</h3>
+                              <Upload size={16} className='text-gray-400' />
+                            </div>
+                            <p className='my-2 text-4xl font-bold'>5</p>
+                            <p className='my-2 text-xs text-gray-500'>
+                              3 open, 1 in progress
+                            </p>
+                          </div>
+
+                          <div className='w-full rounded-xl border p-4 shadow transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.02] hover:shadow-lg'>
+                            <div className='my-2 flex items-center justify-between'>
+                              <h3>Total Proposals</h3>
+                              <Users size={16} className='text-gray-400' />
+                            </div>
+                            <p className='my-2 text-4xl font-bold'>5</p>
+                            <p className='my-2 text-xs text-gray-500'>
+                              2 pending, 2 accepted
+                            </p>
+                          </div>
                         </div>
                       </div>
 
-                      <div className='flex w-full items-center gap-2'>
-                        <div className='w-full rounded-xl border p-4 shadow not-dark:bg-white'>
-                          <div className='my-2 flex items-center justify-between'>
-                            <h3>Total Requests</h3>
-                            <Upload size={16} className='text-gray-400' />
-                          </div>
-                          <p className='my-2 text-4xl font-bold'>5</p>
-                          <p className='my-2 text-xs text-gray-500'>
-                            3 open, 1 in progress
-                          </p>
-                        </div>
-
-                        <div className='w-full rounded-xl border p-4 shadow not-dark:bg-white'>
-                          <div className='my-2 flex items-center justify-between'>
-                            <h3>Total Proposals</h3>
-                            <Users size={16} className='text-gray-400' />
-                          </div>
-                          <p className='my-2 text-4xl font-bold'>5</p>
-                          <p className='my-2 text-xs text-gray-500'>
-                            2 pending, 2 accepted
-                          </p>
-                        </div>
+                      <div className='inline-flex h-[255px] min-h-[255px] w-[200px] min-w-[200px] overflow-hidden rounded-lg border border-t-8 border-t-teal-950 shadow-md transition-all duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg'>
+                        <Calendar
+                          mode='single'
+                          selected={date}
+                          onSelect={setDate}
+                          className='h-[425px] origin-top-left scale-60 not-dark:bg-white'
+                          captionLayout='dropdown'
+                        />
                       </div>
-                    </div>
-
-                    <div className='inline-flex h-[255px] min-h-[255px] w-[200px] min-w-[200px] overflow-hidden rounded-lg border border-t-8 border-t-teal-950 shadow-md'>
-                      <Calendar
-                        mode='single'
-                        selected={date}
-                        onSelect={setDate}
-                        className='h-[425px] origin-top-left scale-60 not-dark:bg-white'
-                        captionLayout='dropdown'
-                      />
                     </div>
                   </div>
                 </div>
@@ -369,7 +373,7 @@ export default function OverViewLayout({
               <div className='col-span-1 grid'>
                 <div className='flex flex-col gap-6 lg:col-span-1'>
                   {/* Actions Pending */}
-                  <Card className='border-t-8 border-t-yellow-500 shadow-sm not-dark:bg-white'>
+                  <Card className='h-full border-t-8 border-t-yellow-500 shadow-sm transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.005] hover:shadow-lg'>
                     <CardHeader>
                       <CardTitle className='flex items-center text-lg'>
                         <AlertCircle
@@ -395,13 +399,13 @@ export default function OverViewLayout({
                   </Card>
 
                   {/* Upcoming Meeting */}
-                  <Card className='border-t-8 border-t-red-800 shadow-sm not-dark:bg-white'>
+                  <Card className='h-full border-t-8 border-t-red-800 shadow-sm transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.005] hover:shadow-lg'>
                     <CardHeader>
                       <CardTitle className='flex items-center text-lg'>
                         <span className='mr-2 text-xl text-red-500'>📅</span>{' '}
                         Upcoming Meeting
                         <ArrowRight
-                          className='ml-auto text-gray-400'
+                          className='ml-auto text-gray-400 transition-transform duration-200 group-hover:translate-x-1'
                           size={16}
                         />
                       </CardTitle>
@@ -431,7 +435,7 @@ export default function OverViewLayout({
                   </Card>
 
                   {/* Mail Card */}
-                  <Card className='border-t-8 border-t-blue-500 shadow-sm not-dark:bg-white'>
+                  <Card className='h-full border-t-8 border-t-blue-500 shadow-sm transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.005] hover:shadow-lg'>
                     <CardHeader>
                       <CardTitle className='flex items-center text-lg'>
                         <Mail size={20} className='mr-2 text-blue-500' /> Mail
@@ -474,7 +478,7 @@ export default function OverViewLayout({
                   </Card>
 
                   {/* Updates Card */}
-                  <Card className='border-t-8 border-t-emerald-800 shadow-sm not-dark:bg-white'>
+                  <Card className='h-full border-t-8 border-t-emerald-800 shadow-sm transition-all duration-200 ease-in-out not-dark:bg-white hover:scale-[1.005] hover:shadow-lg'>
                     <CardHeader>
                       <CardTitle className='flex items-center text-lg'>
                         <RefreshCw size={20} className='mr-2 text-green-600' />{' '}
@@ -507,6 +511,6 @@ export default function OverViewLayout({
           <ScrollBar orientation='horizontal' />
         </ScrollArea>
       </div>
-    </PageContainer>
+    </div>
   );
 }

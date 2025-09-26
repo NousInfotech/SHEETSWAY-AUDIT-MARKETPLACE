@@ -1622,7 +1622,11 @@ const SubfolderView: React.FC<SubfolderViewProps> = ({
       {filteredSubfolders.map((subfolder) => (
         <div
           key={subfolder.id}
-          className={`cursor-pointer rounded-lg border p-3 text-center transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${selectedSubfolderId === subfolder.id ? 'border-b-4 border-b-blue-500 shadow-sm not-dark:bg-blue-100' : 'border-transparent not-dark:bg-gray-100 hover:bg-gray-200'}`}
+          className={`group relative transform cursor-pointer rounded-xl p-4 text-center transition-all duration-300 ease-in-out hover:scale-[1.02] hover:border hover:border-violet-200 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 ${
+            selectedSubfolderId === subfolder.id
+              ? 'border-b-4 border-b-blue-600 bg-blue-50 shadow-md not-dark:text-blue-800 dark:bg-blue-950/30'
+              : 'border border-transparent bg-gray-50 hover:bg-blue-50 dark:bg-gray-800 dark:hover:bg-gray-700'
+          } `}
           onClick={() =>
             handleSingleClick(() => handleSubfolderSelect(subfolder.id))
           }
@@ -1632,10 +1636,15 @@ const SubfolderView: React.FC<SubfolderViewProps> = ({
             )
           }
         >
+          {/* Strikethrough effect on hover for non-selected items */}
+          <div
+            className={`pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-blue-400 to-purple-500 opacity-0 transition-opacity duration-300 group-hover:opacity-10 ${selectedSubfolderId === subfolder.id ? 'hidden' : ''} `}
+          ></div>
+
           <img
             src='/assets/file-icons/open-folder.png'
             alt={`${subfolder.name} folder`}
-            className={`mx-auto h-12 w-12`}
+            className={`mx-auto mb-3 h-14 w-14 transition-transform duration-300 group-hover:scale-110`}
           />
           {renamingInfo?.id === subfolder.id &&
           renamingInfo.type === 'subfolder' ? (
@@ -1644,15 +1653,31 @@ const SubfolderView: React.FC<SubfolderViewProps> = ({
               ref={renameInputRef as React.RefObject<HTMLInputElement>}
               onBlur={(e) => handleRename(e.target.value)}
               onKeyDown={handleRenameKeyDown}
-              className='mt-2 h-8'
+              className='mt-2 h-9 border-blue-400 bg-white text-center focus:border-blue-600 dark:bg-gray-900'
               onClick={(e) => e.stopPropagation()}
               onDoubleClick={(e) => e.stopPropagation()}
             />
           ) : (
-            <p className='mt-2 truncate text-sm font-medium text-gray-700'>
+            <p
+              className={`mt-2 truncate text-sm font-semibold transition-colors duration-300 ${
+                selectedSubfolderId === subfolder.id
+                  ? 'text-blue-700 dark:text-blue-300'
+                  : 'text-gray-800 group-hover:text-blue-600 dark:text-gray-200 dark:group-hover:text-blue-400'
+              } `}
+            >
               {subfolder.name}
             </p>
           )}
+
+          {/* Optional: Add a subtle overlay on hover for selected items */}
+          {selectedSubfolderId === subfolder.id && (
+            <div className='pointer-events-none absolute inset-0 rounded-xl bg-blue-200 opacity-0 transition-opacity duration-300 group-hover:opacity-20 dark:bg-blue-800'></div>
+          )}
+
+          {/* Optional: Shine effect on hover */}
+          <div className='pointer-events-none absolute inset-0 overflow-hidden rounded-xl'>
+            <div className='animate-shine absolute -inset-full opacity-0 transition-opacity duration-500 group-hover:opacity-100'></div>
+          </div>
         </div>
       ))}
     </div>
@@ -1711,7 +1736,7 @@ const FileListView: React.FC<FileListViewProps> = ({
       {heading}
     </h2>
 
-    <div className='flex flex-wrap items-center justify-between gap-2 my-5'>
+    <div className='my-5 flex flex-wrap items-center justify-between gap-2'>
       <Button
         variant='outline'
         onClick={handleInitiateUpload}
@@ -1756,7 +1781,7 @@ const FileListView: React.FC<FileListViewProps> = ({
         <Search className='absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400' />
         <Input
           placeholder='Search files...'
-          className='pl-10 '
+          className='pl-10'
           value={fileSearchTerm}
           onChange={(e) => setFileSearchTerm(e.target.value)}
         />
@@ -2103,7 +2128,11 @@ export default function FilesandDocuments({ engagement }: any) {
     const trimmedName = newSubfolderName.trim();
     if (!trimmedName || !selectedLibraryId) return;
     try {
-      await createSubFolder({rootId:primaryRootId, parentId: selectedLibraryId, name: trimmedName });
+      await createSubFolder({
+        rootId: primaryRootId,
+        parentId: selectedLibraryId,
+        name: trimmedName
+      });
       toast.success(`Folder "${trimmedName}" created.`);
       await fetchSubfolders(selectedLibraryId); // Only refetch subfolders
     } catch (error) {

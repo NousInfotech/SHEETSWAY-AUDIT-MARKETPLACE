@@ -555,95 +555,126 @@ export function ProposalsViewPage() {
 
   // Default view - show all requests
   return (
-    <div className='container mx-auto space-y-6 py-6'>
+    <div className='container mx-auto space-y-8 py-8'>
       {/* Header */}
       <div className='flex items-center justify-between'>
         <div>
-          <h1 className='text-3xl font-bold tracking-tight'>
+          <h1 className='text-4xl font-extrabold tracking-tight text-gray-900 lg:text-5xl dark:text-white'>
             Proposals Management
           </h1>
-          <p className='text-muted-foreground'>
-            Manage requests and review proposals from auditors
+          <p className='text-muted-foreground mt-2 text-lg'>
+            Manage all your requests and review incoming proposals from auditors
           </p>
         </div>
       </div>
 
       {/* Statistics Cards */}
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-4'>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>
+      <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4'>
+        <Card className='hover:shadow-primary/10 dark:hover:shadow-primary/5 group relative transform-gpu overflow-hidden transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-xl'>
+          <div className='bg-primary/10 absolute -top-4 -right-4 h-24 w-24 rounded-full transition-all duration-300 group-hover:scale-125'></div>
+          <CardHeader className='z-10 flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-base font-semibold'>
               Total Requests
             </CardTitle>
-            <FileText className='text-muted-foreground h-4 w-4' />
+            <FileText className='text-primary h-5 w-5 opacity-80' />
           </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>{totalRequests}</div>
-            <p className='text-muted-foreground text-xs'>
-              {requests.filter((r) => r.status === 'Open').length} open,{' '}
-              {requests.filter((r) => r.status === 'In Progress').length} in
-              progress
+          <CardContent className='z-10'>
+            <div className='text-4xl font-bold text-gray-900 dark:text-white'>
+              {totalRequests}
+            </div>
+            <p className='text-muted-foreground mt-1 text-sm'>
+              <span className='font-medium text-green-600 dark:text-green-400'>
+                {requests.filter((r) => r.status === 'Open').length} open
+              </span>
+              ,{' '}
+              <span className='font-medium text-blue-600 dark:text-blue-400'>
+                {requests.filter((r) => r.status === 'In Progress').length} in
+                progress
+              </span>
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>
+        <Card className='group relative transform-gpu overflow-hidden transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/5'>
+          <div className='absolute -top-4 -right-4 h-24 w-24 rounded-full bg-indigo-500/10 transition-all duration-300 group-hover:scale-125'></div>
+          <CardHeader className='z-10 flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-base font-semibold'>
               Total Proposals
             </CardTitle>
-            <Users className='text-muted-foreground h-4 w-4' />
+            <Users className='h-5 w-5 text-indigo-500 opacity-80' />
           </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>{totalProposals}</div>
-            <p className='text-muted-foreground text-xs'>
-              {pendingProposalsCount} pending, {acceptedProposalsCount} accepted
+          <CardContent className='z-10'>
+            <div className='text-4xl font-bold text-gray-900 dark:text-white'>
+              {totalProposals}
+            </div>
+            <p className='text-muted-foreground mt-1 text-sm'>
+              <span className='font-medium text-orange-600 dark:text-orange-400'>
+                {pendingProposalsCount} pending
+              </span>
+              ,{' '}
+              <span className='font-medium text-teal-600 dark:text-teal-400'>
+                {acceptedProposalsCount} accepted
+              </span>
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>
+        <Card className='group relative transform-gpu overflow-hidden transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-xl hover:shadow-teal-500/10 dark:hover:shadow-teal-500/5'>
+          <div className='absolute -top-4 -right-4 h-24 w-24 rounded-full bg-teal-500/10 transition-all duration-300 group-hover:scale-125'></div>
+          <CardHeader className='z-10 flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-base font-semibold'>
               Accepted Proposals
             </CardTitle>
-            <CheckCircle className='text-muted-foreground h-4 w-4' />
+            <CheckCircle className='h-5 w-5 text-teal-500 opacity-80' />
           </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>{acceptedProposalsCount}</div>
-            <p className='text-muted-foreground text-xs'>
-              {((acceptedProposalsCount / totalProposals) * 100).toFixed(1)}%
+          <CardContent className='z-10'>
+            <div className='text-4xl font-bold text-gray-900 dark:text-white'>
+              {acceptedProposalsCount}
+            </div>
+            <p className='text-muted-foreground mt-1 text-sm'>
+              <span className='font-medium text-teal-600 dark:text-teal-400'>
+                {totalProposals > 0
+                  ? ((acceptedProposalsCount / totalProposals) * 100).toFixed(1)
+                  : '0.0'}
+                %
+              </span>{' '}
               acceptance rate
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>
+        <Card className='group relative transform-gpu overflow-hidden transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-xl hover:shadow-orange-500/10 dark:hover:shadow-orange-500/5'>
+          <div className='absolute -top-4 -right-4 h-24 w-24 rounded-full bg-orange-500/10 transition-all duration-300 group-hover:scale-125'></div>
+          <CardHeader className='z-10 flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-base font-semibold'>
               Pending Review
             </CardTitle>
-            <FileText className='text-muted-foreground h-4 w-4' />
+            <FileText className='h-5 w-5 text-orange-500 opacity-80' />
           </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>{pendingProposalsCount}</div>
-            <p className='text-muted-foreground text-xs'>
-              Require your attention
+          <CardContent className='z-10'>
+            <div className='text-4xl font-bold text-gray-900 dark:text-white'>
+              {pendingProposalsCount}
+            </div>
+            <p className='text-muted-foreground mt-1 text-sm'>
+              Proposals requiring your attention
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* All Requests */}
+      {/* All Requests Table */}
       <FitContentScrollArea
-        dependency={requests} // Pass the requests array here.
+        dependency={requests}
         minHeight='390px'
         minWidth='1230px'
+        className='rounded-xl border border-gray-200 bg-white/50 shadow-lg dark:border-gray-700 dark:bg-gray-800/50' // Add more styling to the scroll area container
       >
-        <Card className='w-full'>
-          <CardHeader>
-            <CardTitle>All Requests</CardTitle>
-            <CardDescription>
+        <Card className='w-full border-none bg-transparent shadow-none'>
+          <CardHeader className='pb-4'>
+            <CardTitle className='text-3xl font-bold text-gray-900 dark:text-white'>
+              All Requests
+            </CardTitle>
+            <CardDescription className='text-lg'>
               Click on a request to view its proposals
             </CardDescription>
           </CardHeader>

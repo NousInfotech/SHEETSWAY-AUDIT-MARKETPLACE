@@ -14,21 +14,33 @@ import {
   Calendar,
   Clock,
   AlertCircle,
-  User
+  User,
+  RefreshCcw // Using RefreshCcw for a more modern refresh icon
 } from 'lucide-react';
-import { Icons } from '@/components/icons';
+import { Icons } from '@/components/icons'; // Assuming Icons.refresh is used for refresh. If not, replace with RefreshCcw
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { SigningPortalModal } from './SigningPortalModal';
+import { Input } from '@/components/ui/input'; // Import Input
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'; // Import Select components
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Import Card components
+import { Badge } from '@/components/ui/badge'; // Import Badge for status/priority
 
 // payment
 import { loadStripe } from '@stripe/stripe-js';
 import PaymentModal from './PaymentModal';
+import { SigningPortalModal } from './SigningPortalModal';
 
 import { useAuth } from '@/components/layout/providers';
 import instance from '@/lib/axios';
 import { ENGAGEMENT_API } from '@/config/api';
 import { useClientEngagementStore } from '../store';
+import { cn } from '@/lib/utils'; // Assuming you have a utility for class merging
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY as string
@@ -50,7 +62,6 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
   onRefresh
 }) => {
   const [isSignModalOpen, setIsSignModalOpen] = useState<boolean>(false);
-
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -74,15 +85,10 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
   const { appUser, loading: authLoading } = useAuth();
   let userId = appUser?.id;
 
-  // Get the specific action from your store
   const { loadClientEngagements } = useClientEngagementStore();
 
   const handleUploadSuccess = () => {
-    // Step 1: Immediately close the modal. This provides instant feedback to the user.
     setIsSignModalOpen(false);
-
-    // Step 2: Trigger the store to refresh the data.
-    // The store will handle setting its own loading and error states.
     if (appUser?.id) {
       loadClientEngagements(appUser.id);
     } else {
@@ -92,28 +98,21 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
 
   const handlePayment = async (id: string) => {
     setIsProcessing(true);
-
     try {
       const res = await instance.post(
         `${ENGAGEMENT_API}/${id}/pre-engagement-payment/create`,
         { userId }
       );
-
-      console.log('Full response from backend:', res.data);
-
       const checkoutUrl = res.data?.checkoutUrl;
-
       if (!checkoutUrl) {
         throw new Error("Checkout URL was not found in the server's response.");
       }
-
       window.location.href = checkoutUrl;
     } catch (error) {
       console.error('Payment Error:', error);
       alert(
         `Payment failed: ${error instanceof Error ? error.message : 'Unknown Error'}`
       );
-
       setIsProcessing(false);
     }
   };
@@ -150,10 +149,10 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
         engagement.request.title
           .toLowerCase()
           .includes(filters.search.toLowerCase()) ||
-        'engagement description'
+        'engagement description' // Placeholder, replace with actual description field
           .toLowerCase()
           .includes(filters.search.toLowerCase());
-      const matchesStatus = !filters.status || 'In Progress' === filters.status;
+      const matchesStatus = !filters.status || 'In Progress' === filters.status; // engagement.status;
       const matchesType =
         !filters.type || engagement.request.type === filters.type;
       const matchesFramework =
@@ -164,144 +163,172 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
   );
 
   const Header = () => (
-    <header className='bg-card dark:bg-card border-border rounded-t-xl border-b px-6 py-4 transition-colors'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2'>
-          <button
-            onClick={() => location.reload()}
-            className='hover:bg-muted text-muted-foreground rounded p-1 transition-colors'
-            title='Refresh engagements'
-            aria-label='Refresh engagements'
-          >
-            <Icons.refresh className='h-5 w-5' />
-          </button>
-
-          <div>
-            <h1 className='text-foreground text-3xl font-bold'>
-              Active Engagements
-            </h1>
-            <p className='text-muted-foreground mt-1'>
-              Manage and track your ongoing projects
-            </p>
-          </div>
+    <CardHeader className='bg-card flex flex-row items-center justify-between rounded-t-xl border-b px-6 py-4'>
+      <div className='flex items-center gap-4'>
+        <Button
+          variant='ghost'
+          size='icon'
+          onClick={() => location.reload()} // Or call onRefresh if it's external
+          className='text-muted-foreground hover:bg-muted hover:text-foreground'
+          title='Refresh engagements'
+          aria-label='Refresh engagements'
+        >
+          <RefreshCcw className='h-5 w-5' /> {/* Using RefreshCcw */}
+        </Button>
+        <div>
+          <CardTitle className='text-3xl font-bold'>
+            Active Engagements
+          </CardTitle>
+          <p className='text-muted-foreground mt-1 text-sm'>
+            Manage and track your ongoing projects
+          </p>
         </div>
       </div>
-    </header>
+    </CardHeader>
   );
 
   const FilterBar = () => {
     const totalEngagements = engagements.length;
     const activeEngagements = engagements.filter(
       (e) => e.status === 'In Progress'
-    ).length;
+    ).length; // Adjust based on actual status field
     const pendingReview = engagements.filter(
       (e) => e.status === 'Under Review'
-    ).length;
+    ).length; // Adjust based on actual status field
+
     return (
-      <div className='bg-card dark:bg-card border-border border-b px-6 py-4 transition-colors'>
+      <div className='bg-card border-b px-6 py-4'>
         <div className='flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
-          <div className='flex flex-wrap items-center gap-4'>
+          <div className='flex flex-wrap items-center gap-3'>
             <div className='relative'>
-              <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400' />
-              <input
+              <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+              <Input
                 type='text'
                 placeholder='Search engagements...'
                 value={filters.search}
                 onChange={(e) =>
                   setFilters((prev) => ({ ...prev, search: e.target.value }))
                 }
-                className='border-border bg-background text-foreground placeholder-muted-foreground rounded-lg border py-2 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-blue-500'
+                className='w-full pl-9 focus-visible:ring-amber-500 md:w-[200px]'
               />
             </div>
-            <select
+            <Select
               value={sortOption}
-              onChange={(e) =>
-                setSortOption(e.target.value as typeof sortOption)
-              }
-              className='border-border bg-background text-foreground rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500'
+              onValueChange={(value: typeof sortOption) => setSortOption(value)}
             >
-              <option value='createdAt'>Sort: Created At</option>
-              <option value='clientName'>Sort: Client Name</option>
-              <option value='status'>Sort: Status</option>
-              <option value='startDate'>Sort: Start Date</option>
-              <option value='deadline'>Sort: Deadline</option>
-              <option value='progress'>Sort: Progress</option>
-            </select>
-            <select
-              value={filters.status}
-              onChange={(e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  status: e.target.value as Filters['status']
-                }))
-              }
-              className='border-border bg-background text-foreground rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500'
+              <SelectTrigger className='w-[180px] focus:ring-amber-500'>
+                <SelectValue placeholder='Sort: Created At' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='createdAt'>Sort: Created At</SelectItem>
+                <SelectItem value='clientName'>Sort: Client Name</SelectItem>
+                <SelectItem value='status'>Sort: Status</SelectItem>
+                <SelectItem value='startDate'>Sort: Start Date</SelectItem>
+                <SelectItem value='deadline'>Sort: Deadline</SelectItem>
+                <SelectItem value='progress'>Sort: Progress</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={filters.status === '' ? 'all' : filters.status}
+              onValueChange={(newValue) => {
+                // Renamed 'value' to 'newValue' to avoid confusion
+                // Determine the actual status value for your filters state
+                const statusValue: Filters['status'] =
+                  newValue === 'all'
+                    ? '' // If 'all' was selected, set internal status to empty string
+                    : (newValue as Filters['status']); // Cast to Filters['status']
+                setFilters((prev) => ({ ...prev, status: statusValue }));
+              }}
             >
-              <option value=''>All Status</option>
-              <option value='Planning'>Planning</option>
-              <option value='In Progress'>In Progress</option>
-              <option value='Under Review'>Under Review</option>
-            </select>
-            <select
-              value={filters.type}
-              onChange={(e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  type: e.target.value as Filters['type']
-                }))
-              }
-              className='border-border bg-background text-foreground rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500'
+              <SelectTrigger className='w-[160px] focus:ring-amber-500'>
+                <SelectValue placeholder='All Status' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Status</SelectItem>
+                <SelectItem value='Planning'>Planning</SelectItem>
+                <SelectItem value='In Progress'>In Progress</SelectItem>
+                <SelectItem value='Under Review'>Under Review</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={filters.type === '' ? 'all' : filters.type}
+              onValueChange={(newValue) => {
+                const typeValue: Filters['type'] =
+                  newValue === 'all' ? '' : (newValue as Filters['type']);
+                setFilters((prev) => ({ ...prev, type: typeValue }));
+              }}
             >
-              <option value=''>All Types</option>
-              <option value='Audit'>Audit</option>
-              <option value='Tax'>Tax</option>
-            </select>
-            <select
-              value={filters.framework}
-              onChange={(e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  framework: e.target.value as Filters['framework']
-                }))
-              }
-              className='border-border bg-background text-foreground rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500'
+              <SelectTrigger className='w-[140px] focus:ring-amber-500'>
+                <SelectValue placeholder='All Types' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Types</SelectItem>
+                <SelectItem value='Audit'>Audit</SelectItem>
+                <SelectItem value='Tax'>Tax</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={filters.framework === '' ? 'all' : filters.framework}
+              onValueChange={(newValue) => {
+                const frameworkValue: Filters['framework'] =
+                  newValue === 'all' ? '' : (newValue as Filters['framework']);
+                setFilters((prev) => ({ ...prev, framework: frameworkValue }));
+              }}
             >
-              <option value=''>All Frameworks</option>
-              <option value='IFRS'>IFRS</option>
-              <option value='GAPSME'>GAPSME</option>
-            </select>
+              <SelectTrigger className='w-[180px] focus:ring-amber-500'>
+                <SelectValue placeholder='All Frameworks' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='all'>All Frameworks</SelectItem>
+                <SelectItem value='IFRS'>IFRS</SelectItem>
+                <SelectItem value='GAPSME'>GAPSME</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
           <div className='flex items-center gap-4'>
-            <div className='flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300'>
+            <div className='text-muted-foreground flex items-center gap-2 text-sm'>
               <span className='whitespace-nowrap'>
-                Total: {totalEngagements}
+                Total: <span className='font-semibold'>{totalEngagements}</span>
               </span>
               <span className='whitespace-nowrap'>
-                Active: {activeEngagements}
+                Active:{' '}
+                <span className='font-semibold'>{activeEngagements}</span>
               </span>
-              <span className='whitespace-nowrap'>Review: {pendingReview}</span>
+              <span className='whitespace-nowrap'>
+                Review: <span className='font-semibold'>{pendingReview}</span>
+              </span>
             </div>
             <div className='flex items-center gap-2'>
-              <button
+              <Button
+                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                size='icon'
                 onClick={() => setViewMode('grid')}
-                className={`rounded-lg p-2 transition-colors ${
+                className={cn(
                   viewMode === 'grid'
-                    ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'
-                }`}
+                    ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                    : 'text-muted-foreground hover:bg-muted'
+                )}
+                title='Grid View'
               >
                 <Grid className='h-4 w-4' />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                size='icon'
                 onClick={() => setViewMode('list')}
-                className={`rounded-lg p-2 transition-colors ${
+                className={cn(
                   viewMode === 'list'
-                    ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'
-                }`}
+                    ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                    : 'text-muted-foreground hover:bg-muted'
+                )}
+                title='List View'
               >
                 <List className='h-4 w-4' />
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -310,26 +337,27 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
   };
 
   const EngagementCard = ({ engagement }: { engagement: any }) => {
-    const StatusIcon = statusConfig['In Progress'].icon;
+    const currentStatusConfig = statusConfig['In Progress']; // Fallback
+    const StatusIcon = currentStatusConfig.icon;
     const isOverdue = new Date(engagement.request.deadline) < new Date();
+    const priority = engagement.priority || 'Medium'; // Default to Medium if not set
+    const currentPriorityConfig = priorityConfig['Medium'];
+
     return (
-      <div className='bg-card dark:bg-card border-border rounded-lg border transition-all duration-200 hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-600'>
-        <div className='p-2'>
+      <Card className='group transform-gpu overflow-hidden transition-all duration-300 ease-in-out hover:scale-[1.02] hover:bg-gray-50 hover:border-indigo-300 hover:shadow-xl dark:hover:border-indigo-600'>
+        <CardContent className='p-6'>
           <div className='mb-4 flex items-start justify-between'>
             <div className='flex-1'>
               <h3 className='text-foreground mb-1 text-lg font-semibold'>
                 {engagement.request.title}
               </h3>
-              {/* Auditor Names */}
-              <p className='mb-1 text-sm text-blue-700 dark:text-blue-300'>
+              <p className='mb-1 text-sm text-amber-700 dark:text-amber-300'>
                 {engagement.auditor.name}
               </p>
-              {/* Proposal (mocked) */}
               <p className='mb-1 text-sm text-green-700 dark:text-green-300'>
                 Proposal: View proposal details
               </p>
-              {/* Scope */}
-              <p className='mb-2 text-sm text-gray-600 dark:text-gray-300'>
+              <p className='text-muted-foreground mb-2 text-sm'>
                 Scope: tax compliance and filing requirements
               </p>
               <div className='flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400'>
@@ -343,40 +371,47 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
                 </div>
               </div>
             </div>
-            <div
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${priorityConfig['Medium'].textColor} bg-opacity-10`}
+            <Badge
+              className={cn(
+                'ml-auto',
+                currentPriorityConfig.bgColor, // Use actual background color if defined
+                currentPriorityConfig.textColor, // Use actual text color if defined
+                'group-hover:ring-2 group-hover:ring-amber-500' // Stunning hover effect
+              )}
             >
-              Medium
-              <span
-                className={`h-2 w-2 rounded-full ${priorityConfig['Medium'].color}`}
-              ></span>
-              {engagement.priority}
-            </div>
+              {priority}
+            </Badge>
           </div>
+
           <div className='mb-4 flex items-center justify-between'>
-            <div
-              className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${statusConfig['In Progress'].textColor} bg-opacity-10`}
+            <Badge
+              className={cn(
+                'inline-flex items-center gap-1.5',
+                currentStatusConfig.bgColor, // Assuming statusConfig has a bgColor property
+                currentStatusConfig.textColor, // Assuming statusConfig has a textColor property
+                'group-hover:ring-2 group-hover:ring-amber-500' // Stunning hover effect
+              )}
             >
-              <StatusIcon className='h-4 w-4' />
-              In progress
-            </div>
-            <div className='text-sm text-gray-600 dark:text-gray-300'>
-              {2}% Complete
+              <StatusIcon className='h-3.5 w-3.5' />
+              {engagement.status}
+            </Badge>
+            <div className='text-muted-foreground text-sm'>
+              {engagement.progress || 0}% Complete
             </div>
           </div>
+
           <div className='mb-4'>
-            <div className='mb-1 flex justify-between text-sm text-gray-600 dark:text-gray-300'>
+            <div className='text-muted-foreground mb-1 flex justify-between text-sm'>
               <span>Progress</span>
-              <span>{2}%</span>
+              <span>{engagement.progress || 0}%</span>
             </div>
-            <div className='h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700'>
-              <div
-                className='h-2 rounded-full bg-blue-600 transition-all duration-300'
-                style={{ width: `${2}%` }}
-              ></div>
-            </div>
+            <Progress
+              value={engagement.progress || 0}
+              className='h-2 [&>*]:bg-amber-500'
+            />
           </div>
-          <div className='mb-4 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300'>
+
+          <div className='text-muted-foreground mb-6 flex items-center justify-between text-sm'>
             <div className='flex items-center gap-1'>
               <Calendar className='h-4 w-4' />
               <span>
@@ -384,7 +419,10 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               </span>
             </div>
             <div
-              className={`flex items-center gap-1 ${isOverdue ? 'text-red-600 dark:text-red-400' : ''}`}
+              className={cn(
+                'flex items-center gap-1',
+                isOverdue && 'font-medium text-red-600 dark:text-red-400'
+              )}
             >
               <Clock className='h-4 w-4' />
               <span>
@@ -396,65 +434,66 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               )}
             </div>
           </div>
+
           <div className='flex w-full items-center justify-between'>
             <div className='flex items-center gap-1'>
-              <User className='h-4 w-4 text-gray-500 dark:text-gray-400' />
-              <span className='text-sm whitespace-nowrap text-gray-600 dark:text-gray-300'>
+              <User className='text-muted-foreground h-4 w-4' />
+              <span className='text-muted-foreground text-sm whitespace-nowrap'>
                 1 member
               </span>
             </div>
             {engagement.status !== 'AWAITING_PAYMENT' &&
               engagement.status !== 'ACTIVE' && (
-                <button
-                  // onClick={() => onEnterWorkspace(engagement)}
+                <Button
                   onClick={() => {
                     setSelectedEngagement(engagement);
                     setIsSignModalOpen(true);
                   }}
-                  className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+                  className='bg-emerald-500 text-white shadow-lg transition-all duration-200 group-hover:scale-[1.02] hover:bg-emerald-600 active:bg-emerald-700'
                 >
-                  <Play className='h-4 w-4' />
+                  <Play className='mr-2 h-4 w-4' />
                   GO TO START
-                  <ArrowRight className='h-4 w-4' />
-                </button>
+                  <ArrowRight className='ml-2 h-4 w-4' />
+                </Button>
               )}
             {engagement.status === 'AWAITING_PAYMENT' && (
-              <button
-                // onClick={() => onEnterWorkspace(engagement)}
+              <Button
                 onClick={() => {
                   setSelectedEngagement(engagement);
                   setIsPaymentModalOpen(true);
                 }}
-                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+                className='bg-emerald-500 text-white shadow-lg transition-all duration-200 group-hover:scale-[1.02] hover:bg-emerald-600 active:bg-emerald-700'
               >
-                <Play className='h-4 w-4' />
+                <Play className='mr-2 h-4 w-4' />
                 GO TO PAYMENT
-                <ArrowRight className='h-4 w-4' />
-              </button>
+                <ArrowRight className='ml-2 h-4 w-4' />
+              </Button>
             )}
             {engagement.status === 'ACTIVE' && (
-              <button
+              <Button
                 onClick={() => onEnterWorkspace(engagement)}
-                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+                className='bg-emerald-500 text-white shadow-lg transition-all duration-200 group-hover:scale-[1.02] hover:bg-emerald-600 active:bg-emerald-700'
               >
-                <Play className='h-4 w-4' />
+                <Play className='mr-2 h-4 w-4' />
                 WORKSPACE
-                <ArrowRight className='h-4 w-4' />
-              </button>
+                <ArrowRight className='ml-2 h-4 w-4' />
+              </Button>
             )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   };
 
   const EngagementListItem = ({ engagement }: { engagement: any }) => {
-    const StatusIcon = statusConfig['In Progress'].icon;
+    const currentStatusConfig = statusConfig['In Progress'];
+    const StatusIcon = currentStatusConfig.icon;
     const isOverdue = new Date(engagement.request.deadline) < new Date();
+
     return (
-      <div className='bg-card hover:bg-muted/50 grid min-w-[1280px] shrink-0 grid-cols-[2fr_1fr_1fr_150px_180px_auto] items-center gap-4 border-b p-4 transition-colors last:border-b-0 md:min-w-full'>
+      <div className='group hover:bg-muted/50 grid min-w-[1280px] shrink-0 grid-cols-[2fr_1fr_1fr_150px_180px_auto] items-center gap-4 border-b p-4 transition-all duration-200 ease-in-out last:border-b-0 hover:shadow-sm md:min-w-full'>
         <div className=''>
-          <div className='text-foreground font-semibold'>
+          <div className='text-foreground font-semibold transition-colors group-hover:text-amber-700 dark:group-hover:text-amber-300'>
             {engagement.request.title}
           </div>
           <div className='text-muted-foreground line-clamp-1 text-sm'>
@@ -474,40 +513,49 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
         </div>
 
         <div
-          className={`flex items-center gap-2 text-sm font-medium ${'text-yellow-500' /*statusConfig[engagement.status].textColor*/}`}
+          className={cn(
+            'flex items-center gap-2 text-sm font-medium',
+            currentStatusConfig.textColor
+          )}
         >
-          <Clock className='h-4 w-4' /* <StatusIcon /> */ />
-          <span>In progress</span>
+          <StatusIcon className='h-4 w-4' />
+          <span>{engagement.status}</span>
         </div>
 
         <div>
-          <Progress value={engagement.progress} />
+          <Progress
+            value={engagement.progress || 0}
+            className='h-2 [&>*]:bg-amber-500'
+          />
           <div className='text-muted-foreground mt-1 text-right text-xs'>
-            {2}%
+            {engagement.progress || 0}%
           </div>
         </div>
 
         <div
-          className={`flex items-center gap-1.5 text-sm whitespace-nowrap ${true ? 'text-destructive font-medium' : 'text-muted-foreground'}`}
+          className={cn(
+            'flex items-center gap-1.5 text-sm whitespace-nowrap',
+            isOverdue ? 'text-destructive font-medium' : 'text-muted-foreground'
+          )}
         >
           <Clock className='h-4 w-4' />
           <span>
             {new Date(engagement.request.deadline).toLocaleDateString()}
           </span>
-          {true && <AlertCircle className='h-4 w-4' />}
+          {isOverdue && <AlertCircle className='h-4 w-4' />}
         </div>
 
         <div className='text-right'>
           {engagement.status !== 'AWAITING_PAYMENT' &&
             engagement.status !== 'ACTIVE' && (
               <Button
-                // onClick={() => onEnterWorkspace(engagement)}
                 onClick={() => {
                   setSelectedEngagement(engagement);
                   setIsSignModalOpen(true);
                 }}
                 variant='outline'
                 size='sm'
+                className='border-amber-500 text-amber-500 group-hover:ring-2 group-hover:ring-amber-500 hover:bg-amber-50 hover:text-amber-600'
               >
                 <Play className='h-4 w-4 md:mr-2' />
                 <span className='inline text-xs'>GO TO START</span>
@@ -515,13 +563,13 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
             )}
           {engagement.status === 'AWAITING_PAYMENT' && (
             <Button
-              // onClick={() => onEnterWorkspace(engagement)}
               onClick={() => {
                 setSelectedEngagement(engagement);
                 setIsPaymentModalOpen(true);
               }}
               variant='outline'
               size='sm'
+              className='border-amber-500 text-amber-500 group-hover:ring-2 group-hover:ring-amber-500 hover:bg-amber-50 hover:text-amber-600'
             >
               <Play className='h-4 w-4 md:mr-2' />
               <span className='inline text-xs'>GO TO PAYMENT</span>
@@ -532,9 +580,10 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               onClick={() => onEnterWorkspace(engagement)}
               variant='outline'
               size='sm'
+              className='border-amber-500 text-amber-500 group-hover:ring-2 group-hover:ring-amber-500 hover:bg-amber-50 hover:text-amber-600'
             >
               <Play className='h-4 w-4 md:mr-2' />
-              <span className='inline text-xs'>WORK SPACE</span>
+              <span className='inline text-xs'>WORKSPACE</span>
             </Button>
           )}
         </div>
@@ -544,13 +593,13 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
 
   const EmptyState = () => (
     <div className='flex flex-col items-center justify-center py-12 text-center'>
-      <div className='mb-4 rounded-full bg-gray-100 p-6 dark:bg-gray-700'>
-        <FileText className='h-12 w-12 text-gray-500 dark:text-gray-400' />
+      <div className='bg-muted mb-4 rounded-full p-6'>
+        <FileText className='text-muted-foreground h-12 w-12' />
       </div>
-      <h3 className='mb-2 text-lg font-semibold text-gray-900 dark:text-white'>
+      <h3 className='text-foreground mb-2 text-lg font-semibold'>
         No Active Engagements
       </h3>
-      <p className='max-w-md text-gray-600 dark:text-gray-300'>
+      <p className='text-muted-foreground max-w-md'>
         You don&apos;t have any active engagements matching your current
         filters. Try adjusting your search criteria or create a new engagement.
       </p>
@@ -558,19 +607,19 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
   );
 
   return (
-    <div className='bg-background dark:bg-background min-h-fit w-full shrink-0 transition-colors'>
+    <Card className='min-h-fit w-full overflow-hidden'>
       <Header />
       <FilterBar />
-      <main className='max-h-[calc(100vh-280px)] overflow-y-auto py-6'>
+      <main className='max-h-[calc(100vh-280px)] overflow-y-auto p-6'>
         {filteredEngagements.length === 0 ? (
           <EmptyState />
         ) : (
           <div
-            className={
+            className={cn(
               viewMode === 'grid'
                 ? 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'
                 : 'space-y-4'
-            }
+            )}
           >
             {filteredEngagements.map((engagement) =>
               viewMode === 'grid' ? (
@@ -578,7 +627,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               ) : (
                 <div
                   key={engagement.id}
-                  className='grid grid-cols-1 overflow-x-auto'
+                  className='bg-card grid grid-cols-1 overflow-x-auto rounded-lg border shadow-sm'
                 >
                   <EngagementListItem engagement={engagement} />
                 </div>
@@ -598,10 +647,6 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
         />
       )}
 
-      {/* 
-        === RENDER THE MODAL HERE === 
-        It lives outside the card's visual flow but is controlled by its state.
-      */}
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onOpenChange={setIsPaymentModalOpen}
@@ -609,7 +654,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
         handlePayment={handlePayment}
         isProcessing={isProcessing}
       />
-    </div>
+    </Card>
   );
 };
 
