@@ -130,7 +130,7 @@ export default function SignUpViewPage({
         {/* Embla Carousel */}
 
         <div className='absolute inset-0 z-10 overflow-hidden'>
-          <div className='embla flex h-full items-center' ref={emblaRef}>
+          <div className='embla flex h-[72%] items-center' ref={emblaRef}>
             <div className='embla__container flex h-full'>
               {' '}
               {/* Slides */}
@@ -138,28 +138,28 @@ export default function SignUpViewPage({
                 <img
                   src='/assets/authPageImages/client ticket.png'
                   alt='Slide 1'
-                  className='max-h-[90%] max-w-[90%] object-contain'
+                  className='max-h-[95%] max-w-[95%] object-contain'
                 />
               </div>
               <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
                 <img
                   src='/assets/authPageImages/Calendar.png'
                   alt='Slide 2'
-                  className='max-h-[90%] max-w-[90%] object-contain'
+                  className='max-h-[95%] max-w-[95%] object-contain'
                 />
               </div>
               <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
                 <img
                   src='/assets/authPageImages/Lamp.png'
                   alt='Slide 3'
-                  className='max-h-[90%] max-w-[90%] object-contain' // Adjusted for scaling down
+                  className='max-h-[95%] max-w-[95%] object-contain' // Adjusted for scaling down
                 />
               </div>
               <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
                 <img
                   src='/assets/authPageImages/Lightning.png'
                   alt='Slide 4'
-                  className='max-h-[90%] max-w-[90%] object-contain' // Adjusted for scaling down
+                  className='max-h-[95%] max-w-[95%] object-contain' // Adjusted for scaling down
                 />
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function SignUpViewPage({
           <img
             src='/assets/authPageImages/text.png'
             alt='footer'
-            className='mx-auto h-28 bg-cover brightness-105 contrast-150 saturate-150'
+            className='mx-auto h-44 bg-cover brightness-105 contrast-150 saturate-150'
           />
         </div>
       </div>
