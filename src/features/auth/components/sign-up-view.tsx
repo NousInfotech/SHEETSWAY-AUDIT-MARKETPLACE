@@ -171,7 +171,7 @@ export default function SignUpViewPage({
           <img
             src='/assets/authPageImages/text.png'
             alt='footer'
-            className='mx-auto h-44 bg-cover brightness-105 contrast-150 saturate-150'
+            className='mx-auto h-44 bg-cover brightness-95 contrast-150 saturate-150'
           />
         </div>
       </div>
