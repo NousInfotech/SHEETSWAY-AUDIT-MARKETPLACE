@@ -395,7 +395,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               <StatusIcon className='h-3.5 w-3.5' />
               {engagement.status}
             </Badge>
-            <div className='text-muted-foreground text-sm'>
+            <div className='text-muted-foreground text-sm whitespace-nowrap'>
               {engagement.progress || 0}% Complete
             </div>
           </div>
@@ -438,8 +438,8 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           <div className='flex w-full items-center justify-between'>
             <div className='flex items-center gap-1'>
               <User className='text-muted-foreground h-4 w-4' />
-              <span className='text-muted-foreground text-sm whitespace-nowrap'>
-                1 member
+              <span className='text-xs text-muted-foreground whitespace-nowrap'>
+                1
               </span>
             </div>
             {engagement.status !== 'AWAITING_PAYMENT' &&
@@ -449,11 +449,11 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
                     setSelectedEngagement(engagement);
                     setIsSignModalOpen(true);
                   }}
-                  className='bg-emerald-500 text-white shadow-lg transition-all duration-200 group-hover:scale-[1.02] hover:bg-emerald-600 active:bg-emerald-700'
+                  className='bg-indigo-500 text-white shadow-lg transition-all duration-200 group-hover:scale-[1.02] hover:bg-indigo-600 active:bg-indigo-700'
                 >
-                  <Play className='mr-2 h-4 w-4' />
+                  <Play className='mr-1 h-4 w-4' />
                   GO TO START
-                  <ArrowRight className='ml-2 h-4 w-4' />
+                  <ArrowRight className='ml-1 h-4 w-4' />
                 </Button>
               )}
             {engagement.status === 'AWAITING_PAYMENT' && (
@@ -462,7 +462,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
                   setSelectedEngagement(engagement);
                   setIsPaymentModalOpen(true);
                 }}
-                className='bg-emerald-500 text-white shadow-lg transition-all duration-200 group-hover:scale-[1.02] hover:bg-emerald-600 active:bg-emerald-700'
+                className='bg-indigo-500 text-white shadow-lg transition-all duration-200 group-hover:scale-[1.02] hover:bg-indigo-600 active:bg-indigo-700'
               >
                 <Play className='mr-2 h-4 w-4' />
                 GO TO PAYMENT
@@ -472,7 +472,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
             {engagement.status === 'ACTIVE' && (
               <Button
                 onClick={() => onEnterWorkspace(engagement)}
-                className='bg-emerald-500 text-white shadow-lg transition-all duration-200 group-hover:scale-[1.02] hover:bg-emerald-600 active:bg-emerald-700'
+                className='bg-indigo-500 text-white shadow-lg transition-all duration-200 group-hover:scale-[1.02] hover:bg-indigo-600 active:bg-indigo-700'
               >
                 <Play className='mr-2 h-4 w-4' />
                 WORKSPACE
@@ -557,7 +557,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
                 size='sm'
                 className='border-amber-500 text-amber-500 group-hover:ring-2 group-hover:ring-amber-500 hover:bg-amber-50 hover:text-amber-600'
               >
-                <Play className='h-4 w-4 md:mr-2' />
+                <Play className='h-4 w-4 md:mr-1' />
                 <span className='inline text-xs'>GO TO START</span>
               </Button>
             )}
@@ -617,7 +617,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           <div
             className={cn(
               viewMode === 'grid'
-                ? 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'
+                ? 'grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3'
                 : 'space-y-4'
             )}
           >

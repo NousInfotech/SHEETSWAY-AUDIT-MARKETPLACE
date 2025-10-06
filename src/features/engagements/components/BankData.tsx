@@ -21,14 +21,6 @@ export default function BankData() {
     null
   );
 
-  const handleConnectionSelect = (currentAccount: any) => {
-    setSelectedConnection(currentAccount);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedConnection(null);
-  };
-
   const listConnections = async (customerId: string) => {
     try {
       const connections = await fetchConnections(customerId);
@@ -44,6 +36,14 @@ export default function BankData() {
       listConnections(appUser?.bankCustomerId);
     }
   }, [authLoading, appUser?.bankCustomerId]);
+
+  const handleConnectionSelect = (currentAccount: any) => {
+    setSelectedConnection(currentAccount);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedConnection(null);
+  };
 
   return (
     <div className='container mx-auto p-4'>

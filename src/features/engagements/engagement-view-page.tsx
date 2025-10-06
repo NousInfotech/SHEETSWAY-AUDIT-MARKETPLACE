@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Engagement,
   AccountingData,
-  
   Payment,
   Contract,
   Review,
@@ -19,9 +18,6 @@ import {
 } from './data/mock-data';
 import ActiveEngagements from './components/ActiveEngagements';
 import EngagementWorkspace from './components/EngagementWorkspace';
-import AccountingDataTab from './components/AccountingDataTab';
-
-
 
 import EngagementSettingsTab from './components/EngagementSettingsTab';
 import DocumentsTab from './components/DocumentsTab';
@@ -35,7 +31,6 @@ import PaymentEscrowTab from './components/PaymentEscrowTab';
 import MilestoneTab from './components/MilestoneTab';
 import BankingDataView from './components/BankingDataView';
 import ApideckHomePage from './components/ApideckHomePage';
-
 
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
@@ -72,8 +67,6 @@ const EngagementViewPage = () => {
 
     console.log(clientEngagements);
     setEngagements(clientEngagements);
-
-
 
     setAccountingData(
       savedAccountingData
@@ -192,13 +185,8 @@ const EngagementViewPage = () => {
             onTabChange={setCurrentWorkspaceTab}
             onBack={handleBackToEngagements}
           >
-            {currentWorkspaceTab === 'accounting' && (
-              <ApideckHomePage />
-              // <AccountingDataTab data={accountingData} />
-            )}
-            {currentWorkspaceTab === 'banking' && (
-              <BankingDataView />
-            )}
+            {currentWorkspaceTab === 'accounting' && <ApideckHomePage />}
+            {currentWorkspaceTab === 'banking' && <BankingDataView />}
             {currentWorkspaceTab === 'payments' && (
               <PaymentEscrowTab engagement={selectedEngagement} />
             )}
